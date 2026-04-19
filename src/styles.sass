@@ -35,3 +35,27 @@ body
 p-password.ng-invalid.ng-touched
   input
     border-color: #ef4444 !important
+
+.nav-profile
+  @apply bg-gray-200 p-2 rounded-full h-10 w-10 flex items-center justify-center
+
+.nav-item
+  @apply text-gray-800
+
+  &:hover
+    @apply text-black cursor-pointer
+
+.nav-logo
+  @apply font-bold text-lg
+
+.main-layout
+  @apply relative flex min-h-0 w-full flex-1 gap-3 p-6
+
+.sidebar-item
+  @apply flex items-center justify-between
+
+  &>a
+    @apply flex flex-1 items-center gap-2
+
+    &:hover span
+      @apply underline

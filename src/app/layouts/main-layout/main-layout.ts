@@ -1,10 +1,12 @@
 import { Component, inject } from '@angular/core';
-import { Router, RouterOutlet } from '@angular/router';
+import { Router, RouterOutlet, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { Card } from 'primeng/card';
+import { BadgeModule } from 'primeng/badge';
 
 @Component({
   selector: 'app-main-layout',
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, RouterLink, Card, BadgeModule],
   templateUrl: './main-layout.html',
   styleUrl: './main-layout.sass',
 })

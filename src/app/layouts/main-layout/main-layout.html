@@ -1,18 +1,54 @@
-<header class="header">
-    <div class="left">
-        <h2>Webshop Central</h2>
+<div class="min-h-screen bg-gray-100">
+    <nav class="relative bg-white after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-px after:bg-white/10
+        shadow">
+        <div class="mx-auto">
+            <div class="relative flex h-16 items-center justify-between px-6">
+                <div class="flex flex-1 items-center justify-start gap-6 ">
+                    <a routerLink="/dashboard" class="nav-item nav-logo">Webshop Central</a>
+                    <a routerLink="/dashboard" class="nav-item">Dashboard</a>
+                    <a routerLink="/dashboard" class="nav-item">Dashboard</a>
+                    <a routerLink="/dashboard" class="nav-item">Dashboard</a>
+                    <a routerLink="/dashboard" class="nav-item">Dashboard</a>
+                </div>
+                <div class="flex h-16 items-center justify-between gap-4">
+                    <span>{{ user?.name || user?.email }}</span>
+                    <div class="nav-profile">
+                        <i class="pi pi-user"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-layout">
+        <div>
+            <p-card>
+                <div class="w-80 flex flex-col gap-2">
+                    <div class="sidebar-item">
+                        <a routerLink="/dashboard">
+                            <i class="pi pi-th-large"></i>
+                            <span>Dashboard</span>
+                        </a>
+                        <p-badge value="3" severity="danger" badgeSize="small" />
+                    </div>
+                    <div class="sidebar-item">
+                        <a routerLink="/dashboard">
+                            <i class="pi pi-box"></i>
+                            <span>Products</span>
+                        </a>
+                    </div>
+                    <div class="sidebar-item">
+                        <a routerLink="/dashboard">
+                            <i class="pi pi-shopping-cart"></i>
+                            <span>Orders</span>
+                        </a>
+                        <p-badge value="12" severity="danger" badgeSize="small" />
+                    </div>
+                </div>
+            </p-card>
+        </div>
+
+        <router-outlet />
     </div>
 
-    <div class="right">
-        <span class="user">
-            {{ user?.name || user?.email }}
-        </span>
-
-        <button (click)="logout()">Logout</button>
-    </div>
-</header>
-
-
-<div>
-    <router-outlet />
 </div>
