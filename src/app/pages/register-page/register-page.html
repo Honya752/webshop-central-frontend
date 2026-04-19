@@ -1,0 +1,74 @@
+<form [formGroup]="form" (ngSubmit)="submit()">
+    <h1>Register</h1>
+
+    @if (errorMessage()) {
+    <p class="form-error">{{ errorMessage() }}</p>
+    }
+
+    <div class="field">
+        <label>Name</label>
+        <input type="text" formControlName="name" />
+
+        @if (name.touched && name.hasError('required')) {
+        <small>Name is required</small>
+        }
+
+        @if (name.hasError('server')) {
+        <small class="error">
+            {{ name.getError('server') }}
+        </small>
+        }
+    </div>
+
+    <div class="field">
+        <label>Email</label>
+        <input type="email" formControlName="email" />
+
+        @if (email.touched && email.hasError('required')) {
+        <small>Email is required</small>
+        }
+
+        @if (email.touched && email.hasError('email')) {
+        <small>Please enter a valid email address</small>
+        }
+
+        @if (email.hasError('server')) {
+        <small class="error">
+            {{ email.getError('server') }}
+        </small>
+        }
+    </div>
+
+    <div class="field">
+        <label>Password</label>
+        <input type="password" formControlName="password" />
+
+        @if (password.touched && password.hasError('required')) {
+        <small>Password is required</small>
+        }
+
+        @if (form.hasError('passwordMismatch') && passwordConfirm.touched) {
+        <small class="error">Passwords do not match</small>
+        }
+
+        @if (password.hasError('server')) {
+        <small class="error">
+            {{ password.getError('server') }}
+        </small>
+        }
+    </div>
+
+    <div class="field">
+        <label>Confirm password</label>
+        <input type="password" formControlName="passwordConfirm" />
+
+        @if (passwordConfirm.touched && passwordConfirm.hasError('required')) {
+        <small>Please confirm your password</small>
+        }
+    </div>
+
+    <button type="submit" [disabled]="isSubmitting()">
+        {{ isSubmitting() ? 'Signing up...' : 'Sign up' }}
+    </button>
+
+</form>

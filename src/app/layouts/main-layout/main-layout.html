@@ -1,0 +1,18 @@
+<header class="header">
+    <div class="left">
+        <h2>Webshop Central</h2>
+    </div>
+
+    <div class="right">
+        <span class="user">
+            {{ user?.name || user?.email }}
+        </span>
+
+        <button (click)="logout()">Logout</button>
+    </div>
+</header>
+
+
+<div>
+    <router-outlet />
+</div>
