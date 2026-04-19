@@ -1,74 +1,97 @@
-<form [formGroup]="form" (ngSubmit)="submit()">
-    <h1>Register</h1>
+<p-card class="login-card">
 
-    @if (errorMessage()) {
-    <p class="form-error">{{ errorMessage() }}</p>
-    }
+    <form [formGroup]="form" (ngSubmit)="submit()" class="form">
+        <h1 class="header">Webshop Central</h1>
 
-    <div class="field">
-        <label>Name</label>
-        <input type="text" formControlName="name" />
-
-        @if (name.touched && name.hasError('required')) {
-        <small>Name is required</small>
+        @if (errorMessage()) {
+        <p class="form-error">{{ errorMessage() }}</p>
         }
 
-        @if (name.hasError('server')) {
-        <small class="error">
-            {{ name.getError('server') }}
-        </small>
-        }
-    </div>
+        <div class="field">
+            <div class="flex items-center justify-between">
+                <label for="name">Name</label>
+                <div>
+                    @if (name.touched && name.hasError('required')) {
+                    <small class="error">Name is required</small>
+                    }
 
-    <div class="field">
-        <label>Email</label>
-        <input type="email" formControlName="email" />
+                    @if (name.hasError('server')) {
+                    <small class="error">
+                        {{ name.getError('server') }}
+                    </small>
+                    }
+                </div>
+            </div>
+            <input pInputText type="text" formControlName="name" />
+        </div>
 
-        @if (email.touched && email.hasError('required')) {
-        <small>Email is required</small>
-        }
+        <div class="field">
+            <div class="flex items-center justify-between">
+                <label for="email">Email</label>
+                <div>
+                    @if (email.touched && email.hasError('required')) {
+                    <small class="error">Email address is required</small>
+                    }
 
-        @if (email.touched && email.hasError('email')) {
-        <small>Please enter a valid email address</small>
-        }
+                    @if (email.touched && email.hasError('email')) {
+                    <small class="error">Email address is invalid</small>
+                    }
 
-        @if (email.hasError('server')) {
-        <small class="error">
-            {{ email.getError('server') }}
-        </small>
-        }
-    </div>
+                    @if (email.hasError('server')) {
+                    <small class="error">
+                        {{ email.getError('server') }}
+                    </small>
+                    }
+                </div>
+            </div>
+            <input pInputText type="email" formControlName="email" />
+        </div>
 
-    <div class="field">
-        <label>Password</label>
-        <input type="password" formControlName="password" />
+        <div class="field">
+            <div class="flex items-center justify-between">
+                <label>Password</label>
 
-        @if (password.touched && password.hasError('required')) {
-        <small>Password is required</small>
-        }
+                @if (password.touched && password.hasError('required')) {
+                <small class="error">Password is required</small>
+                }
 
-        @if (form.hasError('passwordMismatch') && passwordConfirm.touched) {
-        <small class="error">Passwords do not match</small>
-        }
+                @if (form.hasError('passwordMismatch') && passwordConfirm.touched) {
+                <small class="error">Passwords do not match</small>
+                }
 
-        @if (password.hasError('server')) {
-        <small class="error">
-            {{ password.getError('server') }}
-        </small>
-        }
-    </div>
+                @if (password.hasError('server')) {
+                <small class="error">
+                    {{ password.getError('server') }}
+                </small>
+                }
 
-    <div class="field">
-        <label>Confirm password</label>
-        <input type="password" formControlName="passwordConfirm" />
+            </div>
+            <p-password inputId="password" formControlName="password" [feedback]="false" [toggleMask]="true"
+                fluid></p-password>
 
-        @if (passwordConfirm.touched && passwordConfirm.hasError('required')) {
-        <small>Please confirm your password</small>
-        }
-    </div>
+        </div>
 
-    <button type="submit" [disabled]="isSubmitting()">
-        {{ isSubmitting() ? 'Signing up...' : 'Sign up' }}
-    </button>
+        <div class="field">
+            <div class="flex items-center justify-between">
+                <label for="passwordConfirm">Confirm password</label>
+                <div>
+                    @if (passwordConfirm.touched && passwordConfirm.hasError('required')) {
+                    <small class="error">Please confirm your password</small>
+                    }
+                </div>
+            </div>
+            <p-password inputId="passwordConfirm" formControlName="passwordConfirm" [feedback]="false"
+                [toggleMask]="true" fluid></p-password>
 
-</form>
+        </div>
+
+        <div class="flex items-center justify-between">
+            <a routerLink="/login" class="link">I already have an account</a>
+
+            <button pButton type="submit" [disabled]="isSubmitting()">
+                <i class="pi pi-sign-in"></i>
+                <span pButtonLabel>Sign up</span>
+            </button>
+        </div>
+    </form>
+</p-card>

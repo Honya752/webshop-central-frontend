@@ -1,12 +1,23 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { InputTextModule } from 'primeng/inputtext';
+import { PasswordModule } from 'primeng/password';
+import { ButtonModule } from 'primeng/button';
+import { CardModule } from 'primeng/card';
 
 @Component({
   selector: 'app-login-page',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [
+    ReactiveFormsModule,
+    RouterLink,
+    InputTextModule,
+    PasswordModule,
+    ButtonModule,
+    CardModule
+  ],
   templateUrl: './login-page.html',
   styleUrl: './login-page.sass',
 })
@@ -19,7 +30,7 @@ export class LoginPage {
   errorMessage = signal('');
 
   form = this.fb.nonNullable.group({
-    email: ['', [Validators.required, Validators.required]],
+    email: ['', [Validators.required, Validators.email]],
     password: ['', Validators.required],
   });
 
@@ -36,14 +47,35 @@ export class LoginPage {
       next: () => {
         this.router.navigateByUrl('/dashboard');
       },
-      error: () => {
-        this.errorMessage.set('Invalid login');
+      error: (error) => {
+        const serverError = error?.error?.message;
+
+        if (typeof (serverError) === 'string') {
+          this.errorMessage.set(serverError)
+        }
+
+        if (serverError) {
+          this.applyBackendErrors(serverError);
+        }
+
         this.isSubmitting.set(false);
       },
       complete: () => {
         this.isSubmitting.set(false);
       }
     })
+  }
+
+  applyBackendErrors(errors: Record<string, string[]>) {
+    Object.keys(errors).forEach((field) => {
+      const control = this.form.get(field);
+
+      if (control) {
+        control.setErrors({
+          server: errors[field][0],
+        });
+      }
+    });
   }
 
   get email() { return this.form.controls.email }

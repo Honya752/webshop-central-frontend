@@ -1,1 +1,37 @@
 /* You can add global styles to this file, and also import other style files */
+@import "tailwindcss"
+@import "primeicons/primeicons.css"
+
+body
+  font-family: Inter, system-ui, sans-serif
+  margin: 0
+
+.field
+  @apply flex flex-col gap-1
+
+.login-card
+  width: 40vw
+
+.form
+  @apply flex flex-col gap-4
+
+.error
+  @apply text-red-600
+
+.header
+  @apply text-4xl font-semibold tracking-tight text-balance text-center py-3
+
+.link
+  @apply text-sm text-blue-600
+  &:hover
+    @apply underline cursor-pointer
+
+.form-error
+  @apply text-red-600 font-bold
+
+.ng-invalid.ng-touched
+  border-color: #ef4444 !important
+
+p-password.ng-invalid.ng-touched
+  input
+    border-color: #ef4444 !important

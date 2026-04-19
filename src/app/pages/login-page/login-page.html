@@ -1,34 +1,53 @@
-<form [formGroup]="form" (ngSubmit)="submit()">
-    <h1>Login</h1>
+<p-card class="login-card">
 
-    <div>
-        <label for="email">Email</label>
-        <input id="email" type="email" formControlName="email">
+    <form [formGroup]="form" (ngSubmit)="submit()" class="form">
 
-        @if (email.touched && email.hasError('required')) {
-        <small class="error">Az email megadása kötelező.</small>
+        <h1 class="header">Webshop Central</h1>
+
+        @if (errorMessage()) {
+        <p class="form-error">{{ errorMessage() }}</p>
         }
 
-        @if (email.touched && email.hasError('email')) {
-        <small class="error">Adj meg egy érvényes email címet.</small>
-        }
-    </div>
+        <div class="field">
+            <div class="flex items-center justify-between">
+                <label for="email">Email</label>
+                <div>
 
-    <div class="field">
-        <label for="password">Jelszó</label>
-        <input id="password" type="password" formControlName="password" />
+                    @if (email.touched && email.hasError('required')) {
+                    <small class="error">Email address is required</small>
+                    }
 
-        @if (password.touched && password.hasError('required')) {
-        <small class="error">A jelszó megadása kötelező.</small>
-        }
-    </div>
+                    @if (email.touched && email.hasError('email')) {
+                    <small class="error">Email adddress is invalid</small>
+                    }
+                </div>
+            </div>
+            <input pInputText id="email" formControlName="email" type="email">
+        </div>
 
-    @if (errorMessage()) {
-    <p class="form-error">{{ errorMessage() }}</p>
-    }
+        <div class="field">
+            <div class="flex items-center justify-between">
+                <label for="password">Password</label>
 
-    <button type="submit" [disabled]="isSubmitting()">
-        {{ isSubmitting() ? 'Bejelentkezés...' : 'Bejelentkezés' }}
-    </button>
+                <div>
+                    @if (password.touched && password.hasError('required')) {
+                    <small class="error">Password is required</small>
+                    }
+                </div>
+            </div>
+            <p-password inputId="password" formControlName="password" [feedback]="false" [toggleMask]="true"
+                fluid></p-password>
 
-</form>
+        </div>
+
+
+        <div class="flex items-center justify-between">
+            <a routerLink="/register" class="link">Don't have an account?</a>
+
+            <button pButton type="submit" [disabled]="isSubmitting()">
+                <i class="pi pi-user"></i>
+                <span pButtonLabel>Login</span>
+            </button>
+        </div>
+    </form>
+</p-card>
