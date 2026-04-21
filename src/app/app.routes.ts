@@ -8,6 +8,7 @@ import { ProductsPage } from './pages/products-page/products-page';
 import { CreateProductPage } from './pages/create-product-page/create-product-page';
 import { OrdersPage } from './pages/orders-page/orders-page';
 import { OrderDetailPage } from './pages/order-detail-page/order-detail-page';
+import { StoresPage } from './pages/stores-page/stores-page';
 
 export const routes: Routes = [
     {
@@ -26,12 +27,16 @@ export const routes: Routes = [
         children: [
             { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
             { path: 'dashboard', component: DashboardPage },
+
             { path: 'products', component: ProductsPage },
             { path: 'product/create', component: CreateProductPage },
             { path: 'product:/id', component: ProductsPage },
             { path: 'product/:id/edit', component: CreateProductPage },
+
             { path: 'orders', component: OrdersPage },
             { path: 'order/:id', component: OrderDetailPage },
+
+            { path: 'stores', component: StoresPage }
         ]
     },
 
