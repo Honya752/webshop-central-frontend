@@ -13,6 +13,7 @@ import { AuthService } from '../../services/auth.service';
 import { debounceTime } from 'rxjs';
 import { DatePipe } from '@angular/common';
 import { CurrencyPipe } from '@angular/common';
+import { RouterLink } from "@angular/router";
 
 
 type OrderFilterForm = FormGroup<{
@@ -22,7 +23,7 @@ type OrderFilterForm = FormGroup<{
 
 @Component({
   selector: 'app-orders-page',
-  imports: [CurrencyPipe, DatePipe, Card, TableModule, ButtonModule, TagModule, ProgressSpinnerModule, InputGroupModule, ReactiveFormsModule, SelectModule, InputTextModule],
+  imports: [CurrencyPipe, DatePipe, Card, TableModule, ButtonModule, TagModule, ProgressSpinnerModule, InputGroupModule, ReactiveFormsModule, SelectModule, InputTextModule, RouterLink],
   templateUrl: './orders-page.html',
   styleUrl: './orders-page.sass',
 })

@@ -1,7 +1,7 @@
 import { HttpClient } from "@angular/common/http";
 import { inject, Injectable } from "@angular/core";
 import { environment } from "../../environment";
-import { ApiPaginationResponse } from "../types/api-response";
+import { ApiPaginationResponse, ApiResponse } from "../types/api-response";
 import { map } from "rxjs";
 
 type OrderStore = {
@@ -52,5 +52,14 @@ export class OrdersService {
                 console.log(response);
                 return { orders, meta };
             }))
+    }
+
+    getOrderById(id: string) {
+        return this.http
+            .get<ApiResponse<Order>>(`${environment.apiUrl}/orders/${id}`)
+            .pipe(map((response) => {
+                console.log(response)
+                return response.data
+            }));
     }
 }

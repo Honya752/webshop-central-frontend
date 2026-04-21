@@ -1,1 +1,38 @@
-<p>order-detail-page works!</p>
+<p-card>
+    <h1 class="header">Order</h1>
+    <p>Order date: <span class="font-bold">{{ order()?.createdAt | date:'yyyy. MM. dd. HH:mm' }}</span></p>
+
+    <p-table [value]="order()?.orderItems ?? []">
+        <ng-template #caption>
+            <div class="flex items-center justify-between">
+                <span class="text-xl font-bold">Ordered items</span>
+            </div>
+        </ng-template>
+
+        <ng-template #header>
+            <tr>
+                <th>SKU</th>
+                <th>Quantity</th>
+                <th>Unit Price</th>
+            </tr>
+        </ng-template>
+
+        <ng-template #body let-item>
+            <tr>
+                <td>{{item.sku}}</td>
+                <td>{{item.quantity}}</td>
+                <td>{{ item.unitPrice | currency:order()?.currency:'symbol':'1.0-0' }}</td>
+            </tr>
+        </ng-template>
+
+        <ng-template #footer>
+            <tr>
+                <td></td>
+                <td></td>
+                <td>
+                    <p class="text-end">Total: {{ order()?.total | currency:order()?.currency:'symbol':'1.0-0' }}</p>
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+</p-card>
