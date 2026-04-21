@@ -6,6 +6,7 @@ import { DashboardPage } from './pages/dashboard-page/dashboard-page';
 import { RegisterPage } from './pages/register-page/register-page';
 import { ProductsPage } from './pages/products-page/products-page';
 import { CreateProductPage } from './pages/create-product-page/create-product-page';
+import { OrdersPage } from './pages/orders-page/orders-page';
 
 export const routes: Routes = [
     {
@@ -28,6 +29,7 @@ export const routes: Routes = [
             { path: 'product/create', component: CreateProductPage },
             { path: 'product:/id', component: ProductsPage },
             { path: 'product/:id/edit', component: CreateProductPage },
+            { path: 'orders', component: OrdersPage },
         ]
     },
 

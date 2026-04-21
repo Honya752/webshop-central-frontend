@@ -1,93 +1,89 @@
 import { AfterViewInit, Component, ElementRef, inject, OnDestroy, OnInit, signal, ViewChild } from '@angular/core';
-import { Product, ProductsService } from '../../services/product.service';
-import { Card } from 'primeng/card';
-import { TableModule } from 'primeng/table';
-import { ButtonModule } from 'primeng/button';
-import { TagModule } from 'primeng/tag';
-import { AuthService } from '../../services/auth.service';
-import { RouterLink } from "@angular/router";
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { debounceTime } from 'rxjs';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { Card } from 'primeng/card';
+import { TableModule } from 'primeng/table';
+import { ButtonModule } from 'primeng/button';
+import { TagModule } from 'primeng/tag';
+import { Order, OrdersService } from '../../services/orders.service';
+import { AuthService } from '../../services/auth.service';
+import { debounceTime } from 'rxjs';
+import { DatePipe } from '@angular/common';
+import { CurrencyPipe } from '@angular/common';
 
-type ProductFilterForm = FormGroup<{
-  search: FormControl<string>;
-  sortBy: FormControl<'name' | 'price' | 'createdAt'>;
+
+type OrderFilterForm = FormGroup<{
+  sortBy: FormControl<'createdAt' | 'total' | 'status'>;
   sortOrder: FormControl<'asc' | 'desc'>;
-}>;
+}>
 
 @Component({
-  selector: 'app-products-page',
-  imports: [Card, TableModule, ButtonModule, TagModule, RouterLink, ProgressSpinnerModule, InputGroupModule, ReactiveFormsModule, SelectModule, InputTextModule],
-  templateUrl: './products-page.html',
-  styleUrl: './products-page.sass',
+  selector: 'app-orders-page',
+  imports: [CurrencyPipe, DatePipe, Card, TableModule, ButtonModule, TagModule, ProgressSpinnerModule, InputGroupModule, ReactiveFormsModule, SelectModule, InputTextModule],
+  templateUrl: './orders-page.html',
+  styleUrl: './orders-page.sass',
 })
-export class ProductsPage implements OnInit, AfterViewInit, OnDestroy {
+export class OrdersPage implements OnInit, AfterViewInit, OnDestroy {
 
   private fb = inject(FormBuilder);
+  private ordersService = inject(OrdersService);
+  private authService = inject(AuthService);
 
-  products = signal<Product[]>([]);
+  orders = signal<Order[]>([]);
 
   page = signal(1);
-  limit = 20;
+  limit = 30;
 
   isLoading = signal(false);
   hasNextPage = signal(true);
 
-  filterForm: ProductFilterForm = this.fb.group({
-    search: this.fb.nonNullable.control<string>(''),
-    sortBy: this.fb.nonNullable.control<'name' | 'price' | 'createdAt'>('createdAt'),
+  filterForm: OrderFilterForm = this.fb.group({
+    sortBy: this.fb.nonNullable.control<'createdAt' | 'total' | 'status'>('createdAt'),
     sortOrder: this.fb.nonNullable.control<'asc' | 'desc'>('desc')
-  });
+  })
 
   private observer!: IntersectionObserver;
 
   @ViewChild('loadMoreTrigger', { static: true })
   loadMoreTrigger!: ElementRef;
 
-  constructor(
-    private productService: ProductsService,
-    private authService: AuthService
-  ) { }
-
-  loadProducts(): void {
+  loadOrders() {
     if (this.isLoading() || !this.hasNextPage()) return;
 
     this.isLoading.set(true);
 
-    const params = {
+    const param = {
       page: this.page(),
       limit: this.limit,
-      search: this.filterForm.controls.search.getRawValue(),
       sortBy: this.filterForm.controls.sortBy.getRawValue(),
       sortOrder: this.filterForm.controls.sortOrder.getRawValue()
-    };
+    }
 
-    this.productService.getProducts(params).subscribe({
+    this.ordersService.getAllOrders(param).subscribe({
       next: (payload) => {
-        const { products, meta } = payload;
+        const { orders, meta } = payload;
 
-        this.products.update(prev => [...prev, ...products]);
+        this.orders.update(prev => [...prev, ...orders]);
         this.hasNextPage.set(meta.pages > meta.page);
-        this.page.update(p => p + 1);
+        this.page.set(meta.page);
 
         this.isLoading.set(false);
       },
       error: (error) => {
         this.isLoading.set(false);
-      },
+      }
     })
   }
 
   resetAndReload(): void {
-    this.products.set([]);
+    this.orders.set([]);
     this.page.set(1);
     this.hasNextPage.set(true);
 
-    this.loadProducts();
+    this.loadOrders();
   }
 
   ngOnInit(): void {
@@ -96,13 +92,13 @@ export class ProductsPage implements OnInit, AfterViewInit, OnDestroy {
       .subscribe(values => {
         this.resetAndReload()
       });
-    this.loadProducts();
+    this.loadOrders();
   }
 
   ngAfterViewInit(): void {
     this.observer = new IntersectionObserver((entries) => {
       if (entries[0].isIntersecting) {
-        this.loadProducts();
+        this.loadOrders();
       }
     }, {
       rootMargin: '200px'
@@ -120,8 +116,8 @@ export class ProductsPage implements OnInit, AfterViewInit, OnDestroy {
   }
 
   sortByOptions = [
-    { label: 'Name', value: 'name' },
-    { label: 'Price', value: 'price' },
+    { label: 'Status', value: 'status' },
+    { label: 'Total price', value: 'total' },
     { label: 'Creation Date', value: 'createdAt' }
   ];
 
