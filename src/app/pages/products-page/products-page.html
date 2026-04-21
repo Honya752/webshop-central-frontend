@@ -1,4 +1,26 @@
-<p-card class="w-full">
+<p-card>
+    <form [formGroup]="filterForm" class="flex flex-row gap-4">
+        <p-inputgroup>
+            <p-button label="Search" severity="contrast" />
+            <input pInputText type="search" formControlName="search" placeholder="Search by SKU or EAN code" />
+        </p-inputgroup>
+
+        <p-select [options]="sortByOptions" formControlName="sortBy" optionLabel="label" optionValue="value"
+            placeholder="Rendezés" class="w-full md:w-56" />
+
+        <p-select [options]="sortOrderOptions" formControlName="sortOrder" optionLabel="label" optionValue="value"
+            placeholder="Sorrend" class="w-full md:w-56" />
+    </form>
+</p-card>
+
+<p-card class="w-full mt-4">
+    @if (isLoading()) {
+    <div class="card flex justify-center">
+        <p-progress-spinner ariaLabel="loading" />
+    </div>
+    }
+    @else {
+
     <p-table [value]="products()" [tableStyle]="{ 'min-width': '60rem' }">
         <ng-template #caption>
             <div class="flex items-center justify-between">
@@ -56,5 +78,5 @@
     </p-table>
 
     <div #loadMoreTrigger class="h-4"></div>
-
+    }
 </p-card>

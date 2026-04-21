@@ -40,6 +40,14 @@ type CreateProductImage = {
     alt: string;
 }
 
+type FilterParam = {
+    page: number,
+    limit: number,
+    search: string,
+    sortBy: string,
+    sortOrder: string
+}
+
 export type CreateProduct = {
     sku: string;
     ean: string;
@@ -54,11 +62,9 @@ export type CreateProduct = {
 export class ProductsService {
     private http = inject(HttpClient);
 
-    getProducts(page: number, limit: number) {
+    getProducts(param: FilterParam) {
         return this.http
-            .get<ApiPaginationResponse<Product>>(`${environment.apiUrl}/products`, {
-                params: { page, limit }
-            })
+            .get<ApiPaginationResponse<Product>>(`${environment.apiUrl}/products`, { params: param })
             .pipe(map((response) => {
                 const { data: products, meta } = response;
                 return { products, meta };
