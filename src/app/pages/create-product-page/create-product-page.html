@@ -1,0 +1,192 @@
+<p-card class="px-6">
+
+    <form [formGroup]="form" (ngSubmit)="submit()" class="form">
+
+        <h1 class="header">
+            @if (isEditMode) {Edit product}
+            @else {Create a product}
+        </h1>
+
+        @if (errorMessage()) {
+        <p class="form-error">{{ errorMessage() }}</p>
+        }
+
+        <div formArrayName="images" class="flex flex-col gap-4">
+            <div class="flex items-center justify-between pt-4">
+                <h2 class="font-bold">Product images</h2>
+                <div>
+                    <button pButton type="button" size="small" (click)="addImage()"
+                        [disabled]="images.length >= maxImages">
+                        <i class="pi pi-plus" pButtonIcon></i>
+                        <span pButtonLabel>Add</span>
+                    </button>
+                    <button pButton type="button" size="small" severity="danger"
+                        (click)="removeImage(images.length - 1)" [disabled]="images.length >= maxImages" class="ms-2">
+                        <i class="pi pi-minus" pButtonIcon></i>
+                        <span pButtonLabel>Remove</span>
+                    </button>
+                </div>
+            </div>
+
+            @for (group of images.controls; track $index; let i = $index) {
+            <p-panel [formGroupName]="i" class="form-group">
+                <div class="flex justify-between gap-4">
+                    <div class="field w-full">
+                        <div class="flex items-center justify-between">
+                            <label for="url">Product image URL</label>
+
+                            @if (group.controls.url.touched && group.controls.url.invalid) {
+                            <small class="error">Valid URL required</small>
+                            }
+                        </div>
+                        <input pInputText type="text" formControlName="url" class="font-mono" />
+                    </div>
+
+                    <div class="field w-70">
+                        <div class="flex items-center justify-between">
+                            <label for="alt">Alternative text</label>
+
+                            @if (group.controls.alt.touched && group.controls.alt.invalid) {
+                            <small class="error">Valid alternative text required</small>
+                            }
+                        </div>
+                        <input pInputText type="text" formControlName="alt" />
+                    </div>
+                </div>
+            </p-panel>
+            }
+
+        </div>
+
+        <div formArrayName="localizations" class="flex flex-col gap-4">
+            <div class="flex items-center justify-between pt-4">
+                <h2 class="font-bold">Localizations</h2>
+                <div>
+                    <button pButton type="button" size="small" (click)="addLocalization()"
+                        [disabled]="localizations.length >= maxLocalizations">
+                        <i class="pi pi-plus" pButtonIcon></i>
+                        <span pButtonLabel>Add</span>
+                    </button>
+                    <button pButton type="button" size="small" severity="danger"
+                        (click)="removeLocalization(localizations.length - 1)"
+                        [disabled]="localizations.length >= maxLocalizations" class="ms-2">
+                        <i class="pi pi-minus" pButtonIcon></i>
+                        <span pButtonLabel>Remove</span>
+                    </button>
+                </div>
+            </div>
+
+            @for (group of localizations.controls; track $index; let i = $index) {
+            <p-panel [formGroupName]="i" class="form-group">
+                <div class="flex justify-between gap-4">
+                    <div class="field w-full">
+                        <div class="flex items-center justify-between">
+                            <label for="name">Product name</label>
+
+                            @if (group.controls.name.touched && group.controls.name.invalid) {
+                            <small class="error">Valid product name required</small>
+                            }
+                        </div>
+                        <input pInputText type="text" formControlName="name" fluid />
+                    </div>
+
+                    <div class="field w-70">
+                        <div class="flex items-center justify-between">
+                            <label for="region">Region</label>
+
+                            @if (group.controls.region.touched && group.controls.region.invalid) {
+                            <small class="error">Invalid region</small>
+                            }
+                        </div>
+                        <input pInputText type="text" formControlName="region" fluid />
+                    </div>
+                </div>
+
+                <div class="field pt-4">
+                    <div class="flex items-center justify-between">
+                        <label for="description">Description</label>
+
+                        @if (group.controls.description.touched && group.controls.description.invalid) {
+                        <small class="error">Invalid description</small>
+                        }
+                    </div>
+                    <textarea rows="3" pTextarea formControlName="description"></textarea>
+                </div>
+            </p-panel>
+            }
+        </div>
+
+        <div class="flex items-center justify-between gap-6">
+            <div class="field w-full">
+                <div class="flex items-center justify-between">
+                    <label for="sku">SKU code</label>
+                    <div>
+                        @if (form.controls.sku.touched && form.controls.sku.hasError('required')) {
+                        <small class="error">SKU code is required</small>
+                        }
+
+                        @if (form.controls.sku.hasError('server')) {
+                        <small class="error">
+                            {{ form.controls.sku.getError('server') }}
+                        </small>
+                        }
+                    </div>
+                </div>
+                <input pInputText type="text" formControlName="sku" />
+            </div>
+
+            <div class="field  w-full">
+                <div class="flex items-center justify-between">
+                    <label for="ean">EAN code</label>
+                    <div>
+                        @if (form.controls.ean.touched && form.controls.ean.hasError('required')) {
+                        <small class="error">EAN code is required</small>
+                        }
+
+                        @if (form.controls.ean.hasError('server')) {
+                        <small class="error">
+                            {{ form.controls.ean.getError('server') }}
+                        </small>
+                        }
+                    </div>
+                </div>
+                <input pInputText type="text" formControlName="ean" />
+            </div>
+        </div>
+
+        <div class="field">
+            <div class="flex items-center justify-between">
+                <label for="price">Price</label>
+                <div>
+                    @if (form.controls.price.touched && form.controls.price.invalid) {
+                    <small class="error">Price must be 0 or greater</small>
+                    }
+
+                    @if (form.controls.price.hasError('server')) {
+                    <small class="error">
+                        {{ form.controls.price.getError('server') }}
+                    </small>
+                    }
+                </div>
+            </div>
+            <p-inputnumber inputId="price" mode="currency" currency="HUF" locale="hu-Hu" formControlName="price"
+                [maxFractionDigits]="0" />
+        </div>
+
+        <div class="flex items-center justify-between">
+            <div></div>
+
+            <button pButton type="submit">
+                @if (isEditMode) {
+                <i class="pi pi-check"></i>
+                <span pButtonLabel>Save</span>
+                }
+                @else {
+                <i class="pi pi-plus"></i>
+                <span pButtonLabel>Upload</span>
+                }
+            </button>
+        </div>
+    </form>
+
+</p-card>

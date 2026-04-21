@@ -4,6 +4,8 @@ import { AuthLayout } from './layouts/auth-layout/auth-layout';
 import { MainLayout } from './layouts/main-layout/main-layout';
 import { DashboardPage } from './pages/dashboard-page/dashboard-page';
 import { RegisterPage } from './pages/register-page/register-page';
+import { ProductsPage } from './pages/products-page/products-page';
+import { CreateProductPage } from './pages/create-product-page/create-product-page';
 
 export const routes: Routes = [
     {
@@ -21,7 +23,11 @@ export const routes: Routes = [
         canActivate: [],
         children: [
             { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
-            { path: 'dashboard', component: DashboardPage }
+            { path: 'dashboard', component: DashboardPage },
+            { path: 'products', component: ProductsPage },
+            { path: 'product/create', component: CreateProductPage },
+            { path: 'product:/id', component: ProductsPage },
+            { path: 'product/:id/edit', component: CreateProductPage },
         ]
     },
 

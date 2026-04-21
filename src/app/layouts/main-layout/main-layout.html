@@ -32,13 +32,13 @@
                         <p-badge value="3" severity="danger" badgeSize="small" />
                     </div>
                     <div class="sidebar-item">
-                        <a routerLink="/dashboard">
+                        <a routerLink="/products">
                             <i class="pi pi-box"></i>
                             <span>Products</span>
                         </a>
                     </div>
                     <div class="sidebar-item">
-                        <a routerLink="/dashboard">
+                        <a routerLink="/orders">
                             <i class="pi pi-shopping-cart"></i>
                             <span>Orders</span>
                         </a>
@@ -48,7 +48,9 @@
             </p-card>
         </div>
 
-        <router-outlet />
+        <div class="w-full">
+            <router-outlet />
+        </div>
     </div>
 
 </div>

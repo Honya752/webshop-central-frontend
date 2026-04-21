@@ -1,7 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
 import { ButtonModule } from 'primeng/button';
@@ -24,6 +24,7 @@ import { CardModule } from 'primeng/card';
 export class LoginPage {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
+  private route = inject(ActivatedRoute);
   private router = inject(Router);
 
   isSubmitting = signal(false);
@@ -45,7 +46,8 @@ export class LoginPage {
 
     this.authService.login(this.form.getRawValue()).subscribe({
       next: () => {
-        this.router.navigateByUrl('/dashboard');
+        const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
+        this.router.navigateByUrl(returnUrl || '/dashboard');
       },
       error: (error) => {
         const serverError = error?.error?.message;
