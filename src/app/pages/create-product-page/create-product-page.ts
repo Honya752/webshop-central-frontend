@@ -1,6 +1,5 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CreateProduct, ProductsService } from '../../services/product.service';
-import { AuthService } from '../../services/auth.service';
 import { FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Card } from 'primeng/card';
@@ -161,8 +160,6 @@ export class CreateProductPage implements OnInit {
       localizations: this.localizations.getRawValue(),
       images: this.images.getRawValue()
     };
-
-    console.log(payload);
 
     this.productsService.createProduct(payload).subscribe({
       next: (payload) => {

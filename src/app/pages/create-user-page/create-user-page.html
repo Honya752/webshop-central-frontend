@@ -1,0 +1,103 @@
+<p-card class="px-6">
+    <h1 class="header">
+        @if (isEditMode) {Edit user profile}
+        @else {Create a user}
+    </h1>
+
+    @if (errorMessage()) {
+    <p class="form-error">{{ errorMessage() }}</p>
+    }
+    <form [formGroup]="form" (ngSubmit)="submit()" class="form">
+
+        <div class="field w-full">
+            <div class="flex items-center justify-between">
+                <label for="name">Name</label>
+                <div>
+                    @if (form.controls.name.touched && form.controls.name.hasError('required')) {
+                    <small class="error">Name is required</small>
+                    }
+
+                    @if (form.controls.name.hasError('server')) {
+                    <small class="error">
+                        {{ form.controls.name.getError('server') }}
+                    </small>
+                    }
+                </div>
+            </div>
+            <input pInputText type="text" formControlName="name" />
+        </div>
+
+        <div class="field w-full">
+            <div class="flex items-center justify-between">
+                <label for="email">Email address</label>
+                <div>
+                    @if (form.controls.email.touched && form.controls.email.hasError('required')) {
+                    <small class="error">Valid email address is required</small>
+                    }
+
+                    @if (form.controls.email.hasError('server')) {
+                    <small class="error">
+                        {{ form.controls.email.getError('server') }}
+                    </small>
+                    }
+                </div>
+            </div>
+            <input pInputText type="email" formControlName="email" />
+        </div>
+
+        <div class="field w-full">
+            <div class="flex items-center justify-between">
+                <label for="password">Password</label>
+                <div>
+                    @if (form.controls.password.touched && form.controls.password.invalid) {
+                    <small class="error">Password must be at least 6 characters</small>
+                    }
+
+                    @if (form.controls.password.hasError('server')) {
+                    <small class="error">
+                        {{ form.controls.password.getError('server') }}
+                    </small>
+                    }
+                </div>
+            </div>
+            <p-password formControlName="password" [feedback]="false" [toggleMask]="true" autocomplete="off" fluid />
+        </div>
+
+        <div class="flex flex-row w-full gap-4">
+            <div class="field w-full">
+                <label for="globalRole">Role</label>
+                <p-select [options]="roleOptions" formControlName="globalRole" optionLabel="label" optionValue="value"
+                    placeholder="Role" class="w-full" />
+            </div>
+
+            <div class="field w-full">
+                <label for="globalRole">Store member</label>
+                <p-select [options]="storeOptions()" formControlName="storeId" optionLabel="label" optionValue="value"
+                    placeholder="Store" class="w-full" [checkmark]="true" [showClear]="true" />
+            </div>
+
+            <div class="field w-full">
+                <label for="globalRole">Store role</label>
+                <p-select [options]="storeRoleOptions" formControlName="storeRole" optionLabel="label"
+                    optionValue="value" placeholder="Store Role" class="w-full" [checkmark]="true" [showClear]="true" />
+            </div>
+        </div>
+
+        <div class="flex items-center justify-between">
+            <div></div>
+
+            <button pButton type="submit">
+                @if (isEditMode) {
+                <i class="pi pi-check"></i>
+                <span pButtonLabel>Save</span>
+                }
+                @else {
+                <i class="pi pi-plus"></i>
+                <span pButtonLabel>Upload</span>
+                }
+            </button>
+        </div>
+    </form>
+
+
+</p-card>

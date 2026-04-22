@@ -1,0 +1,57 @@
+<p-toast />
+<p-confirmdialog />
+
+<p-card>
+    <p-table [value]="users()" [loading]="isLoading()" class="table-auto">
+        <ng-template #caption>
+            <div class="flex items-center justify-between">
+                <span class="text-xl font-bold">Users</span>
+            </div>
+        </ng-template>
+
+        <ng-template #header>
+            <tr>
+                <th>Name</th>
+                <th>Email address</th>
+                <th>Role</th>
+                <th>Store Member</th>
+                <th class="flex gap-2 justify-end">Actions</th>
+            </tr>
+        </ng-template>
+
+        <ng-template #body let-user>
+            <tr>
+                <td class="font-bold">{{user.name}}</td>
+                <td>{{user.email}}</td>
+                <td>{{roles[user.globalRole]}}</td>
+                <td>
+                    @if (user.storeMembership !== null) {
+                    <span>{{storeRoles[user.storeMembership.role]}}</span>
+                    <span class="text-gray-500"> @
+                        <a [routerLink]="['/store', user.storeMembership.id]" class="text-link">
+                            {{user.storeMembership.name}}
+                        </a>
+                    </span>
+                    }
+                    @else {
+                    <span class="text-gray-400">-</span>
+                    }
+                </td>
+                <td class="flex gap-2 justify-end">
+                    <p-button icon="pi pi-pencil" [rounded]="true" severity="success" [outlined]="true"
+                        [routerLink]="['/user', user.id]" />
+                    <p-button icon="pi pi-trash" [rounded]="true" severity="danger" [outlined]="true"
+                        (click)="confirmDelete($event, user.id)" />
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+
+    @if (isLoading()) {
+    <div class="card flex justify-center">
+        <p-progress-spinner ariaLabel="loading" />
+    </div>
+    }
+
+    <div #loadMoreTrigger class="h-4"></div>
+</p-card>
