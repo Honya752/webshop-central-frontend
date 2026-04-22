@@ -12,6 +12,10 @@ import { InputGroupModule } from 'primeng/inputgroup';
 import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ToastModule } from 'primeng/toast';
+import { ConfirmationService, MessageService } from 'primeng/api';
+import { DecimalPipe } from '@angular/common';
 
 type ProductFilterForm = FormGroup<{
   search: FormControl<string>;
@@ -21,13 +25,18 @@ type ProductFilterForm = FormGroup<{
 
 @Component({
   selector: 'app-products-page',
-  imports: [Card, TableModule, ButtonModule, TagModule, RouterLink, ProgressSpinnerModule, InputGroupModule, ReactiveFormsModule, SelectModule, InputTextModule],
+  imports: [ConfirmDialogModule, DecimalPipe, ToastModule, Card, TableModule, ButtonModule, TagModule, RouterLink, ProgressSpinnerModule, InputGroupModule, ReactiveFormsModule, SelectModule, InputTextModule],
   templateUrl: './products-page.html',
+  providers: [MessageService, ConfirmationService],
   styleUrl: './products-page.sass',
 })
 export class ProductsPage implements OnInit, AfterViewInit, OnDestroy {
 
-  private fb = inject(FormBuilder);
+  private readonly fb = inject(FormBuilder);
+  private readonly messageService = inject(MessageService);
+  private readonly confirmationService = inject(ConfirmationService);
+  private readonly productService = inject(ProductsService);
+  private readonly authService = inject(AuthService);
 
   products = signal<Product[]>([]);
 
@@ -49,8 +58,6 @@ export class ProductsPage implements OnInit, AfterViewInit, OnDestroy {
   loadMoreTrigger!: ElementRef;
 
   constructor(
-    private productService: ProductsService,
-    private authService: AuthService
   ) { }
 
   loadProducts(): void {
@@ -79,6 +86,32 @@ export class ProductsPage implements OnInit, AfterViewInit, OnDestroy {
       error: (error) => {
         this.isLoading.set(false);
       },
+    })
+  }
+
+  deleteProduct(id: string) {
+    this.isLoading.set(true);
+
+    this.productService.deleteProduct(id).subscribe({
+      next: () => {
+        this.resetAndReload();
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Deleted',
+          detail: 'Product deleted successfully',
+        });
+
+        this.isLoading.set(false);
+      },
+      error: () => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to delete product',
+        });
+
+        this.isLoading.set(false);
+      }
     })
   }
 
@@ -115,6 +148,26 @@ export class ProductsPage implements OnInit, AfterViewInit, OnDestroy {
     this.observer?.disconnect();
   }
 
+  confirmDelete(event: Event, id: string) {
+    this.confirmationService.confirm({
+      target: event.target as EventTarget,
+      message: 'Are you sure you want to delete this product?',
+      header: 'Delete confirmation',
+      icon: 'pi pi-exclamation-triangle', rejectButtonProps: {
+        label: 'Cancel',
+        severity: 'secondary',
+        outlined: true,
+      },
+      acceptButtonProps: {
+        label: 'Delete',
+        severity: 'danger',
+      },
+      accept: () => {
+        this.deleteProduct(id);
+      },
+    });
+  }
+
   get Role() {
     return this.authService.currentUser()?.globalRole;
   }
@@ -129,5 +182,4 @@ export class ProductsPage implements OnInit, AfterViewInit, OnDestroy {
     { label: 'Ascending', value: 'asc' },
     { label: 'Descending', value: 'desc' }
   ];
-
 }

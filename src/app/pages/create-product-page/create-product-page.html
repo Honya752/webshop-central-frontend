@@ -1,3 +1,5 @@
+<p-toast />
+
 <p-card class="px-6">
 
     <form [formGroup]="form" (ngSubmit)="submit()" class="form">
@@ -31,6 +33,8 @@
             @for (group of images.controls; track $index; let i = $index) {
             <p-panel [formGroupName]="i" class="form-group">
                 <div class="flex justify-between gap-4">
+                    <img [src]="group.controls.url.value || 'https://placehold.co/200x200?text=No+image'" alt="Preview"
+                        imageClass="h-full w-full object-cover" class="w-24 rounded" />
                     <div class="field w-full">
                         <div class="flex items-center justify-between">
                             <label for="url">Product image URL</label>
@@ -98,7 +102,13 @@
                             <small class="error">Invalid region</small>
                             }
                         </div>
-                        <input pInputText type="text" formControlName="region" fluid />
+                        <div class="flex flex-row gap-2 items-center">
+                            <input pInputText type="text" formControlName="region" fluid maxlength="2" />
+
+                            <div>
+                                <span class="text-4xl">{{getFlagEmoji(group.controls.region.value)}}</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 

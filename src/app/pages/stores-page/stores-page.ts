@@ -69,4 +69,12 @@ export class StoresPage implements OnInit, AfterViewInit, OnDestroy {
     this.observer?.disconnect();
   }
 
+  getFlagEmoji(region: string): string {
+    return region
+      .toUpperCase()
+      .replace(/./g, char =>
+        String.fromCodePoint(127397 + char.charCodeAt(0))
+      );
+  }
+
 }

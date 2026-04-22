@@ -1,5 +1,5 @@
 import { HttpClient } from "@angular/common/http";
-import { ApplicationConfig, inject, Injectable } from "@angular/core";
+import { ApplicationConfig, inject, Injectable, Signal } from "@angular/core";
 import { ApiPaginationResponse, ApiResponse } from "../types/api-response";
 import { environment } from "../../environment";
 import { map, tap } from "rxjs";
@@ -56,6 +56,14 @@ export type CreateProduct = {
     images: CreateProductImage[];
 }
 
+export type UpdateProduct = {
+    sku?: string;
+    ean?: string;
+    price: number;
+    localizations?: ProductLocalization[];
+    images?: CreateProductImage[];
+}
+
 @Injectable({
     providedIn: 'root'
 })
@@ -81,6 +89,23 @@ export class ProductsService {
 
     createProduct(payload: CreateProduct) {
         return this.http
-            .post<ApiResponse<Product>>(`${environment.apiUrl}/products`, payload);
+            .post<ApiResponse<Product>>(`${environment.apiUrl}/products`, payload)
+            .pipe(map((response) => {
+                return response.data;
+            }));
+    }
+
+    updateProduct(payload: UpdateProduct, id: string) {
+        return this.http
+            .patch<ApiResponse<Product>>(`${environment.apiUrl}/products/${id}`, payload)
+            .pipe(map(response => response.data));
+    }
+
+    deleteProduct(id: string) {
+        return this.http
+            .delete<ApiResponse<Product>>(`${environment.apiUrl}/products/${id}`)
+            .pipe(map((response) => {
+                return response.data;
+            }));
     }
 }

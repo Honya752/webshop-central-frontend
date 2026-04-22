@@ -1,8 +1,11 @@
+<p-toast />
+<p-confirmdialog />
+
 <p-card>
     <form [formGroup]="filterForm" class="flex flex-row gap-4">
         <p-inputgroup>
             <p-button label="Search" severity="contrast" />
-            <input pInputText type="search" formControlName="search" placeholder="Search by SKU or EAN code" />
+            <input pInputText type="search" formControlName="search" placeholder="Search by name, EAN or SKU codes" />
         </p-inputgroup>
 
         <p-select [options]="sortByOptions" formControlName="sortBy" optionLabel="label" optionValue="value"
@@ -14,14 +17,7 @@
 </p-card>
 
 <p-card class="w-full mt-4">
-    @if (isLoading()) {
-    <div class="card flex justify-center">
-        <p-progress-spinner ariaLabel="loading" />
-    </div>
-    }
-    @else {
-
-    <p-table [value]="products()" [tableStyle]="{ 'min-width': '60rem' }">
+    <p-table [value]="products()" [loading]="isLoading()">
         <ng-template #caption>
             <div class="flex items-center justify-between">
                 <span class="text-xl font-bold">Products</span>
@@ -30,53 +26,43 @@
 
         <ng-template #header>
             <tr>
-                <th>SKU</th>
                 <th>Name</th>
                 <th>Image</th>
-                <th>Price</th>
+                <th>Status</th>
+                <th>SKU</th>
                 <th>EAN</th>
-                <th>Operations</th>
+                <th>Price</th>
+                <th class="flex gap-2 justify-end">Actions</th>
             </tr>
         </ng-template>
 
         <ng-template #body let-product>
             <tr>
-                <td>{{ product.sku }}</td>
-
                 <td>{{ product.name }}</td>
 
                 <td>
                     <img [src]="product.images?.[0]?.url" [alt]="product.name" class="w-24 rounded" />
                 </td>
 
-                <td>{{ product.price }}</td>
+                <td>status</td>
 
-                <td>{{ product.ean }}</td>
+                <td class="font-mono">{{ product.sku }}</td>
+
+                <td class="font-mono">{{ product.ean }}</td>
+
+                <td>{{ product.price | number }} Ft</td>
 
                 <td>
-                    @if (Role === 'SYSADMIN') {
-                    <a [routerLink]="`/product/${product.id}/edit`">
-                        edit
-                    </a>
-                    <p-button icon="pi pi-trash" rounded size="small" severity="danger" />
-                    }
-                </td>
-
-            </tr>
-        </ng-template>
-
-        <ng-template #footer>
-            <tr>
-                <td colspan="6">
-                    @if (isLoading()) {
-                    <p>Betöltés...</p>
-                    }
-                    In total there are {{ products().length }} products.
+                    <p-button icon="pi pi-chevron-right" [rounded]="true" severity="secondary" [outlined]="true"
+                        [routerLink]="['/product', product.id]" class="ml-4 float-right" />
+                    <p-button icon="pi pi-trash" [rounded]="true" severity="danger" [outlined]="true"
+                        (click)="confirmDelete($event, product.id)" class="ml-4 float-right" />
+                    <p-button icon="pi pi-pencil" [rounded]="true" severity="success" [outlined]="true"
+                        [routerLink]="['/product', product.id, 'edit']" class="ml-4 float-right" />
                 </td>
             </tr>
         </ng-template>
     </p-table>
-    }
 
     <div #loadMoreTrigger class="h-4"></div>
 </p-card>

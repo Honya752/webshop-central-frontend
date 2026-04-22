@@ -9,10 +9,14 @@ import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
 import { SelectModule } from 'primeng/select';
 import { PasswordModule } from 'primeng/password';
+import { ToastModule } from 'primeng/toast';
+import { ConfirmationService, MessageService } from 'primeng/api';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
 
 @Component({
   selector: 'app-create-user-page',
-  imports: [CommonModule, PasswordModule, ReactiveFormsModule, Card, InputTextModule, ButtonModule, RouterLink, SelectModule],
+  imports: [CommonModule, PasswordModule, ReactiveFormsModule, Card, InputTextModule, ButtonModule, RouterLink, SelectModule, ConfirmDialogModule, ToastModule,],
+  providers: [MessageService, ConfirmationService],
   templateUrl: './create-user-page.html',
   styleUrl: './create-user-page.sass',
 })
