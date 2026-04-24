@@ -30,15 +30,38 @@ export type Product = {
     images: ProductImages[];
 }
 
-export type AllProductData = {
+export type ProductMapping = {
+    id: string;
+    externalUrl: string;
+    externalId: string;
+    lastSyncedAt: Date;
+    storeName: string;
+    storeId: string;
+}
+
+export type ProductOrders = {
+    orderId: string;
+    storeId: string;
+    storeName: string;
+    quantity: number;
+    unitPrice: number;
+    currency: string;
+    createAt: Date;
+}
+
+export type ProductDetail = {
     id: string;
     sku: string;
     ean: string;
     price: number;
     brand: string;
     category: string;
+    createdAt: Date;
+    updatedAt: Date;
     localizations: ProductLocalization[];
     images: ProductImages[];
+    mappings: ProductMapping[];
+    orders: ProductOrders[];
 }
 
 type ProductLocalization = {
@@ -98,7 +121,7 @@ export class ProductsService {
 
     getAllProductData(id: string) {
         return this.http
-            .get<ApiResponse<AllProductData>>(`${environment.apiUrl}/products/${id}/data`)
+            .get<ApiResponse<ProductDetail>>(`${environment.apiUrl}/products/${id}/data`)
             .pipe(map((response) => {
                 return response.data;
             }));

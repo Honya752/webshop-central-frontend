@@ -39,7 +39,7 @@
         </ng-template>
 
         <ng-template #body let-product>
-            <tr>
+            <tr [routerLink]="['/product', product.id]" class="hover:cursor-pointer">
                 <td>{{ product.name }}</td>
 
                 <td>
@@ -69,11 +69,11 @@
 
                 <td>
                     <p-button icon="pi pi-chevron-right" [rounded]="true" severity="secondary" [outlined]="true"
-                        [routerLink]="['/product', product.id]" class="ml-4 float-right" />
+                        [routerLink]="['/product', product.id]" class="ml-2 float-right" />
                     <p-button icon="pi pi-trash" [rounded]="true" severity="danger" [outlined]="true"
-                        (click)="confirmDelete($event, product.id)" class="ml-4 float-right" />
+                        (click)="confirmDelete($event, product.id)" class="ml-2 float-right" />
                     <p-button icon="pi pi-pencil" [rounded]="true" severity="success" [outlined]="true"
-                        [routerLink]="['/product', product.id, 'edit']" class="ml-4 float-right" />
+                        [routerLink]="['/product', product.id, 'edit']" class="ml-2 float-right" />
                 </td>
             </tr>
         </ng-template>

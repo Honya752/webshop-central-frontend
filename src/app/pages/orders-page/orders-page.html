@@ -33,7 +33,7 @@
             <tr>
                 <td>{{order.status}}</td>
                 <td>{{order.store.name}}</td>
-                <td>{{ order.createdAt | date:'yyyy.MM.dd. HH:mm' }}</td>
+                <td>{{ order.createdAt | date:'yyyy. MM. dd. HH:mm' }}</td>
                 <td>{{ order.total | currency:order.currency:'symbol':'1.0-0' }}</td>
                 <td>{{order.paymentMethod}}</td>
                 <td>

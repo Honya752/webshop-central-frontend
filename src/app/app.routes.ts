@@ -14,6 +14,7 @@ import { CreateUserPage } from './pages/create-user-page/create-user-page';
 import { WholesalersPage } from './pages/wholesalers-page/wholesalers-page';
 import { CreateWholesalerPage } from './pages/create-wholesaler-page/create-wholesaler-page';
 import { CreateStorePage } from './pages/create-store-page/create-store-page';
+import { ProductDetailPage } from './pages/product-detail-page/product-detail-page';
 
 export const routes: Routes = [
     {
@@ -36,7 +37,7 @@ export const routes: Routes = [
 
             { path: 'products', component: ProductsPage },
             { path: 'product/create', component: CreateProductPage },
-            { path: 'product/:id', component: ProductsPage },
+            { path: 'product/:id', component: ProductDetailPage },
             { path: 'product/:id/edit', component: CreateProductPage },
 
             { path: 'orders', component: OrdersPage },

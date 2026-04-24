@@ -1,0 +1,110 @@
+<p-toast />
+
+<p-card>
+    <h1 class="header">Product data</h1>
+    <p>{{product()?.brand}}</p>
+</p-card>
+
+<p-card class="mt-6">
+    <form [formGroup]="webshopForm" (ngSubmit)="addToWebshop()" class="form">
+        <div class="field w-full">
+            <label for="globalRole">Stores</label>
+            <p-select [options]="storeOptions()" formControlName="storeId" optionLabel="label" optionValue="value"
+                placeholder="Store" class="w-full" [checkmark]="true" [showClear]="true" />
+        </div>
+
+        <button pButton>
+            <i class="pi pi-plus" pButtonIcon></i>
+            <span pButtonLabel>Add</span>
+        </button>
+    </form>
+</p-card>
+
+<p-card class="mt-6">
+    stock info
+</p-card>
+
+<p-card class="mt-6">
+    <p-table [value]="product()?.mappings ?? []" [loading]="isLoading()">
+        <ng-template #caption>
+            <div class="flex items-center justify-between">
+                <span class="text-xl font-bold">Stores mappings</span>
+            </div>
+        </ng-template>
+
+        <ng-template #header>
+            <tr>
+                <th>Store name</th>
+                <th>Status</th>
+                <th>External ID</th>
+                <th>External link</th>
+                <th>Last synced at</th>
+                <th></th>
+            </tr>
+        </ng-template>
+
+        <ng-template #body let-map>
+            <tr>
+                <td>
+                    <a [routerLink]="['/store', map.storeId]">{{ map.storeName }}</a>
+                </td>
+                <td>
+                    @if (isInSync(map)) {
+                    <p-tag severity="success" value="insync" />
+                    }
+                    @else {
+                    <p-tag severity="warn" value="out of sync" />
+                    }
+                </td>
+                <td class="font-mono">{{map.externalId ?? '-'}}</td>
+                <td>
+                    @if (map.externalUrl !== null) {
+                    <a [href]="map.externalUrl" class="link">link</a>
+                    }
+                    @else {-}
+                </td>
+                <td>
+                    <span class="my-auto">{{ map.lastSyncedAt | date:'yyyy. MM. dd. HH:mm' }}</span>
+                </td>
+                <td>
+                    <p-button class="float-right" icon="pi pi-sync" [rounded]="true" severity="secondary"
+                        [outlined]="true" (click)="syncWithStore(map.storeId, product()?.id ?? null)" />
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+</p-card>
+
+<p-card class="mt-6">
+    <p-table [value]="product()?.orders ?? []" , [loading]="isLoading()">
+
+        <ng-template #caption>
+            <div class="flex items-center justify-between">
+                <span class="text-xl font-bold">Recent Orders</span>
+            </div>
+        </ng-template>
+
+        <ng-template #header>
+            <tr>
+                <th>Store name</th>
+                <th>Quantity</th>
+                <th>Unit price</th>
+                <th>Date</th>
+                <th>Status</th>
+            </tr>
+        </ng-template>
+
+        <ng-template #body let-order>
+            <tr>
+                <td>
+                    <a [routerLink]="['/order', order.storeId]">{{ order.storeName }}</a>
+                </td>
+                <td class="font-mono">{{order.quantity}}</td>
+                <td>{{ order.unitPrice | currency:order.currency:'symbol':'1.0-0' }}</td>
+                <td>{{ order.createAt | date:'yyyy. MM. dd. HH:mm' }}</td>
+                <td>status</td>
+            </tr>
+        </ng-template>
+
+    </p-table>
+</p-card>

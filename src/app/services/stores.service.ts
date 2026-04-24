@@ -82,4 +82,10 @@ export class StoresService {
             .pipe(map(response => response.data))
     }
 
+    addProductToStore(storeId: string, productId: string) {
+        return this.http
+            .post(`${environment.apiUrl}/stores/${storeId}/product-sync/${productId}`, {})
+            .pipe(map(response => response));
+    }
+
 }
