@@ -11,12 +11,16 @@ import { OrderDetailPage } from './pages/order-detail-page/order-detail-page';
 import { StoresPage } from './pages/stores-page/stores-page';
 import { UsersPage } from './pages/users-page/users-page';
 import { CreateUserPage } from './pages/create-user-page/create-user-page';
+import { WholesalersPage } from './pages/wholesalers-page/wholesalers-page';
+import { CreateWholesalerPage } from './pages/create-wholesaler-page/create-wholesaler-page';
+import { CreateStorePage } from './pages/create-store-page/create-store-page';
 
 export const routes: Routes = [
     {
         path: '',
         component: AuthLayout,
         children: [
+            { path: '', pathMatch: 'full', redirectTo: 'login' },
             { path: 'login', component: LoginPage },
             { path: 'register', component: RegisterPage },
         ],
@@ -39,10 +43,16 @@ export const routes: Routes = [
             { path: 'order/:id', component: OrderDetailPage },
 
             { path: 'stores', component: StoresPage },
+            { path: 'store/create', component: CreateStorePage },
+            { path: 'store/:id', component: CreateStorePage },
 
             { path: 'users', component: UsersPage },
             { path: 'user/create', component: CreateUserPage },
-            { path: 'user/:id', component: CreateUserPage }
+            { path: 'user/:id', component: CreateUserPage },
+
+            { path: 'wholesalers', component: WholesalersPage },
+            { path: 'wholesaler/create', component: CreateWholesalerPage },
+            { path: 'wholesaler/:id', component: CreateWholesalerPage },
         ]
     },
 

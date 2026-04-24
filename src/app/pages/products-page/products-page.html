@@ -26,8 +26,10 @@
 
         <ng-template #header>
             <tr>
-                <th>Name</th>
                 <th>Image</th>
+                <th>Name</th>
+                <th>Brand</th>
+                <th>Category</th>
                 <th>Status</th>
                 <th>SKU</th>
                 <th>EAN</th>
@@ -44,7 +46,20 @@
                     <img [src]="product.images?.[0]?.url" [alt]="product.name" class="w-24 rounded" />
                 </td>
 
-                <td>status</td>
+                <td>{{ product.brand }}</td>
+
+                <td>{{ product.category }}</td>
+
+                <td>
+                    @if (product.stock === null) {
+                    <p-tag severity="danger" value="unavaible" />
+                    }
+                    @else if (product.stock.stock
+                    <= 5) { <p-tag severity="warn" value="lowstock" />
+                    } @else {
+                    <p-tag severity="success" value="instock" />
+                    }
+                </td>
 
                 <td class="font-mono">{{ product.sku }}</td>
 

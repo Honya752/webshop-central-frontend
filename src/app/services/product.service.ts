@@ -10,13 +10,23 @@ type ProductImages = {
     alt: string;
 }
 
+type ProducStock = {
+    wholesalerId: string;
+    name: string;
+    baseUrl: string;
+    stock: number;
+}
+
 export type Product = {
     id: string;
     sku: string;
     ean: string;
     price: number;
     name: string;
+    category: string;
+    brand: string;
     description: string;
+    stock: ProducStock | null;
     images: ProductImages[];
 }
 
@@ -25,6 +35,8 @@ export type AllProductData = {
     sku: string;
     ean: string;
     price: number;
+    brand: string;
+    category: string;
     localizations: ProductLocalization[];
     images: ProductImages[];
 }
@@ -52,6 +64,8 @@ export type CreateProduct = {
     sku: string;
     ean: string;
     price: number;
+    brand: string;
+    category: string;
     localizations: ProductLocalization[];
     images: CreateProductImage[];
 }
@@ -60,6 +74,8 @@ export type UpdateProduct = {
     sku?: string;
     ean?: string;
     price: number;
+    brand?: string;
+    category?: string;
     localizations?: ProductLocalization[];
     images?: CreateProductImage[];
 }
@@ -74,6 +90,7 @@ export class ProductsService {
         return this.http
             .get<ApiPaginationResponse<Product>>(`${environment.apiUrl}/products`, { params: param })
             .pipe(map((response) => {
+                console.log(response);
                 const { data: products, meta } = response;
                 return { products, meta };
             }))

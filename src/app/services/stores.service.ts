@@ -19,6 +19,22 @@ export type StoreSummary = {
     baseUrl: string;
 }
 
+export type CreateStore = {
+    name: string;
+    region: string;
+    baseUrl: string;
+    integrationType: string;
+    integrationVer: string;
+}
+
+export type UpdateStore = {
+    name?: string;
+    region?: string;
+    baseUrl?: string;
+    integrationType?: string;
+    integrationVer?: string;
+}
+
 @Injectable({
     providedIn: 'root'
 })
@@ -41,4 +57,29 @@ export class StoresService {
                 return response.data;
             }))
     }
+
+    getStoreDetails(id: string) {
+        return this.http
+            .get<ApiResponse<Store>>(`${environment.apiUrl}/stores/${id}`)
+            .pipe(map(response => response.data))
+    }
+
+    createStore(payload: CreateStore) {
+        return this.http
+            .post<ApiResponse<Store>>(`${environment.apiUrl}/stores`, payload)
+            .pipe(map(response => response.data))
+    }
+
+    updateStore(payload: UpdateStore, id: string) {
+        return this.http
+            .patch<ApiResponse<Store>>(`${environment.apiUrl}/stores/${id}`, payload)
+            .pipe(map(response => response.data))
+    }
+
+    deleteStore(id: string) {
+        return this.http
+            .delete<ApiResponse<Store>>(`${environment.apiUrl}/stores/${id}`)
+            .pipe(map(response => response.data))
+    }
+
 }

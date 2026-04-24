@@ -129,6 +129,44 @@
         <div class="flex items-center justify-between gap-6">
             <div class="field w-full">
                 <div class="flex items-center justify-between">
+                    <label for="brand">Brand</label>
+                    <div>
+                        @if (form.controls.brand.touched && form.controls.brand.hasError('required')) {
+                        <small class="error">Brand is required</small>
+                        }
+
+                        @if (form.controls.brand.hasError('server')) {
+                        <small class="error">
+                            {{ form.controls.brand.getError('server') }}
+                        </small>
+                        }
+                    </div>
+                </div>
+                <input pInputText type="text" formControlName="brand" />
+            </div>
+
+            <div class="field  w-full">
+                <div class="flex items-center justify-between">
+                    <label for="category">Category</label>
+                    <div>
+                        @if (form.controls.category.touched && form.controls.category.hasError('required')) {
+                        <small class="error">Category is required</small>
+                        }
+
+                        @if (form.controls.category.hasError('server')) {
+                        <small class="error">
+                            {{ form.controls.category.getError('server') }}
+                        </small>
+                        }
+                    </div>
+                </div>
+                <input pInputText type="text" formControlName="category" />
+            </div>
+        </div>
+
+        <div class="flex items-center justify-between gap-6">
+            <div class="field w-full">
+                <div class="flex items-center justify-between">
                     <label for="sku">SKU code</label>
                     <div>
                         @if (form.controls.sku.touched && form.controls.sku.hasError('required')) {

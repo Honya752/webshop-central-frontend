@@ -47,6 +47,7 @@ export class LoginPage {
     this.authService.login(this.form.getRawValue()).subscribe({
       next: () => {
         const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
+        console.log(returnUrl);
         this.router.navigateByUrl(returnUrl || '/dashboard');
       },
       error: (error) => {

@@ -1,0 +1,116 @@
+<p-toast />
+<p-confirmdialog />
+
+<p-card class="px-6">
+    <h1 class="header">
+        @if (isEditMode) {Edit store}
+        @else {Create a store}
+    </h1>
+
+    @if (errorMessage()) {
+    <p class="form-error">{{ errorMessage() }}</p>
+    }
+    <form [formGroup]="form" (ngSubmit)="submit()" class="form">
+
+        <div class="field w-full">
+            <div class="flex items-center justify-between">
+                <label for="name">Name</label>
+                <div>
+                    @if (form.controls.name.touched && form.controls.name.hasError('required')) {
+                    <small class="error">Name is required</small>
+                    }
+
+                    @if (form.controls.name.hasError('server')) {
+                    <small class="error">
+                        {{ form.controls.name.getError('server') }}
+                    </small>
+                    }
+                </div>
+            </div>
+            <input pInputText type="text" formControlName="name" />
+        </div>
+
+        <div class="field w-full">
+            <div class="flex items-center justify-between">
+                <label for="region">Region</label>
+                <div>
+                    @if (form.controls.region.touched && form.controls.region.hasError('required')) {
+                    <small class="error">Name is required</small>
+                    }
+
+                    @if (form.controls.region.hasError('server')) {
+                    <small class="error">
+                        {{ form.controls.region.getError('server') }}
+                    </small>
+                    }
+                </div>
+            </div>
+            <div class="flex flex-row gap-2 items-center">
+                <input pInputText type="text" formControlName="region" fluid maxlength="2" />
+
+                <div>
+                    <span class="text-4xl">{{getFlagEmoji(form.controls.region.value)}}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="field w-full">
+            <div class="flex items-center justify-between">
+                <label for="baseUrl">Base URL</label>
+                <div>
+                    @if (form.controls.baseUrl.touched && form.controls.baseUrl.hasError('required')) {
+                    <small class="error">Base URL is required</small>
+                    }
+
+                    @if (form.controls.baseUrl.hasError('server')) {
+                    <small class="error">
+                        {{ form.controls.baseUrl.getError('server') }}
+                    </small>
+                    }
+                </div>
+            </div>
+            <input pInputText type="text" formControlName="baseUrl" />
+        </div>
+
+        <div class="field w-full">
+            <label for="integrationType">Integration Type</label>
+            <p-select [options]="integrations" formControlName="integrationType" optionLabel="label" optionValue="value"
+                placeholder="Integrations" class="w-full" />
+        </div>
+
+        <div class="field w-full">
+            <div class="flex items-center justify-between">
+                <label for="integrationVer">Version</label>
+                <div>
+                    @if (form.controls.integrationVer.touched && form.controls.integrationVer.hasError('required')) {
+                    <small class="error">Version is required</small>
+                    }
+
+                    @if (form.controls.integrationVer.hasError('server')) {
+                    <small class="error">
+                        {{ form.controls.integrationVer.getError('server') }}
+                    </small>
+                    }
+                </div>
+            </div>
+            <input pInputText type="text" formControlName="integrationVer" />
+        </div>
+
+        <div class="flex items-center justify-between">
+            <div></div>
+
+            <button pButton type="submit">
+                @if (isEditMode) {
+                <i class="pi pi-check"></i>
+                <span pButtonLabel>Save</span>
+                }
+                @else {
+                <i class="pi pi-plus"></i>
+                <span pButtonLabel>Upload</span>
+                }
+            </button>
+        </div>
+    </form>
+
+
+</p-card>

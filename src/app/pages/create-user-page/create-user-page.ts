@@ -81,11 +81,6 @@ export class CreateUserPage implements OnInit {
 
   submit(): void {
     if (this.form.invalid) {
-      Object.entries(this.form.controls).forEach(([name, control]) => {
-        if (control.invalid) {
-          console.log(name, control.errors, control.value);
-        }
-      });
       this.form.markAllAsTouched();
       return;
     }

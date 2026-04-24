@@ -28,6 +28,8 @@ type ProductForm = FormGroup<{
   sku: FormControl<string>;
   ean: FormControl<string>;
   price: FormControl<number | null>;
+  brand: FormControl<string>;
+  category: FormControl<string>;
   localizations: FormArray<LocalizationForm>;
   images: FormArray<ProductImageForm>;
 }>;
@@ -57,6 +59,8 @@ export class CreateProductPage implements OnInit {
   form: ProductForm = this.fb.group({
     sku: this.fb.nonNullable.control('', [Validators.required]),
     ean: this.fb.nonNullable.control('', [Validators.required]),
+    brand: this.fb.nonNullable.control('', [Validators.required]),
+    category: this.fb.nonNullable.control('', [Validators.required]),
     price: this.fb.control<number | null>(null, [
       Validators.required,
       Validators.min(0)
@@ -84,6 +88,8 @@ export class CreateProductPage implements OnInit {
             sku: product.sku,
             ean: product.ean,
             price: product.price,
+            category: product.category,
+            brand: product.brand
           });
 
           product.localizations.forEach((loc) => {
@@ -162,6 +168,8 @@ export class CreateProductPage implements OnInit {
       const payload: UpdateProduct = {
         sku: this.form.controls.sku.getRawValue(),
         ean: this.form.controls.ean.getRawValue(),
+        brand: this.form.controls.brand.getRawValue(),
+        category: this.form.controls.category.getRawValue(),
         price: this.form.controls.price.getRawValue()!,
         localizations: this.localizations.getRawValue(),
         images: this.images.getRawValue()
@@ -196,6 +204,8 @@ export class CreateProductPage implements OnInit {
       const payload: CreateProduct = {
         sku: this.form.controls.sku.getRawValue(),
         ean: this.form.controls.ean.getRawValue(),
+        brand: this.form.controls.brand.getRawValue(),
+        category: this.form.controls.category.getRawValue(),
         price: this.form.controls.price.getRawValue()!,
         localizations: this.localizations.getRawValue(),
         images: this.images.getRawValue()
