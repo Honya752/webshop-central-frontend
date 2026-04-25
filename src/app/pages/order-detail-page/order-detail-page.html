@@ -1,6 +1,23 @@
+<p-toast />
+
 <p-card>
-    <h1 class="header">Order</h1>
-    <p>Order date: <span class="font-bold">{{ order()?.createdAt | date:'yyyy. MM. dd. HH:mm' }}</span></p>
+    <div class="flex justify-evenly text-lg mb-6 px-4 ">
+        <div class="w-full">
+            <p>Order date: <span class="font-bold">{{ order()?.createdAt | date:'yyyy. MM. dd. HH:mm' }}</span></p>
+            <p>Store: <a class="link-text font-bold" [href]="order()?.store?.baseUrl">{{order()?.store?.name}}</a></p>
+            <p>Order status:
+                @if (order()?.status === 'PROCESSING') { <p-tag severity="secondary" value="Processing" /> }
+                @else if (order()?.status === 'ORDERED_FROM_WHOLESALER') { <p-tag severity="warn" value="Ordered" /> }
+                @else if (order()?.status === 'SHIPPING_TO_STORE') { <p-tag severity="info" value="Shipping" /> }
+                @else if (order()?.status === 'COMPLETED') { <p-tag severity="success" value="Completed" /> }
+                @else if (order()?.status === 'CANCELLED') { <p-tag severity="danger" value="Cancelled" /> }
+            </p>
+        </div>
+        <div class="w-full">
+            <p>Customer name: <span class="font-bold">{{order()?.name ?? ''}}</span></p>
+            <p>Customer email: <span class="font-bold">{{order()?.email ?? ''}}</span></p>
+        </div>
+    </div>
 
     <p-table [value]="order()?.orderItems ?? []">
         <ng-template #caption>
@@ -11,28 +28,72 @@
 
         <ng-template #header>
             <tr>
+                <th>Name</th>
+                <th>Image</th>
                 <th>SKU</th>
-                <th>Quantity</th>
+                <th>
+                    <p class="text-center w-full">Quantity</p>
+                </th>
                 <th>Unit Price</th>
+                <th>Subtotal</th>
+                <th>
+                    <p class="text-center w-full">EAN</p>
+                </th>
             </tr>
         </ng-template>
 
         <ng-template #body let-item>
             <tr>
-                <td>{{item.sku}}</td>
-                <td>{{item.quantity}}</td>
+                <td>{{ item.product.name }}</td>
+                <td>
+                    <img [src]="item.product.images?.[0]?.url" [alt]="item.product.name" class="w-24 rounded" />
+                </td>
+                <td class="font-mono">{{ item.product.sku }}</td>
+                <td class="font-mono">
+                    <p class="text-center w-full">
+                        {{item.quantity}}
+                    </p>
+                </td>
                 <td>{{ item.unitPrice | currency:order()?.currency:'symbol':'1.0-0' }}</td>
+                <td>{{ item.total | currency:order()?.currency:'symbol':'1.0-0' }}</td>
+                <td>
+                    <div class="flex justify-center">
+                        <app-barcode [value]="item.product.ean" />
+                    </div>
+                </td>
             </tr>
         </ng-template>
 
         <ng-template #footer>
             <tr>
+                <td class="font-bold">Total:</td>
+                <td></td>
+                <td></td>
                 <td></td>
                 <td></td>
                 <td>
-                    <p class="text-end">Total: {{ order()?.total | currency:order()?.currency:'symbol':'1.0-0' }}</p>
+                    {{ order()?.total | currency:order()?.currency:'symbol':'1.0-0' }}
                 </td>
+                <td></td>
             </tr>
         </ng-template>
     </p-table>
+
+    <div class="mt-8 px-4 flex justify-between">
+        <div>
+            <p class="text-lg">Mark order as:</p>
+        </div>
+        <div class="flex flex-row gap-4">
+            <p-button icon="pi pi-spinner-dotted" severity="secondary" label="Processing"
+                (onClick)="markOrderAs('PROCESSING')" />
+            <p-button icon="pi pi-box" severity="warn" label="Ordered"
+                (onClick)="markOrderAs('ORDERED_FROM_WHOLESALER')" />
+            <p-button icon="pi pi-truck" severity="info" label="Shipping"
+                (onClick)="markOrderAs('SHIPPING_TO_STORE')" />
+            <p-button icon="pi pi-check-circle" severity="success" label="Completed"
+                (onClick)="markOrderAs('COMPLETED')" />
+            <p-button icon="pi pi-times-circle" severity="danger" label="Cancelled"
+                (onClick)="markOrderAs('CANCELLED')" />
+        </div>
+    </div>
 </p-card>

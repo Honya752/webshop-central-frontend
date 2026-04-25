@@ -135,7 +135,8 @@ export class CreateWholesalerPage implements OnInit {
   }
 
   integrations = [
-    { label: "Example Integration", value: "EXAMPLEWHOLESALER" },
+    { label: "JSON integration", value: "JSON_INTEGRATION" },
+    { label: "XML integration", value: "XML_INTEGRATION" },
   ]
 
 }

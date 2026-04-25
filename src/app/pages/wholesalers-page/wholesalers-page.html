@@ -27,6 +27,8 @@
                 <td>
                     <p-button class="float-right" icon="pi pi-sync" [rounded]="true" severity="secondary"
                         [outlined]="true" (click)="syncWholesalerCatalog(store.id)" />
+                    <p-button class="float-right mr-2" icon="pi pi-pencil" [rounded]="true" severity="success"
+                        [outlined]="true" [routerLink]="['/wholesaler', store.id]" />
                 </td>
             </tr>
         </ng-template>

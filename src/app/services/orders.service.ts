@@ -10,7 +10,7 @@ type OrderStore = {
     baseUrl: string;
 };
 
-type OrederItem = {
+type OrderItem = {
     id: string;
     sku: string;
     quantity: string;
@@ -26,9 +26,14 @@ export type Order = {
     paymentMethod: string;
     createdAtExternal: Date;
     createdAt: Date;
-    updatedAt: Date;
     store: OrderStore;
-    orderItems: OrederItem[];
+}
+
+export type OrderData = Order & {
+    name: string;
+    email: string;
+    updatedAt: Date;
+    orderItems: OrderItem[];
 }
 
 type OrderFilterParam = {
@@ -37,6 +42,7 @@ type OrderFilterParam = {
     sortBy: string,
     sortOrder: string
 }
+
 
 @Injectable({
     providedIn: 'root'
@@ -56,10 +62,16 @@ export class OrdersService {
 
     getOrderById(id: string) {
         return this.http
-            .get<ApiResponse<Order>>(`${environment.apiUrl}/orders/${id}`)
+            .get<ApiResponse<OrderData>>(`${environment.apiUrl}/orders/${id}`)
             .pipe(map((response) => {
                 console.log(response)
                 return response.data
             }));
+    }
+
+    setOrderStatus(id: string, status: string) {
+        return this.http
+            .post<ApiResponse<{ status: string }>>(`${environment.apiUrl}/orders/${id}/status`, { status })
+            .pipe(map(response => { response.data.status }));
     }
 }

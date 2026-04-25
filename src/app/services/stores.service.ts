@@ -7,6 +7,7 @@ import { map } from "rxjs";
 export type Store = {
     id: string;
     name: string;
+    slug: string;
     region: string;
     baseUrl: string;
     integrationType: string;
@@ -21,6 +22,7 @@ export type StoreSummary = {
 
 export type CreateStore = {
     name: string;
+    slug: string;
     region: string;
     baseUrl: string;
     integrationType: string;
@@ -29,6 +31,7 @@ export type CreateStore = {
 
 export type UpdateStore = {
     name?: string;
+    slug?: string;
     region?: string;
     baseUrl?: string;
     integrationType?: string;

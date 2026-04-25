@@ -32,6 +32,24 @@
 
         <div class="field w-full">
             <div class="flex items-center justify-between">
+                <label for="slug">Store slug</label>
+                <div>
+                    @if (form.controls.slug.touched && form.controls.slug.hasError('required')) {
+                    <small class="error">Slug is required</small>
+                    }
+
+                    @if (form.controls.slug.hasError('server')) {
+                    <small class="error">
+                        {{ form.controls.slug.getError('server') }}
+                    </small>
+                    }
+                </div>
+            </div>
+            <input pInputText type="text" formControlName="slug" />
+        </div>
+
+        <div class="field w-full">
+            <div class="flex items-center justify-between">
                 <label for="region">Region</label>
                 <div>
                     @if (form.controls.region.touched && form.controls.region.hasError('required')) {

@@ -33,6 +33,7 @@ export class CreateStorePage implements OnInit {
 
   form = this.fb.group({
     name: this.fb.nonNullable.control('', [Validators.required]),
+    slug: this.fb.nonNullable.control('', [Validators.required]),
     region: this.fb.nonNullable.control('', [Validators.required]),
     baseUrl: this.fb.nonNullable.control('', [Validators.required]),
     integrationType: this.fb.nonNullable.control('', [Validators.required]),
@@ -49,6 +50,7 @@ export class CreateStorePage implements OnInit {
         next: (store) => {
           this.form.patchValue({
             name: store.name,
+            slug: store.slug,
             region: store.region,
             baseUrl: store.baseUrl,
             integrationType: store.integrationType,
@@ -69,6 +71,7 @@ export class CreateStorePage implements OnInit {
     if (this.isEditMode && this.id) {
       const payload: UpdateStore = {
         ...(raw.name ? { name: raw.name } : {}),
+        ...(raw.slug ? { slug: raw.slug } : {}),
         ...(raw.region ? { region: raw.region } : {}),
         ...(raw.baseUrl ? { baseUrl: raw.baseUrl } : {}),
         ...(raw.integrationType ? { integrationType: raw.integrationType } : {}),
@@ -101,6 +104,7 @@ export class CreateStorePage implements OnInit {
     else {
       const payload: CreateStore = {
         name: raw.name,
+        slug: raw.slug,
         region: raw.region,
         baseUrl: raw.baseUrl,
         integrationType: raw.integrationType,

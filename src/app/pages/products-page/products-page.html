@@ -65,7 +65,7 @@
 
                 <td class="font-mono">{{ product.ean }}</td>
 
-                <td>{{ product.price | number }} Ft</td>
+                <td>{{ product.stock?.price ?? product.price | number }} Ft</td>
 
                 <td>
                     <p-button icon="pi pi-chevron-right" [rounded]="true" severity="secondary" [outlined]="true"

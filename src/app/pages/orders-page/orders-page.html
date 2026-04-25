@@ -20,24 +20,31 @@
 
         <ng-template #header>
             <tr>
-                <th>Status</th>
+                <th>Order date</th>
                 <th>Store</th>
-                <th>Create At</th>
+                <th>Status</th>
                 <th>Total price</th>
                 <th>Payment Method</th>
-                <th>Operations</th>
+                <th></th>
             </tr>
         </ng-template>
 
         <ng-template #body let-order>
             <tr>
-                <td>{{order.status}}</td>
-                <td>{{order.store.name}}</td>
                 <td>{{ order.createdAt | date:'yyyy. MM. dd. HH:mm' }}</td>
+                <td><a class="link-text" [href]="order.store.baseUrl">{{order.store.name}}</a></td>
+                <td>
+                    @if (order.status === 'PROCESSING') { <p-tag severity="secondary" value="Processing" /> }
+                    @else if (order.status === 'ORDERED_FROM_WHOLESALER') { <p-tag severity="warn" value="Ordered" />
+                    }
+                    @else if (order.status === 'SHIPPING_TO_STORE') { <p-tag severity="info" value="Shipping" /> }
+                    @else if (order.status === 'COMPLETED') { <p-tag severity="success" value="Completed" /> }
+                    @else if (order.status === 'CANCELLED') { <p-tag severity="danger" value="Cancelled" /> }</td>
                 <td>{{ order.total | currency:order.currency:'symbol':'1.0-0' }}</td>
                 <td>{{order.paymentMethod}}</td>
                 <td>
-                    <a [routerLink]="['/order', order.id]">view</a>
+                    <p-button icon="pi pi-chevron-right" [rounded]="true" severity="secondary" [outlined]="true"
+                        [routerLink]="['/order', order.id]" />
                 </td>
             </tr>
         </ng-template>
