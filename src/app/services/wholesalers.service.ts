@@ -64,4 +64,13 @@ export class WholesalersService {
             .delete<ApiResponse<Wholesaler>>(`${environment.apiUrl}/wholesalers/${id}`,)
             .pipe(map(response => response.data));
     }
+
+    syncCatalog(id: string) {
+        return this.http
+            .post(`${environment.apiUrl}/wholesalers/${id}/sync-catalog`, {})
+            .pipe(map((response) => {
+                console.log(response);
+                return response;
+            }))
+    }
 }

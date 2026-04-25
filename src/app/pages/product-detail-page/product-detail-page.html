@@ -21,7 +21,35 @@
 </p-card>
 
 <p-card class="mt-6">
-    stock info
+    <p-table [value]="product()?.stocks ?? []" , [loading]="isLoading()">
+
+        <ng-template #caption>
+            <div class="flex items-center justify-between">
+                <span class="text-xl font-bold">Wholesaler stocks</span>
+            </div>
+        </ng-template>
+
+        <ng-template #header>
+            <tr>
+                <th>Wholesaler name</th>
+                <th>Quantity</th>
+                <th>Wholsale price</th>
+                <th>Last synced</th>
+            </tr>
+        </ng-template>
+
+        <ng-template #body let-stock>
+            <tr>
+                <td>
+                    <a [routerLink]="['/wholesaler', stock.wholesalerId]">{{ stock.name }}</a>
+                </td>
+                <td class="font-mono">{{stock.stock}}</td>
+                <td>{{ stock.price | number }} Ft</td>
+                <td>{{ stock.updatedAt | date:'yyyy. MM. dd. HH:mm' }}</td>
+            </tr>
+        </ng-template>
+
+    </p-table>
 </p-card>
 
 <p-card class="mt-6">

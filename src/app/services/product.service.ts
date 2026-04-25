@@ -15,6 +15,7 @@ type ProducStock = {
     name: string;
     baseUrl: string;
     stock: number;
+    price: number;
 }
 
 export type Product = {
@@ -62,6 +63,7 @@ export type ProductDetail = {
     images: ProductImages[];
     mappings: ProductMapping[];
     orders: ProductOrders[];
+    stocks: ProducStock[];
 }
 
 type ProductLocalization = {

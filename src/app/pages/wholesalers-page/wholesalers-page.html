@@ -1,3 +1,5 @@
+<p-toast />
+
 <p-card>
     <p-table [value]="wholesalers()" [loading]="isLoading()">
         <ng-template #caption>
@@ -11,6 +13,7 @@
                 <th>Name</th>
                 <th>URL</th>
                 <th>Store Type</th>
+                <th></th>
             </tr>
         </ng-template>
 
@@ -21,6 +24,10 @@
                 </td>
                 <td>{{store.baseUrl}}</td>
                 <td>{{store.integrationType}}</td>
+                <td>
+                    <p-button class="float-right" icon="pi pi-sync" [rounded]="true" severity="secondary"
+                        [outlined]="true" (click)="syncWholesalerCatalog(store.id)" />
+                </td>
             </tr>
         </ng-template>
     </p-table>
