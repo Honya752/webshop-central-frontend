@@ -25,8 +25,10 @@
                 <td>{{store.integrationType}}</td>
                 <td class="font-mono">{{store.integrationVer}}</td>
                 <td>
-                    <p-button icon="pi pi-pencil" [rounded]="true" severity="success" [outlined]="true"
+                    <p-button icon="pi pi-chevron-right" [rounded]="true" severity="secondary" [outlined]="true"
                         [routerLink]="['/store', store.id]" class="ml-4 float-right" />
+                    <p-button icon="pi pi-pencil" [rounded]="true" severity="success" [outlined]="true"
+                        [routerLink]="['/store', store.id, 'edit']" class="ml-4 float-right" />
                 </td>
             </tr>
         </ng-template>

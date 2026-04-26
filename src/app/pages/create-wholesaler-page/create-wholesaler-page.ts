@@ -8,12 +8,12 @@ import { SelectModule } from 'primeng/select';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { CreateWholesaler, UpdateWholesaler, WholesalersService } from '../../services/wholesalers.service';
 
 @Component({
   selector: 'app-create-wholesaler-page',
-  imports: [CommonModule, ReactiveFormsModule, Card, InputTextModule, ButtonModule, RouterLink, SelectModule, ConfirmDialogModule, ToastModule,],
+  imports: [CommonModule, ReactiveFormsModule, Card, InputTextModule, ButtonModule, SelectModule, ConfirmDialogModule, ToastModule,],
   providers: [MessageService, ConfirmationService],
   templateUrl: './create-wholesaler-page.html',
   styleUrl: './create-wholesaler-page.sass',

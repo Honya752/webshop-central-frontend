@@ -14,6 +14,11 @@ export type Store = {
     integrationVer: string;
 }
 
+export type StoreData = Store & {
+    products: any,
+    orders: any
+}
+
 export type StoreSummary = {
     id: string;
     name: string;
@@ -63,7 +68,7 @@ export class StoresService {
 
     getStoreDetails(id: string) {
         return this.http
-            .get<ApiResponse<Store>>(`${environment.apiUrl}/stores/${id}`)
+            .get<ApiResponse<StoreData>>(`${environment.apiUrl}/stores/${id}`)
             .pipe(map(response => response.data))
     }
 

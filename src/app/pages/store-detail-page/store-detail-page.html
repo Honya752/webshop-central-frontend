@@ -1,1 +1,119 @@
-<p>store-detail-page works!</p>
+<p-toast />
+
+<p-card>
+    <div class="flex justify-evenly text-lg px-4 ">
+        <div class="w-full">
+            <p>Name: <span class="font-bold">{{ store()?.name }}</span></p>
+            <p>Store page: <a class="font-bold link-text" [href]="store()?.baseUrl">{{store()?.baseUrl}}</a></p>
+        </div>
+        <div class="w-full">
+            <p>Type: <span class="font-bold">{{ store()?.integrationType }} {{store()?.integrationVer}}</span></p>
+        </div>
+    </div>
+</p-card>
+
+<p-card class="mt-6">
+    <p-table [value]="store()?.orders ?? []" , [loading]="isLoading()">
+
+        <ng-template #caption>
+            <div class="flex items-center justify-between">
+                <span class="text-xl font-bold">Recent Orders</span>
+            </div>
+        </ng-template>
+
+        <ng-template #header>
+            <tr>
+                <th>Order date</th>
+                <th>Status</th>
+                <th>Total price</th>
+                <th>Payment Method</th>
+                <th></th>
+            </tr>
+        </ng-template>
+
+        <ng-template #body let-order>
+            <tr>
+                <td>{{ order.createdAt | date:'yyyy. MM. dd. HH:mm' }}</td>
+                <td>
+                    @if (order.status === 'PROCESSING') { <p-tag severity="secondary" value="Processing" /> }
+                    @else if (order.status === 'ORDERED_FROM_WHOLESALER') { <p-tag severity="warn" value="Ordered" />
+                    }
+                    @else if (order.status === 'SHIPPING_TO_STORE') { <p-tag severity="info" value="Shipping" /> }
+                    @else if (order.status === 'COMPLETED') { <p-tag severity="success" value="Completed" /> }
+                    @else if (order.status === 'CANCELLED') { <p-tag severity="danger" value="Cancelled" /> }</td>
+                <td>{{ order.total | currency:order.currency:'symbol':'1.0-0' }}</td>
+                <td>{{order.paymentMethod}}</td>
+                <td>
+                    <p-button icon="pi pi-chevron-right" [rounded]="true" severity="secondary" [outlined]="true"
+                        [routerLink]="['/order', order.id]" />
+                </td>
+            </tr>
+        </ng-template>
+
+    </p-table>
+</p-card>
+
+<p-card class="mt-6">
+    <p-table [value]="store()?.products" [loading]="isLoading()">
+        <ng-template #caption>
+            <div class="flex items-center justify-between">
+                <span class="text-xl font-bold">Products</span>
+            </div>
+        </ng-template>
+
+        <ng-template #header>
+            <tr>
+                <th>Image</th>
+                <th>Name</th>
+                <th>Brand</th>
+                <th>Category</th>
+                <th>Status</th>
+                <th>SKU</th>
+                <th>EAN</th>
+                <th>Price</th>
+                <th>Last synced at</th>
+                <th class="flex gap-2 justify-end">Actions</th>
+            </tr>
+        </ng-template>
+
+        <ng-template #body let-product>
+            <tr class="hover:cursor-pointer">
+                <td>
+                    <img [src]="product.data.images?.[0]?.url" [alt]="product.name" class="w-24 rounded" />
+                </td>
+
+                <td>{{ product.data.name }}</td>
+
+                <td>{{ product.data.brand }}</td>
+
+                <td>{{ product.data.category }}</td>
+
+                <td>
+                    @if (isInSync(product)) {
+                    <p-tag severity="success" value="insync" />
+                    }
+                    @else {
+                    <p-tag severity="warn" value="out of sync" />
+                    }
+                </td>
+
+                <td class="font-mono">{{ product.data.sku }}</td>
+
+                <td class="font-mono">{{ product.data.ean }}</td>
+
+                <td>{{ product.data.stock?.price ?? product.data.price | number }} Ft</td>
+
+                <td>
+                    <span class="my-auto">{{ product.mapping.lastSyncedAt | date:'yyyy. MM. dd. HH:mm' }}</span>
+                </td>
+
+                <td>
+                    <p-button icon="pi pi-chevron-right" [rounded]="true" severity="secondary" [outlined]="true"
+                        [routerLink]="['/product', product.id]" class="ml-2 float-right" />
+                    <p-button class="float-right" icon="pi pi-sync" [rounded]="true" severity="secondary"
+                        [outlined]="true" (click)="syncWithStore(product.data.id)" />
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+</p-card>

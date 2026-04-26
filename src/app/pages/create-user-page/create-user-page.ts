@@ -2,7 +2,7 @@ import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { CreateUser, UpdateUser, UsersService } from '../../services/users.service';
 import { StoresService, StoreSummary } from '../../services/stores.service';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Card } from 'primeng/card';
 import { InputTextModule } from 'primeng/inputtext';
@@ -15,7 +15,7 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 
 @Component({
   selector: 'app-create-user-page',
-  imports: [CommonModule, PasswordModule, ReactiveFormsModule, Card, InputTextModule, ButtonModule, RouterLink, SelectModule, ConfirmDialogModule, ToastModule,],
+  imports: [CommonModule, PasswordModule, ReactiveFormsModule, Card, InputTextModule, ButtonModule, SelectModule, ConfirmDialogModule, ToastModule,],
   providers: [MessageService, ConfirmationService],
   templateUrl: './create-user-page.html',
   styleUrl: './create-user-page.sass',

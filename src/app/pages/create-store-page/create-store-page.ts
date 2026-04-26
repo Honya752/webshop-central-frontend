@@ -8,13 +8,12 @@ import { SelectModule } from 'primeng/select';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { ActivatedRoute, RouterLink } from '@angular/router';
-import { CreateWholesaler, UpdateWholesaler, WholesalersService } from '../../services/wholesalers.service';
+import { ActivatedRoute } from '@angular/router';
 import { CreateStore, StoresService, UpdateStore } from '../../services/stores.service';
 
 @Component({
   selector: 'app-create-store-page',
-  imports: [CommonModule, ReactiveFormsModule, Card, InputTextModule, ButtonModule, RouterLink, SelectModule, ConfirmDialogModule, ToastModule,],
+  imports: [CommonModule, ReactiveFormsModule, Card, InputTextModule, ButtonModule, SelectModule, ConfirmDialogModule, ToastModule,],
   providers: [MessageService, ConfirmationService],
   templateUrl: './create-store-page.html',
   styleUrl: './create-store-page.sass',

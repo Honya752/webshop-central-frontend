@@ -1,7 +1,6 @@
-import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { OrderData, OrdersService } from '../../services/orders.service';
-import { ActivatedRoute, RouterLink } from '@angular/router';
-import { switchMap } from 'rxjs';
+import { ActivatedRoute, } from '@angular/router';
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { Card } from 'primeng/card';
 import { TableModule } from 'primeng/table';
@@ -14,7 +13,7 @@ import { ToastModule } from 'primeng/toast';
 
 @Component({
   selector: 'app-order-detail-page',
-  imports: [CurrencyPipe, DatePipe, Card, TableModule, ButtonModule, TagModule, ProgressSpinnerModule, RouterLink, BarcodeComponent, ToastModule],
+  imports: [CurrencyPipe, DatePipe, Card, TableModule, ButtonModule, TagModule, ProgressSpinnerModule, BarcodeComponent, ToastModule],
   providers: [MessageService],
   templateUrl: './order-detail-page.html',
   styleUrl: './order-detail-page.sass',

@@ -8,7 +8,7 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { PanelModule } from 'primeng/panel';
 import { ButtonModule } from 'primeng/button';
 import { TextareaModule } from 'primeng/textarea';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 import { ImageModule } from 'primeng/image';
@@ -36,7 +36,7 @@ type ProductForm = FormGroup<{
 
 @Component({
   selector: 'app-create-product-page',
-  imports: [CommonModule, ReactiveFormsModule, Card, ImageModule, InputTextModule, InputNumberModule, PanelModule, ButtonModule, TextareaModule, RouterLink, ToastModule],
+  imports: [CommonModule, ReactiveFormsModule, Card, ImageModule, InputTextModule, InputNumberModule, PanelModule, ButtonModule, TextareaModule, ToastModule],
   providers: [MessageService, ConfirmationService],
   templateUrl: './create-product-page.html',
   styleUrl: './create-product-page.sass',
