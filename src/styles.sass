@@ -44,7 +44,7 @@ p-password.ng-invalid.ng-touched
     border-color: #ef4444 !important
 
 .nav-profile
-  @apply bg-gray-200 p-2 rounded-full h-10 w-10 flex items-center justify-center
+  @apply bg-gray-200 p-2 rounded-full h-8 w-8 flex items-center justify-center
 
 .nav-item
   @apply text-gray-800
@@ -61,11 +61,17 @@ p-password.ng-invalid.ng-touched
 .sidebar-item
   @apply flex items-center justify-between
 
-  &>a
+  .item-title
     @apply flex flex-1 items-center gap-2
 
+.sidebar-menu
+  @apply pl-6 flex flex-col gap-2
+
+  &>a
+    @apply flex flex-row gap-2 items-center
+
     &:hover span
-      @apply underline
+      @apply cursor-pointer underline
 
 .form-group
   .p-panel-header

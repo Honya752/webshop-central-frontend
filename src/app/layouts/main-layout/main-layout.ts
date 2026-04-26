@@ -3,10 +3,11 @@ import { Router, RouterOutlet, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { Card } from 'primeng/card';
 import { BadgeModule } from 'primeng/badge';
+import { ButtonModule } from 'primeng/button';
 
 @Component({
   selector: 'app-main-layout',
-  imports: [RouterOutlet, RouterLink, Card, BadgeModule],
+  imports: [RouterOutlet, RouterLink, Card, BadgeModule, ButtonModule],
   templateUrl: './main-layout.html',
   styleUrl: './main-layout.sass',
 })

@@ -27,7 +27,9 @@ export const unauthorizeInterceptor: HttpInterceptorFn = (req, next) => {
 
     return next(req).pipe(
         catchError((error: HttpErrorResponse) => {
-            if (error.status === 401) {
+            const isLoginPage = router.url.startsWith('/login');
+
+            if (error.status === 401 && !isLoginPage) {
                 authService.logout();
 
                 router.navigate(['/login'], {
