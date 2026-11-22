@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { Barcode } from './barcode';
+import { BarcodeComponent } from './barcode';
 
-describe('Barcode', () => {
-  let component: Barcode;
-  let fixture: ComponentFixture<Barcode>;
+describe('BarcodeComponent', () => {
+  let component: BarcodeComponent;
+  let fixture: ComponentFixture<BarcodeComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [Barcode]
+      imports: [BarcodeComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(Barcode);
+    fixture = TestBed.createComponent(BarcodeComponent);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });
