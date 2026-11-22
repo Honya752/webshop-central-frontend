@@ -23,7 +23,7 @@
                         <span pButtonLabel>Add</span>
                     </button>
                     <button pButton type="button" size="small" severity="danger"
-                        (click)="removeImage(images.length - 1)" [disabled]="images.length >= maxImages" class="ms-2">
+                        (click)="removeImage(images.length - 1)" [disabled]="images.length <= 1" class="ms-2">
                         <i class="pi pi-minus" pButtonIcon></i>
                         <span pButtonLabel>Remove</span>
                     </button>
@@ -73,7 +73,7 @@
                     </button>
                     <button pButton type="button" size="small" severity="danger"
                         (click)="removeLocalization(localizations.length - 1)"
-                        [disabled]="localizations.length >= maxLocalizations" class="ms-2">
+                        [disabled]="localizations.length <= 1" class="ms-2">
                         <i class="pi pi-minus" pButtonIcon></i>
                         <span pButtonLabel>Remove</span>
                     </button>
@@ -224,7 +224,7 @@
         <div class="flex items-center justify-between">
             <div></div>
 
-            <button pButton type="submit">
+            <button pButton type="submit" [disabled]="isLoading()">
                 @if (isEditMode) {
                 <i class="pi pi-check"></i>
                 <span pButtonLabel>Save</span>

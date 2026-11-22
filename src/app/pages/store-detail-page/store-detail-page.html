@@ -7,13 +7,14 @@
             <p>Store page: <a class="font-bold link-text" [href]="store()?.baseUrl">{{store()?.baseUrl}}</a></p>
         </div>
         <div class="w-full">
-            <p>Type: <span class="font-bold">{{ store()?.integrationType }} {{store()?.integrationVer}}</span></p>
+            <p>Type: <span class="font-bold">{{ store()?.integrationType }}</span></p>
+            <p>Region: <span class="font-bold">{{ store()?.region }}</span></p>
         </div>
     </div>
 </p-card>
 
 <p-card class="mt-6">
-    <p-table [value]="store()?.orders ?? []" , [loading]="isLoading()">
+    <p-table [value]="store()?.orders ?? []" [loading]="isLoading()">
 
         <ng-template #caption>
             <div class="flex items-center justify-between">
@@ -35,12 +36,7 @@
             <tr>
                 <td>{{ order.createdAt | date:'yyyy. MM. dd. HH:mm' }}</td>
                 <td>
-                    @if (order.status === 'PROCESSING') { <p-tag severity="secondary" value="Processing" /> }
-                    @else if (order.status === 'ORDERED_FROM_WHOLESALER') { <p-tag severity="warn" value="Ordered" />
-                    }
-                    @else if (order.status === 'SHIPPING_TO_STORE') { <p-tag severity="info" value="Shipping" /> }
-                    @else if (order.status === 'COMPLETED') { <p-tag severity="success" value="Completed" /> }
-                    @else if (order.status === 'CANCELLED') { <p-tag severity="danger" value="Cancelled" /> }</td>
+                    <app-order-status-tag [status]="order.status" /></td>
                 <td>{{ order.total | currency:order.currency:'symbol':'1.0-0' }}</td>
                 <td>{{order.paymentMethod}}</td>
                 <td>
@@ -54,7 +50,7 @@
 </p-card>
 
 <p-card class="mt-6">
-    <p-table [value]="store()?.products" [loading]="isLoading()">
+    <p-table [value]="store()?.products ?? []" [loading]="isLoading()">
         <ng-template #caption>
             <div class="flex items-center justify-between">
                 <span class="text-xl font-bold">Products</span>
@@ -79,7 +75,7 @@
         <ng-template #body let-product>
             <tr class="hover:cursor-pointer">
                 <td>
-                    <img [src]="product.data.images?.[0]?.url" [alt]="product.name" class="w-24 rounded" />
+                    <img [src]="product.data.images?.[0]?.url" [alt]="product.data.name" class="w-24 rounded" />
                 </td>
 
                 <td>{{ product.data.name }}</td>
@@ -109,7 +105,7 @@
 
                 <td>
                     <p-button icon="pi pi-chevron-right" [rounded]="true" severity="secondary" [outlined]="true"
-                        [routerLink]="['/product', product.id]" class="ml-2 float-right" />
+                        [routerLink]="['/product', product.data.id]" class="ml-2 float-right" />
                     <p-button class="float-right" icon="pi pi-sync" [rounded]="true" severity="secondary"
                         [outlined]="true" (click)="syncWithStore(product.data.id)" />
                 </td>

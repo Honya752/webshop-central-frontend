@@ -6,11 +6,7 @@
             <p>Order date: <span class="font-bold">{{ order()?.createdAt | date:'yyyy. MM. dd. HH:mm' }}</span></p>
             <p>Store: <a class="link-text font-bold" [href]="order()?.store?.baseUrl">{{order()?.store?.name}}</a></p>
             <p>Order status:
-                @if (order()?.status === 'PROCESSING') { <p-tag severity="secondary" value="Processing" /> }
-                @else if (order()?.status === 'ORDERED_FROM_WHOLESALER') { <p-tag severity="warn" value="Ordered" /> }
-                @else if (order()?.status === 'SHIPPING_TO_STORE') { <p-tag severity="info" value="Shipping" /> }
-                @else if (order()?.status === 'COMPLETED') { <p-tag severity="success" value="Completed" /> }
-                @else if (order()?.status === 'CANCELLED') { <p-tag severity="danger" value="Cancelled" /> }
+                <app-order-status-tag [status]="order()?.status" />
             </p>
         </div>
         <div class="w-full">
@@ -30,6 +26,7 @@
             <tr>
                 <th>Name</th>
                 <th>Image</th>
+                <th>Issue</th>
                 <th>SKU</th>
                 <th>
                     <p class="text-center w-full">Quantity</p>
@@ -44,11 +41,25 @@
 
         <ng-template #body let-item>
             <tr>
-                <td>{{ item.product.name }}</td>
                 <td>
-                    <img [src]="item.product.images?.[0]?.url" [alt]="item.product.name" class="w-24 rounded" />
+                    @if (item.product) {
+                    <a class="link-text" [routerLink]="['/product', item.product.id]">{{ item.product.name }}</a>
+                    }
+                    @else {
+                    <span class="italic">Unknown product</span>
+                    }
                 </td>
-                <td class="font-mono">{{ item.product.sku }}</td>
+                <td>
+                    @if (item.product?.images?.[0]; as image) {
+                    <img [src]="image.url" [alt]="image.alt || item.product?.name" class="w-24 rounded" />
+                    }
+                </td>
+                <td>
+                    @if (item.issue) {
+                    <p-tag severity="danger" [value]="issueLabel(item.issue)" />
+                    }
+                </td>
+                <td class="font-mono">{{ item.sku }}</td>
                 <td class="font-mono">
                     <p class="text-center w-full">
                         {{item.quantity}}
@@ -58,7 +69,9 @@
                 <td>{{ item.total | currency:order()?.currency:'symbol':'1.0-0' }}</td>
                 <td>
                     <div class="flex justify-center">
-                        <app-barcode [value]="item.product.ean" />
+                        @if (item.product?.ean; as ean) {
+                        <app-barcode [value]="ean" />
+                        }
                     </div>
                 </td>
             </tr>
@@ -67,6 +80,7 @@
         <ng-template #footer>
             <tr>
                 <td class="font-bold">Total:</td>
+                <td></td>
                 <td></td>
                 <td></td>
                 <td></td>

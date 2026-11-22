@@ -20,7 +20,7 @@
         <ng-template #body let-store>
             <tr>
                 <td>
-                    <a href="store.baseUrl">{{store.name}}</a>
+                    <a [href]="store.baseUrl">{{store.name}}</a>
                 </td>
                 <td>{{store.baseUrl}}</td>
                 <td>{{store.integrationType}}</td>

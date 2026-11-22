@@ -57,7 +57,7 @@
         <div class="flex items-center justify-between">
             <div></div>
 
-            <button pButton type="submit">
+            <button pButton type="submit" [disabled]="isLoading()">
                 @if (isEditMode) {
                 <i class="pi pi-check"></i>
                 <span pButtonLabel>Save</span>

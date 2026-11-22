@@ -53,7 +53,7 @@
                 <label for="region">Region</label>
                 <div>
                     @if (form.controls.region.touched && form.controls.region.hasError('required')) {
-                    <small class="error">Name is required</small>
+                    <small class="error">Region is required</small>
                     }
 
                     @if (form.controls.region.hasError('server')) {
@@ -91,33 +91,28 @@
         </div>
 
         <div class="field w-full">
-            <label for="integrationType">Integration Type</label>
-            <p-select [options]="integrations" formControlName="integrationType" optionLabel="label" optionValue="value"
-                placeholder="Integrations" class="w-full" />
-        </div>
-
-        <div class="field w-full">
             <div class="flex items-center justify-between">
-                <label for="integrationVer">Version</label>
+                <label for="integrationType">Integration Type</label>
                 <div>
-                    @if (form.controls.integrationVer.touched && form.controls.integrationVer.hasError('required')) {
-                    <small class="error">Version is required</small>
+                    @if (form.controls.integrationType.touched && form.controls.integrationType.hasError('required')) {
+                    <small class="error">Integration type is required</small>
                     }
 
-                    @if (form.controls.integrationVer.hasError('server')) {
+                    @if (form.controls.integrationType.hasError('server')) {
                     <small class="error">
-                        {{ form.controls.integrationVer.getError('server') }}
+                        {{ form.controls.integrationType.getError('server') }}
                     </small>
                     }
                 </div>
             </div>
-            <input pInputText type="text" formControlName="integrationVer" />
+            <p-select [options]="integrations" formControlName="integrationType" optionLabel="label" optionValue="value"
+                placeholder="Integrations" class="w-full" />
         </div>
 
         <div class="flex items-center justify-between">
             <div></div>
 
-            <button pButton type="submit">
+            <button pButton type="submit" [disabled]="isLoading()">
                 @if (isEditMode) {
                 <i class="pi pi-check"></i>
                 <span pButtonLabel>Save</span>

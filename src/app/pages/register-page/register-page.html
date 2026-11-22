@@ -15,6 +15,10 @@
                     <small class="error">Name is required</small>
                     }
 
+                    @if (name.touched && name.hasError('minlength')) {
+                    <small class="error">Name must be at least 3 characters</small>
+                    }
+
                     @if (name.hasError('server')) {
                     <small class="error">
                         {{ name.getError('server') }}
@@ -53,6 +57,10 @@
 
                 @if (password.touched && password.hasError('required')) {
                 <small class="error">Password is required</small>
+                }
+
+                @if (password.touched && password.hasError('minlength')) {
+                <small class="error">Password must be at least 6 characters</small>
                 }
 
                 @if (form.hasError('passwordMismatch') && passwordConfirm.touched) {

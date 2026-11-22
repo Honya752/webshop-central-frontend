@@ -8,7 +8,7 @@
 <p-card class="mt-6">
     <form [formGroup]="webshopForm" (ngSubmit)="addToWebshop()" class="form">
         <div class="field w-full">
-            <label for="globalRole">Stores</label>
+            <label for="storeId">Stores</label>
             <p-select [options]="storeOptions()" formControlName="storeId" optionLabel="label" optionValue="value"
                 placeholder="Store" class="w-full" [checkmark]="true" [showClear]="true" />
         </div>
@@ -21,7 +21,7 @@
 </p-card>
 
 <p-card class="mt-6">
-    <p-table [value]="product()?.stocks ?? []" , [loading]="isLoading()">
+    <p-table [value]="product()?.stocks ?? []" [loading]="isLoading()">
 
         <ng-template #caption>
             <div class="flex items-center justify-between">
@@ -104,7 +104,7 @@
 </p-card>
 
 <p-card class="mt-6">
-    <p-table [value]="product()?.orders ?? []" , [loading]="isLoading()">
+    <p-table [value]="product()?.orders ?? []" [loading]="isLoading()">
 
         <ng-template #caption>
             <div class="flex items-center justify-between">
@@ -118,19 +118,22 @@
                 <th>Quantity</th>
                 <th>Unit price</th>
                 <th>Date</th>
-                <th>Status</th>
+                <th></th>
             </tr>
         </ng-template>
 
         <ng-template #body let-order>
             <tr>
                 <td>
-                    <a [routerLink]="['/order', order.storeId]">{{ order.storeName }}</a>
+                    <a [routerLink]="['/store', order.storeId]">{{ order.storeName }}</a>
                 </td>
                 <td class="font-mono">{{order.quantity}}</td>
                 <td>{{ order.unitPrice | currency:order.currency:'symbol':'1.0-0' }}</td>
-                <td>{{ order.createAt | date:'yyyy. MM. dd. HH:mm' }}</td>
-                <td>status</td>
+                <td>{{ order.createdAt | date:'yyyy. MM. dd. HH:mm' }}</td>
+                <td>
+                    <p-button icon="pi pi-chevron-right" [rounded]="true" severity="secondary" [outlined]="true"
+                        [routerLink]="['/order', order.orderId]" class="float-right" />
+                </td>
             </tr>
         </ng-template>
 
