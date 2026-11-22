@@ -33,8 +33,8 @@ export class CreateStorePage implements OnInit {
   errorMessage = signal('');
 
   form = this.fb.group({
-    name: this.fb.nonNullable.control('', [Validators.required]),
-    slug: this.fb.nonNullable.control('', [Validators.required]),
+    name: this.fb.nonNullable.control('', [Validators.required, Validators.minLength(3)]),
+    slug: this.fb.nonNullable.control('', [Validators.required, Validators.minLength(3)]),
     region: this.fb.nonNullable.control('', [Validators.required]),
     baseUrl: this.fb.nonNullable.control('', [Validators.required]),
     integrationType: this.fb.control<IntegrationType | null>(null, [Validators.required]),

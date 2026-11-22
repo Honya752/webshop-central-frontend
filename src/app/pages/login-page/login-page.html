@@ -18,7 +18,11 @@
                     }
 
                     @if (email.touched && email.hasError('email')) {
-                    <small class="error">Email adddress is invalid</small>
+                    <small class="error">Email address is invalid</small>
+                    }
+
+                    @if (email.hasError('server')) {
+                    <small class="error">{{ email.getError('server') }}</small>
                     }
                 </div>
             </div>
@@ -32,6 +36,10 @@
                 <div>
                     @if (password.touched && password.hasError('required')) {
                     <small class="error">Password is required</small>
+                    }
+
+                    @if (password.hasError('server')) {
+                    <small class="error">{{ password.getError('server') }}</small>
                     }
                 </div>
             </div>

@@ -5,14 +5,14 @@
     <form [formGroup]="filterForm" class="flex flex-row gap-4">
         <p-inputgroup>
             <p-button label="Search" severity="contrast" />
-            <input pInputText type="search" formControlName="search" placeholder="Search by name, EAN or SKU codes" />
+            <input pInputText type="search" formControlName="search" placeholder="Search by name, EAN or SKU code" />
         </p-inputgroup>
 
         <p-select [options]="sortByOptions" formControlName="sortBy" optionLabel="label" optionValue="value"
-            placeholder="Rendezés" class="w-full md:w-56" />
+            placeholder="Sort by" class="w-full md:w-56" />
 
         <p-select [options]="sortOrderOptions" formControlName="sortOrder" optionLabel="label" optionValue="value"
-            placeholder="Sorrend" class="w-full md:w-56" />
+            placeholder="Sort order" class="w-full md:w-56" />
     </form>
 </p-card>
 
@@ -40,24 +40,25 @@
 
         <ng-template #body let-product>
             <tr class="hover:cursor-pointer">
-                <td>{{ product.name }}</td>
-
                 <td>
                     <img [src]="product.images?.[0]?.url" [alt]="product.name" class="w-24 rounded" />
                 </td>
+
+                <td>{{ product.name }}</td>
 
                 <td>{{ product.brand }}</td>
 
                 <td>{{ product.category }}</td>
 
                 <td>
-                    @if (product.stock === null) {
-                    <p-tag severity="danger" value="unavaible" />
+                    @if (!product.stock || product.stock.stock <= 0) {
+                    <p-tag severity="danger" value="Out of stock" />
                     }
-                    @else if (product.stock.stock
-                    <= 5) { <p-tag severity="warn" value="lowstock" />
-                    } @else {
-                    <p-tag severity="success" value="instock" />
+                    @else if (product.stock.stock <= 5) {
+                    <p-tag severity="warn" value="Low stock" />
+                    }
+                    @else {
+                    <p-tag severity="success" value="In stock" />
                     }
                 </td>
 

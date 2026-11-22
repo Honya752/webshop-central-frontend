@@ -3,8 +3,8 @@
 
 <p-card class="px-6">
     <h1 class="header">
-        @if (isEditMode) {Edit user profile}
-        @else {Create a user}
+        @if (isEditMode) {Edit wholesaler}
+        @else {Add a wholesaler}
     </h1>
 
     @if (errorMessage()) {
@@ -20,6 +20,10 @@
                     <small class="error">Name is required</small>
                     }
 
+                    @if (form.controls.name.touched && form.controls.name.hasError('minlength')) {
+                    <small class="error">Name must be at least 3 characters</small>
+                    }
+
                     @if (form.controls.name.hasError('server')) {
                     <small class="error">
                         {{ form.controls.name.getError('server') }}
@@ -27,7 +31,7 @@
                     }
                 </div>
             </div>
-            <input pInputText type="text" formControlName="name" />
+            <input pInputText id="name" type="text" formControlName="name" />
         </div>
 
         <div class="field w-full">
@@ -45,13 +49,26 @@
                     }
                 </div>
             </div>
-            <input pInputText type="text" formControlName="baseUrl" />
+            <input pInputText id="baseUrl" type="text" formControlName="baseUrl" />
         </div>
 
         <div class="field w-full">
-            <label for="integrationType">Integration Type</label>
-            <p-select [options]="integrations" formControlName="integrationType" optionLabel="label" optionValue="value"
-                placeholder="Integrations" class="w-full" />
+            <div class="flex items-center justify-between">
+                <label for="integrationType">Integration type</label>
+                <div>
+                    @if (form.controls.integrationType.touched && form.controls.integrationType.hasError('required')) {
+                    <small class="error">Integration type is required</small>
+                    }
+
+                    @if (form.controls.integrationType.hasError('server')) {
+                    <small class="error">
+                        {{ form.controls.integrationType.getError('server') }}
+                    </small>
+                    }
+                </div>
+            </div>
+            <p-select [options]="integrations" inputId="integrationType" formControlName="integrationType" optionLabel="label" optionValue="value"
+                placeholder="Integration type" class="w-full" />
         </div>
 
         <div class="flex items-center justify-between">
@@ -64,7 +81,7 @@
                 }
                 @else {
                 <i class="pi pi-plus"></i>
-                <span pButtonLabel>Upload</span>
+                <span pButtonLabel>Add</span>
                 }
             </button>
         </div>

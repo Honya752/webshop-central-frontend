@@ -33,7 +33,7 @@ export class CreateWholesalerPage implements OnInit {
   errorMessage = signal('');
 
   form = this.fb.group({
-    name: this.fb.nonNullable.control('', [Validators.required]),
+    name: this.fb.nonNullable.control('', [Validators.required, Validators.minLength(3)]),
     baseUrl: this.fb.nonNullable.control('', [Validators.required]),
     integrationType: this.fb.control<WholesalerIntegrationType | null>(null, [Validators.required]),
   });

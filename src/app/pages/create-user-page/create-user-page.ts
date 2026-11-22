@@ -40,7 +40,7 @@ export class CreateUserPage implements OnInit {
   stores = signal<StoreSummary[]>([]);
 
   form = this.fb.group({
-    name: this.fb.nonNullable.control('', [Validators.required]),
+    name: this.fb.nonNullable.control('', [Validators.required, Validators.minLength(3)]),
     email: this.fb.nonNullable.control('', [Validators.required, Validators.email]),
     password: this.fb.control<string | null>(null),
     globalRole: this.fb.nonNullable.control<GlobalRole>('USER', [Validators.required]),

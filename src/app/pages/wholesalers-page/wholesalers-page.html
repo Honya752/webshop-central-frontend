@@ -12,27 +12,25 @@
             <tr>
                 <th>Name</th>
                 <th>URL</th>
-                <th>Store Type</th>
+                <th>Integration type</th>
                 <th></th>
             </tr>
         </ng-template>
 
-        <ng-template #body let-store>
+        <ng-template #body let-wholesaler>
             <tr>
                 <td>
-                    <a [href]="store.baseUrl">{{store.name}}</a>
+                    <a [href]="wholesaler.baseUrl">{{wholesaler.name}}</a>
                 </td>
-                <td>{{store.baseUrl}}</td>
-                <td>{{store.integrationType}}</td>
+                <td>{{wholesaler.baseUrl}}</td>
+                <td>{{wholesaler.integrationType}}</td>
                 <td>
                     <p-button class="float-right" icon="pi pi-sync" [rounded]="true" severity="secondary"
-                        [outlined]="true" (click)="syncWholesalerCatalog(store.id)" />
+                        [outlined]="true" (click)="syncWholesalerCatalog(wholesaler.id)" />
                     <p-button class="float-right mr-2" icon="pi pi-pencil" [rounded]="true" severity="success"
-                        [outlined]="true" [routerLink]="['/wholesaler', store.id]" />
+                        [outlined]="true" [routerLink]="['/wholesaler', wholesaler.id]" />
                 </td>
             </tr>
         </ng-template>
     </p-table>
-
-    <div #loadMoreTrigger class="h-4"></div>
 </p-card>

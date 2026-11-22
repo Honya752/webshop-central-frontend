@@ -13,6 +13,7 @@ import { ButtonModule } from 'primeng/button';
 import { ToastModule } from 'primeng/toast';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
+import { BarcodeComponent } from '../../components/barcode/barcode';
 
 @Component({
   selector: 'app-product-detail-page',
@@ -25,7 +26,8 @@ import { TagModule } from 'primeng/tag';
     ToastModule,
     TableModule,
     RouterLink,
-    TagModule
+    TagModule,
+    BarcodeComponent,
   ],
   providers: [MessageService],
   templateUrl: './product-detail-page.html',
@@ -42,6 +44,14 @@ export class ProductDetailPage implements OnInit {
   id: string | null = null;
   isLoading = signal(false);
   product = signal<ProductDetail | null>(null);
+
+  /** The product has no name of its own, only localized ones: show the first localization. */
+  readonly productName = computed(() => this.product()?.localizations?.[0]?.name ?? this.product()?.sku ?? '');
+
+  /** Sum of the stock of every wholesaler. */
+  readonly totalStock = computed(() =>
+    (this.product()?.stocks ?? []).reduce((sum, stock) => sum + stock.stock, 0)
+  );
   stores = signal<StoreSummary[]>([]);
 
   webshopForm = this.fb.nonNullable.group({
@@ -109,8 +119,8 @@ export class ProductDetailPage implements OnInit {
       next: () => {
         this.messageService.add({
           severity: 'success',
-          summary: 'Product updated',
-          detail: `Product added successfully`,
+          summary: 'Product synced',
+          detail: 'Product synced to the store successfully',
         });
         if (this.id) this.loadProduct(this.id);
       },
@@ -118,7 +128,7 @@ export class ProductDetailPage implements OnInit {
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
-          detail: 'Failed to add product to store!',
+          detail: 'Failed to sync product to the store!',
         })
       }
     })
@@ -137,5 +147,13 @@ export class ProductDetailPage implements OnInit {
 
     if (!updatedAt || !syncedAt) return false;
     return new Date(syncedAt).getTime() >= new Date(updatedAt).getTime();
+  }
+
+  getFlagEmoji(region: string): string {
+    return region
+      .toUpperCase()
+      .replace(/./g, char =>
+        String.fromCodePoint(127397 + char.charCodeAt(0))
+      );
   }
 }

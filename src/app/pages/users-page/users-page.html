@@ -14,7 +14,7 @@
                 <th>Name</th>
                 <th>Email address</th>
                 <th>Role</th>
-                <th>Store Member</th>
+                <th>Store membership</th>
                 <th class="flex gap-2 justify-end">Actions</th>
             </tr>
         </ng-template>
@@ -25,10 +25,10 @@
                 <td>{{user.email}}</td>
                 <td>{{roles[user.globalRole]}}</td>
                 <td>
-                    @if (user.storeMembership !== null) {
+                    @if (user.storeMembership) {
                     <span>{{storeRoles[user.storeMembership.role]}}</span>
                     <span class="text-gray-500"> @
-                        <a [routerLink]="['/store', user.storeMembership.id]" class="text-link">
+                        <a [routerLink]="['/store', user.storeMembership.storeId]" class="text-link">
                             {{user.storeMembership.name}}
                         </a>
                     </span>

@@ -20,6 +20,10 @@
                     <small class="error">Name is required</small>
                     }
 
+                    @if (form.controls.name.touched && form.controls.name.hasError('minlength')) {
+                    <small class="error">Name must be at least 3 characters</small>
+                    }
+
                     @if (form.controls.name.hasError('server')) {
                     <small class="error">
                         {{ form.controls.name.getError('server') }}
@@ -27,7 +31,7 @@
                     }
                 </div>
             </div>
-            <input pInputText type="text" formControlName="name" />
+            <input pInputText id="name" type="text" formControlName="name" />
         </div>
 
         <div class="field w-full">
@@ -38,6 +42,10 @@
                     <small class="error">Slug is required</small>
                     }
 
+                    @if (form.controls.slug.touched && form.controls.slug.hasError('minlength')) {
+                    <small class="error">Slug must be at least 3 characters</small>
+                    }
+
                     @if (form.controls.slug.hasError('server')) {
                     <small class="error">
                         {{ form.controls.slug.getError('server') }}
@@ -45,7 +53,7 @@
                     }
                 </div>
             </div>
-            <input pInputText type="text" formControlName="slug" />
+            <input pInputText id="slug" type="text" formControlName="slug" />
         </div>
 
         <div class="field w-full">
@@ -64,7 +72,7 @@
                 </div>
             </div>
             <div class="flex flex-row gap-2 items-center">
-                <input pInputText type="text" formControlName="region" fluid maxlength="2" />
+                <input pInputText id="region" type="text" formControlName="region" fluid maxlength="2" />
 
                 <div>
                     <span class="text-4xl">{{getFlagEmoji(form.controls.region.value)}}</span>
@@ -87,12 +95,12 @@
                     }
                 </div>
             </div>
-            <input pInputText type="text" formControlName="baseUrl" />
+            <input pInputText id="baseUrl" type="text" formControlName="baseUrl" />
         </div>
 
         <div class="field w-full">
             <div class="flex items-center justify-between">
-                <label for="integrationType">Integration Type</label>
+                <label for="integrationType">Integration type</label>
                 <div>
                     @if (form.controls.integrationType.touched && form.controls.integrationType.hasError('required')) {
                     <small class="error">Integration type is required</small>
@@ -105,8 +113,8 @@
                     }
                 </div>
             </div>
-            <p-select [options]="integrations" formControlName="integrationType" optionLabel="label" optionValue="value"
-                placeholder="Integrations" class="w-full" />
+            <p-select [options]="integrations" inputId="integrationType" formControlName="integrationType" optionLabel="label" optionValue="value"
+                placeholder="Integration type" class="w-full" />
         </div>
 
         <div class="flex items-center justify-between">
@@ -119,7 +127,7 @@
                 }
                 @else {
                 <i class="pi pi-plus"></i>
-                <span pButtonLabel>Upload</span>
+                <span pButtonLabel>Create</span>
                 }
             </button>
         </div>

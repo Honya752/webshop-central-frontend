@@ -40,7 +40,7 @@
                             <label for="url">Product image URL</label>
 
                             @if (group.controls.url.touched && group.controls.url.invalid) {
-                            <small class="error">Valid URL required</small>
+                            <small class="error">Image URL is required</small>
                             }
                         </div>
                         <input pInputText type="text" formControlName="url" class="font-mono" />
@@ -51,7 +51,7 @@
                             <label for="alt">Alternative text</label>
 
                             @if (group.controls.alt.touched && group.controls.alt.invalid) {
-                            <small class="error">Valid alternative text required</small>
+                            <small class="error">Alternative text is required (max. 255 characters)</small>
                             }
                         </div>
                         <input pInputText type="text" formControlName="alt" />
@@ -88,7 +88,7 @@
                             <label for="name">Product name</label>
 
                             @if (group.controls.name.touched && group.controls.name.invalid) {
-                            <small class="error">Valid product name required</small>
+                            <small class="error">Product name is required (max. 255 characters)</small>
                             }
                         </div>
                         <input pInputText type="text" formControlName="name" fluid />
@@ -99,7 +99,7 @@
                             <label for="region">Region</label>
 
                             @if (group.controls.region.touched && group.controls.region.invalid) {
-                            <small class="error">Invalid region</small>
+                            <small class="error">Region is required</small>
                             }
                         </div>
                         <div class="flex flex-row gap-2 items-center">
@@ -117,7 +117,7 @@
                         <label for="description">Description</label>
 
                         @if (group.controls.description.touched && group.controls.description.invalid) {
-                        <small class="error">Invalid description</small>
+                        <small class="error">Description is required</small>
                         }
                     </div>
                     <textarea rows="3" pTextarea formControlName="description"></textarea>
@@ -142,7 +142,7 @@
                         }
                     </div>
                 </div>
-                <input pInputText type="text" formControlName="brand" />
+                <input pInputText id="brand" type="text" formControlName="brand" />
             </div>
 
             <div class="field  w-full">
@@ -160,7 +160,7 @@
                         }
                     </div>
                 </div>
-                <input pInputText type="text" formControlName="category" />
+                <input pInputText id="category" type="text" formControlName="category" />
             </div>
         </div>
 
@@ -180,7 +180,7 @@
                         }
                     </div>
                 </div>
-                <input pInputText type="text" formControlName="sku" />
+                <input pInputText id="sku" type="text" formControlName="sku" />
             </div>
 
             <div class="field  w-full">
@@ -198,7 +198,7 @@
                         }
                     </div>
                 </div>
-                <input pInputText type="text" formControlName="ean" />
+                <input pInputText id="ean" type="text" formControlName="ean" />
             </div>
         </div>
 
@@ -206,7 +206,11 @@
             <div class="flex items-center justify-between">
                 <label for="price">Price</label>
                 <div>
-                    @if (form.controls.price.touched && form.controls.price.invalid) {
+                    @if (form.controls.price.touched && form.controls.price.hasError('required')) {
+                    <small class="error">Price is required</small>
+                    }
+
+                    @if (form.controls.price.touched && form.controls.price.hasError('min')) {
                     <small class="error">Price must be 0 or greater</small>
                     }
 
@@ -217,7 +221,7 @@
                     }
                 </div>
             </div>
-            <p-inputnumber inputId="price" mode="currency" currency="HUF" locale="hu-Hu" formControlName="price"
+            <p-inputnumber inputId="price" mode="currency" currency="HUF" locale="hu-HU" formControlName="price"
                 [maxFractionDigits]="0" />
         </div>
 
@@ -231,7 +235,7 @@
                 }
                 @else {
                 <i class="pi pi-plus"></i>
-                <span pButtonLabel>Upload</span>
+                <span pButtonLabel>Create</span>
                 }
             </button>
         </div>

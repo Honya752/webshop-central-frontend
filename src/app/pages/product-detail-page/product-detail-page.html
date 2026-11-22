@@ -1,16 +1,80 @@
 <p-toast />
 
 <p-card>
-    <h1 class="header">Product data</h1>
-    <p>{{product()?.brand}}</p>
+    <div class="flex items-start justify-between px-4 mb-6">
+        <h1 class="header">{{ productName() }}</h1>
+        @if (product(); as p) {
+        <p-button icon="pi pi-pencil" label="Edit" severity="success" [outlined]="true"
+            [routerLink]="['/product', p.id, 'edit']" />
+        }
+    </div>
+
+    <div class="flex justify-evenly gap-6 text-lg px-4">
+        <div class="shrink-0">
+            @if (product()?.images?.[0]; as image) {
+            <img [src]="image.url" [alt]="image.alt || productName()" class="w-48 rounded" />
+            }
+        </div>
+        <div class="w-full">
+            <p>Brand: <span class="font-bold">{{ product()?.brand }}</span></p>
+            <p>Category: <span class="font-bold">{{ product()?.category }}</span></p>
+            <p>SKU: <span class="font-bold font-mono">{{ product()?.sku }}</span></p>
+            <p>Price: <span class="font-bold">{{ product()?.price | number }} Ft</span></p>
+            <p>Available stock: <span class="font-bold">{{ totalStock() | number }} pcs</span>
+                @if (totalStock() <= 0) {
+                <p-tag severity="danger" value="Out of stock" class="ml-2" />
+                }
+                @else if (totalStock() <= 5) {
+                <p-tag severity="warn" value="Low stock" class="ml-2" />
+                }
+                @else {
+                <p-tag severity="success" value="In stock" class="ml-2" />
+                }
+            </p>
+        </div>
+        <div class="w-full">
+            <p>Created at: <span class="font-bold">{{ product()?.createdAt | date:'yyyy. MM. dd. HH:mm' }}</span></p>
+            <p>Last updated: <span class="font-bold">{{ product()?.updatedAt | date:'yyyy. MM. dd. HH:mm' }}</span></p>
+            <p>Listed in: <span class="font-bold">{{ product()?.mappings?.length ?? 0 }} store(s)</span></p>
+            @if (product()?.ean; as ean) {
+            <app-barcode [value]="ean" />
+            }
+        </div>
+    </div>
+</p-card>
+
+<p-card class="mt-6">
+    <p-table [value]="product()?.localizations ?? []" [loading]="isLoading()">
+        <ng-template #caption>
+            <div class="flex items-center justify-between">
+                <span class="text-xl font-bold">Localizations</span>
+            </div>
+        </ng-template>
+
+        <ng-template #header>
+            <tr>
+                <th>Region</th>
+                <th>Name</th>
+                <th>Description</th>
+            </tr>
+        </ng-template>
+
+        <ng-template #body let-localization>
+            <tr>
+                <td class="text-2xl" [title]="localization.region">{{ getFlagEmoji(localization.region) }}</td>
+                <td class="font-bold">{{ localization.name }}</td>
+                <td>{{ localization.description }}</td>
+            </tr>
+        </ng-template>
+    </p-table>
 </p-card>
 
 <p-card class="mt-6">
     <form [formGroup]="webshopForm" (ngSubmit)="addToWebshop()" class="form">
         <div class="field w-full">
-            <label for="storeId">Stores</label>
-            <p-select [options]="storeOptions()" formControlName="storeId" optionLabel="label" optionValue="value"
-                placeholder="Store" class="w-full" [checkmark]="true" [showClear]="true" />
+            <label for="storeId">Add product to store</label>
+            <p-select [options]="storeOptions()" inputId="storeId" formControlName="storeId" optionLabel="label" optionValue="value"
+                placeholder="Select a store" class="w-full" [checkmark]="true" [showClear]="true" />
         </div>
 
         <button pButton>
@@ -33,7 +97,7 @@
             <tr>
                 <th>Wholesaler name</th>
                 <th>Quantity</th>
-                <th>Wholsale price</th>
+                <th>Wholesale price</th>
                 <th>Last synced</th>
             </tr>
         </ng-template>
@@ -56,7 +120,7 @@
     <p-table [value]="product()?.mappings ?? []" [loading]="isLoading()">
         <ng-template #caption>
             <div class="flex items-center justify-between">
-                <span class="text-xl font-bold">Stores mappings</span>
+                <span class="text-xl font-bold">Store mappings</span>
             </div>
         </ng-template>
 
@@ -78,10 +142,10 @@
                 </td>
                 <td>
                     @if (isInSync(map)) {
-                    <p-tag severity="success" value="insync" />
+                    <p-tag severity="success" value="In sync" />
                     }
                     @else {
-                    <p-tag severity="warn" value="out of sync" />
+                    <p-tag severity="warn" value="Out of sync" />
                     }
                 </td>
                 <td class="font-mono">{{map.externalId ?? '-'}}</td>
