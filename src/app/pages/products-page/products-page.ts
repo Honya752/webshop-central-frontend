@@ -1,5 +1,7 @@
 import { AfterViewInit, Component, ElementRef, inject, OnDestroy, OnInit, signal, ViewChild } from '@angular/core';
-import { Product, ProductsService } from '../../services/product.service';
+import { ProductsService } from '../../services/product.service';
+import { Product, ProductSortBy } from '../../types/product';
+import { SortOrder } from '../../types/api-response';
 import { Card } from 'primeng/card';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
@@ -19,8 +21,8 @@ import { DecimalPipe } from '@angular/common';
 
 type ProductFilterForm = FormGroup<{
   search: FormControl<string>;
-  sortBy: FormControl<'name' | 'price' | 'createdAt'>;
-  sortOrder: FormControl<'asc' | 'desc'>;
+  sortBy: FormControl<ProductSortBy>;
+  sortOrder: FormControl<SortOrder>;
 }>;
 
 @Component({
@@ -48,17 +50,14 @@ export class ProductsPage implements OnInit, AfterViewInit, OnDestroy {
 
   filterForm: ProductFilterForm = this.fb.group({
     search: this.fb.nonNullable.control<string>(''),
-    sortBy: this.fb.nonNullable.control<'name' | 'price' | 'createdAt'>('createdAt'),
-    sortOrder: this.fb.nonNullable.control<'asc' | 'desc'>('desc')
+    sortBy: this.fb.nonNullable.control<ProductSortBy>('createdAt'),
+    sortOrder: this.fb.nonNullable.control<SortOrder>('desc')
   });
 
   private observer!: IntersectionObserver;
 
   @ViewChild('loadMoreTrigger', { static: true })
   loadMoreTrigger!: ElementRef;
-
-  constructor(
-  ) { }
 
   loadProducts(): void {
     if (this.isLoading() || !this.hasNextPage()) return;
@@ -83,7 +82,7 @@ export class ProductsPage implements OnInit, AfterViewInit, OnDestroy {
 
         this.isLoading.set(false);
       },
-      error: (error) => {
+      error: () => {
         this.isLoading.set(false);
       },
     })
@@ -126,9 +125,7 @@ export class ProductsPage implements OnInit, AfterViewInit, OnDestroy {
   ngOnInit(): void {
     this.filterForm.valueChanges
       .pipe(debounceTime(300))
-      .subscribe(values => {
-        this.resetAndReload()
-      });
+      .subscribe(() => this.resetAndReload());
     this.loadProducts();
   }
 
@@ -172,10 +169,11 @@ export class ProductsPage implements OnInit, AfterViewInit, OnDestroy {
     return this.authService.currentUser()?.globalRole;
   }
 
-  sortByOptions = [
-    { label: 'Name', value: 'name' },
+  sortByOptions: { label: string; value: ProductSortBy }[] = [
+    { label: 'Creation Date', value: 'createdAt' },
     { label: 'Price', value: 'price' },
-    { label: 'Creation Date', value: 'createdAt' }
+    { label: 'SKU', value: 'sku' },
+    { label: 'EAN', value: 'ean' },
   ];
 
   sortOrderOptions = [

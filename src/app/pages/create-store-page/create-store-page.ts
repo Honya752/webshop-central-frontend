@@ -9,7 +9,9 @@ import { ToastModule } from 'primeng/toast';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ActivatedRoute } from '@angular/router';
-import { CreateStore, StoresService, UpdateStore } from '../../services/stores.service';
+import { StoresService } from '../../services/stores.service';
+import { CreateStore, UpdateStore } from '../../types/store';
+import { IntegrationType } from '../../types/enums';
 
 @Component({
   selector: 'app-create-store-page',
@@ -35,8 +37,7 @@ export class CreateStorePage implements OnInit {
     slug: this.fb.nonNullable.control('', [Validators.required]),
     region: this.fb.nonNullable.control('', [Validators.required]),
     baseUrl: this.fb.nonNullable.control('', [Validators.required]),
-    integrationType: this.fb.nonNullable.control('', [Validators.required]),
-    integrationVer: this.fb.nonNullable.control('', [Validators.required]),
+    integrationType: this.fb.control<IntegrationType | null>(null, [Validators.required]),
   });
 
   ngOnInit(): void {
@@ -44,6 +45,8 @@ export class CreateStorePage implements OnInit {
     this.isEditMode = !!this.id;
 
     if (this.isEditMode && this.id) {
+      // The slug is the webhook identifier of the store, it cannot be changed after creation
+      this.form.controls.slug.disable();
 
       this.storesService.getStoreDetails(this.id).subscribe({
         next: (store) => {
@@ -53,8 +56,7 @@ export class CreateStorePage implements OnInit {
             region: store.region,
             baseUrl: store.baseUrl,
             integrationType: store.integrationType,
-            integrationVer: store.integrationVer
-          })
+          });
         }
       })
     }
@@ -66,16 +68,17 @@ export class CreateStorePage implements OnInit {
       return;
     }
 
+    this.isLoading.set(true);
+    this.errorMessage.set('');
+
     const raw = this.form.getRawValue();
     if (this.isEditMode && this.id) {
       const payload: UpdateStore = {
         ...(raw.name ? { name: raw.name } : {}),
-        ...(raw.slug ? { slug: raw.slug } : {}),
         ...(raw.region ? { region: raw.region } : {}),
         ...(raw.baseUrl ? { baseUrl: raw.baseUrl } : {}),
         ...(raw.integrationType ? { integrationType: raw.integrationType } : {}),
-        ...(raw.integrationVer ? { integrationVer: raw.integrationVer } : {}),
-      }
+      };
 
       this.storesService.updateStore(payload, this.id).subscribe({
         next: (store) => {
@@ -88,11 +91,9 @@ export class CreateStorePage implements OnInit {
         }, error: (error) => {
           const serverError = error?.error?.message;
 
-          if (typeof (serverError) === 'string') {
-            this.errorMessage.set(serverError)
-          }
-
-          if (serverError) {
+          if (typeof serverError === 'string') {
+            this.errorMessage.set(serverError);
+          } else if (serverError && typeof serverError === 'object') {
             this.applyBackendErrors(serverError);
           }
 
@@ -106,9 +107,8 @@ export class CreateStorePage implements OnInit {
         slug: raw.slug,
         region: raw.region,
         baseUrl: raw.baseUrl,
-        integrationType: raw.integrationType,
-        integrationVer: raw.integrationVer
-      }
+        integrationType: raw.integrationType!,
+      };
 
       this.storesService.createStore(payload).subscribe({
         next: (store) => {
@@ -121,11 +121,9 @@ export class CreateStorePage implements OnInit {
         }, error: (error) => {
           const serverError = error?.error?.message;
 
-          if (typeof (serverError) === 'string') {
-            this.errorMessage.set(serverError)
-          }
-
-          if (serverError) {
+          if (typeof serverError === 'string') {
+            this.errorMessage.set(serverError);
+          } else if (serverError && typeof serverError === 'object') {
             this.applyBackendErrors(serverError);
           }
 
@@ -146,7 +144,7 @@ export class CreateStorePage implements OnInit {
     });
   }
 
-  integrations = [
+  integrations: { label: string; value: IntegrationType }[] = [
     { label: "Woocommerce", value: "WOOCOMMERCE" },
     { label: "Shopify", value: "SHOPIFY" },
   ];

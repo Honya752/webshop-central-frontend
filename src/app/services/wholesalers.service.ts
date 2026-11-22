@@ -1,33 +1,10 @@
-import { HttpClient } from "@angular/common/http";
-import { inject, Injectable } from "@angular/core";
-import { ApiResponse } from "../types/api-response";
-import { environment } from "../../environment";
-import { map } from "rxjs";
-
-export type Wholesaler = {
-    id: string
-    name: string;
-    baseUrl: string;
-    integrationType: string
-}
-
-export type WholesalerDetail = {
-    name: string;
-    baseUrl: string;
-    integrationType: string
-}
-
-export type CreateWholesaler = {
-    name: string;
-    baseUrl: string;
-    integrationType: string
-}
-
-export type UpdateWholesaler = {
-    name?: string;
-    baseUrl?: string;
-    integrationType?: string
-}
+import { HttpClient } from '@angular/common/http';
+import { inject, Injectable } from '@angular/core';
+import { map } from 'rxjs';
+import { environment } from '../../environment';
+import { ApiResponse } from '../types/api-response';
+import { CatalogImportResult } from '../types/integration';
+import { CreateWholesaler, UpdateWholesaler, Wholesaler, WholesalerDetail } from '../types/wholesaler';
 
 @Injectable({
     providedIn: 'root'
@@ -49,7 +26,7 @@ export class WholesalersService {
 
     createWholesaler(payload: CreateWholesaler) {
         return this.http
-            .post<ApiResponse<Wholesaler>>(`${environment.apiUrl}/wholesalers/`, payload)
+            .post<ApiResponse<Wholesaler>>(`${environment.apiUrl}/wholesalers`, payload)
             .pipe(map(response => response.data));
     }
 
@@ -61,16 +38,13 @@ export class WholesalersService {
 
     deleteWholesaler(id: string) {
         return this.http
-            .delete<ApiResponse<Wholesaler>>(`${environment.apiUrl}/wholesalers/${id}`,)
+            .delete<ApiResponse<Wholesaler>>(`${environment.apiUrl}/wholesalers/${id}`)
             .pipe(map(response => response.data));
     }
 
     syncCatalog(id: string) {
         return this.http
-            .post(`${environment.apiUrl}/wholesalers/${id}/sync-catalog`, {})
-            .pipe(map((response) => {
-                console.log(response);
-                return response;
-            }))
+            .post<ApiResponse<CatalogImportResult>>(`${environment.apiUrl}/wholesalers/${id}/sync-catalog`, {})
+            .pipe(map(response => response.data));
     }
 }

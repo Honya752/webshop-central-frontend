@@ -9,7 +9,9 @@ import { ToastModule } from 'primeng/toast';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ActivatedRoute } from '@angular/router';
-import { CreateWholesaler, UpdateWholesaler, WholesalersService } from '../../services/wholesalers.service';
+import { WholesalersService } from '../../services/wholesalers.service';
+import { CreateWholesaler, UpdateWholesaler } from '../../types/wholesaler';
+import { WholesalerIntegrationType } from '../../types/enums';
 
 @Component({
   selector: 'app-create-wholesaler-page',
@@ -33,7 +35,7 @@ export class CreateWholesalerPage implements OnInit {
   form = this.fb.group({
     name: this.fb.nonNullable.control('', [Validators.required]),
     baseUrl: this.fb.nonNullable.control('', [Validators.required]),
-    integrationType: this.fb.nonNullable.control('', [Validators.required]),
+    integrationType: this.fb.control<WholesalerIntegrationType | null>(null, [Validators.required]),
   });
 
   ngOnInit(): void {
@@ -60,6 +62,9 @@ export class CreateWholesalerPage implements OnInit {
       return;
     }
 
+    this.isLoading.set(true);
+    this.errorMessage.set('');
+
     const raw = this.form.getRawValue();
     if (this.isEditMode && this.id) {
       const payload: UpdateWholesaler = {
@@ -79,11 +84,9 @@ export class CreateWholesalerPage implements OnInit {
         }, error: (error) => {
           const serverError = error?.error?.message;
 
-          if (typeof (serverError) === 'string') {
-            this.errorMessage.set(serverError)
-          }
-
-          if (serverError) {
+          if (typeof serverError === 'string') {
+            this.errorMessage.set(serverError);
+          } else if (serverError && typeof serverError === 'object') {
             this.applyBackendErrors(serverError);
           }
 
@@ -95,8 +98,8 @@ export class CreateWholesalerPage implements OnInit {
       const payload: CreateWholesaler = {
         name: raw.name,
         baseUrl: raw.baseUrl,
-        integrationType: raw.integrationType
-      }
+        integrationType: raw.integrationType!,
+      };
 
       this.wholesalersService.createWholesaler(payload).subscribe({
         next: (wholesaler) => {
@@ -109,11 +112,9 @@ export class CreateWholesalerPage implements OnInit {
         }, error: (error) => {
           const serverError = error?.error?.message;
 
-          if (typeof (serverError) === 'string') {
-            this.errorMessage.set(serverError)
-          }
-
-          if (serverError) {
+          if (typeof serverError === 'string') {
+            this.errorMessage.set(serverError);
+          } else if (serverError && typeof serverError === 'object') {
             this.applyBackendErrors(serverError);
           }
 
@@ -134,7 +135,7 @@ export class CreateWholesalerPage implements OnInit {
     });
   }
 
-  integrations = [
+  integrations: { label: string; value: WholesalerIntegrationType }[] = [
     { label: "JSON integration", value: "JSON_INTEGRATION" },
     { label: "XML integration", value: "XML_INTEGRATION" },
   ]

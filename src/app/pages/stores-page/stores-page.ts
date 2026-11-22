@@ -1,5 +1,6 @@
 import { AfterViewInit, Component, ElementRef, inject, OnDestroy, OnInit, signal, ViewChild } from '@angular/core';
-import { Store, StoresService } from '../../services/stores.service';
+import { StoresService } from '../../services/stores.service';
+import { Store } from '../../types/store';
 import { Card } from 'primeng/card';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
@@ -33,7 +34,7 @@ export class StoresPage implements OnInit, AfterViewInit, OnDestroy {
 
     this.isLoading.set(true);
 
-    this.storesService.getStores(this.page(), this.limit).subscribe({
+    this.storesService.getStores({ page: this.page(), limit: this.limit }).subscribe({
       next: (payload) => {
 
         const { stores, meta } = payload;
@@ -43,7 +44,7 @@ export class StoresPage implements OnInit, AfterViewInit, OnDestroy {
 
         this.isLoading.set(false);
       },
-      error: (error) => {
+      error: () => {
         this.isLoading.set(false);
       },
     })

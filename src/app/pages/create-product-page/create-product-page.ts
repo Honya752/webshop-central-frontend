@@ -1,5 +1,6 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { CreateProduct, ProductsService, UpdateProduct } from '../../services/product.service';
+import { ProductsService } from '../../services/product.service';
+import { CreateProduct, UpdateProduct } from '../../types/product';
 import { FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Card } from 'primeng/card';
@@ -164,6 +165,9 @@ export class CreateProductPage implements OnInit {
       return;
     }
 
+    this.isLoading.set(true);
+    this.errorMessage.set('');
+
     if (this.isEditMode && this.id) {
       const payload: UpdateProduct = {
         sku: this.form.controls.sku.getRawValue(),
@@ -175,10 +179,9 @@ export class CreateProductPage implements OnInit {
         images: this.images.getRawValue()
       };
 
-      console.log(payload)
-
       this.productsService.updateProduct(payload, this.id).subscribe({
         next: (product) => {
+          this.isLoading.set(false);
           this.messageService.add({
             severity: 'success',
             summary: 'Product updated',
@@ -188,11 +191,9 @@ export class CreateProductPage implements OnInit {
         error: (error) => {
           const serverError = error?.error?.message;
 
-          if (typeof (serverError) === 'string') {
-            this.errorMessage.set(serverError)
-          }
-
-          if (serverError) {
+          if (typeof serverError === 'string') {
+            this.errorMessage.set(serverError);
+          } else if (serverError && typeof serverError === 'object') {
             this.applyBackendErrors(serverError);
           }
 
@@ -224,11 +225,9 @@ export class CreateProductPage implements OnInit {
         error: (error) => {
           const serverError = error?.error?.message;
 
-          if (typeof (serverError) === 'string') {
-            this.errorMessage.set(serverError)
-          }
-
-          if (serverError) {
+          if (typeof serverError === 'string') {
+            this.errorMessage.set(serverError);
+          } else if (serverError && typeof serverError === 'object') {
             this.applyBackendErrors(serverError);
           }
 

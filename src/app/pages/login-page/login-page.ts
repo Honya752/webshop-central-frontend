@@ -47,17 +47,14 @@ export class LoginPage {
     this.authService.login(this.form.getRawValue()).subscribe({
       next: () => {
         const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
-        console.log(returnUrl);
         this.router.navigateByUrl(returnUrl || '/dashboard');
       },
       error: (error) => {
         const serverError = error?.error?.message;
 
-        if (typeof (serverError) === 'string') {
-          this.errorMessage.set(serverError)
-        }
-
-        if (serverError) {
+        if (typeof serverError === 'string') {
+          this.errorMessage.set(serverError);
+        } else if (serverError && typeof serverError === 'object') {
           this.applyBackendErrors(serverError);
         }
 

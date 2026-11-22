@@ -5,7 +5,8 @@ import { Card } from 'primeng/card';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
-import { Wholesaler, WholesalersService } from '../../services/wholesalers.service';
+import { WholesalersService } from '../../services/wholesalers.service';
+import { Wholesaler } from '../../types/wholesaler';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 
@@ -30,12 +31,11 @@ export class WholesalersPage implements OnInit {
 
     this.wholesalersService.listWholesalers().subscribe({
       next: (payload) => {
-        console.log(payload);
         this.wholesalers.set(payload);
         this.isLoading.set(false);
       },
-      error: (error) => {
-        this.isLoading.set(false)
+      error: () => {
+        this.isLoading.set(false);
       }
     })
   }
@@ -46,19 +46,20 @@ export class WholesalersPage implements OnInit {
 
   syncWholesalerCatalog(id: string) {
     this.wholesalersService.syncCatalog(id).subscribe({
-      next: (payload) => {
+      next: (result) => {
         this.messageService.add({
-          severity: 'success',
+          severity: result.failed.length ? 'warn' : 'success',
           summary: 'Wholesaler catalog updated',
-          detail: `Wholesaler catalog updated successfully`,
+          detail: `${result.total} products: ${result.created} created, ${result.updated} updated, `
+            + `${result.zeroed} zeroed, ${result.failed.length} failed`,
         });
       },
-      error: (error) => {
+      error: () => {
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
-          detail: 'Failed update wholesaler catalog!',
-        })
+          detail: 'Failed to update wholesaler catalog!',
+        });
       }
     })
   }

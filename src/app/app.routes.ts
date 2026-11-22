@@ -1,21 +1,7 @@
 import { Routes } from '@angular/router';
-import { LoginPage } from './pages/login-page/login-page';
 import { AuthLayout } from './layouts/auth-layout/auth-layout';
 import { MainLayout } from './layouts/main-layout/main-layout';
-import { DashboardPage } from './pages/dashboard-page/dashboard-page';
-import { RegisterPage } from './pages/register-page/register-page';
-import { ProductsPage } from './pages/products-page/products-page';
-import { CreateProductPage } from './pages/create-product-page/create-product-page';
-import { OrdersPage } from './pages/orders-page/orders-page';
-import { OrderDetailPage } from './pages/order-detail-page/order-detail-page';
-import { StoresPage } from './pages/stores-page/stores-page';
-import { UsersPage } from './pages/users-page/users-page';
-import { CreateUserPage } from './pages/create-user-page/create-user-page';
-import { WholesalersPage } from './pages/wholesalers-page/wholesalers-page';
-import { CreateWholesalerPage } from './pages/create-wholesaler-page/create-wholesaler-page';
-import { CreateStorePage } from './pages/create-store-page/create-store-page';
-import { ProductDetailPage } from './pages/product-detail-page/product-detail-page';
-import { StoreDetailPage } from './pages/store-detail-page/store-detail-page';
+import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
     {
@@ -23,39 +9,39 @@ export const routes: Routes = [
         component: AuthLayout,
         children: [
             { path: '', pathMatch: 'full', redirectTo: 'login' },
-            { path: 'login', component: LoginPage },
-            { path: 'register', component: RegisterPage },
+            { path: 'login', loadComponent: () => import('./pages/login-page/login-page').then(m => m.LoginPage) },
+            { path: 'register', loadComponent: () => import('./pages/register-page/register-page').then(m => m.RegisterPage) },
         ],
     },
 
     {
         path: '',
         component: MainLayout,
-        canActivate: [],
+        canActivate: [authGuard],
         children: [
             { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
-            { path: 'dashboard', component: DashboardPage },
+            { path: 'dashboard', loadComponent: () => import('./pages/dashboard-page/dashboard-page').then(m => m.DashboardPage) },
 
-            { path: 'products', component: ProductsPage },
-            { path: 'product/create', component: CreateProductPage },
-            { path: 'product/:id', component: ProductDetailPage },
-            { path: 'product/:id/edit', component: CreateProductPage },
+            { path: 'products', loadComponent: () => import('./pages/products-page/products-page').then(m => m.ProductsPage) },
+            { path: 'product/create', loadComponent: () => import('./pages/create-product-page/create-product-page').then(m => m.CreateProductPage) },
+            { path: 'product/:id', loadComponent: () => import('./pages/product-detail-page/product-detail-page').then(m => m.ProductDetailPage) },
+            { path: 'product/:id/edit', loadComponent: () => import('./pages/create-product-page/create-product-page').then(m => m.CreateProductPage) },
 
-            { path: 'orders', component: OrdersPage },
-            { path: 'order/:id', component: OrderDetailPage },
+            { path: 'orders', loadComponent: () => import('./pages/orders-page/orders-page').then(m => m.OrdersPage) },
+            { path: 'order/:id', loadComponent: () => import('./pages/order-detail-page/order-detail-page').then(m => m.OrderDetailPage) },
 
-            { path: 'stores', component: StoresPage },
-            { path: 'store/create', component: CreateStorePage },
-            { path: 'store/:id', component: StoreDetailPage },
-            { path: 'store/:id/edit', component: CreateStorePage },
+            { path: 'stores', loadComponent: () => import('./pages/stores-page/stores-page').then(m => m.StoresPage) },
+            { path: 'store/create', loadComponent: () => import('./pages/create-store-page/create-store-page').then(m => m.CreateStorePage) },
+            { path: 'store/:id', loadComponent: () => import('./pages/store-detail-page/store-detail-page').then(m => m.StoreDetailPage) },
+            { path: 'store/:id/edit', loadComponent: () => import('./pages/create-store-page/create-store-page').then(m => m.CreateStorePage) },
 
-            { path: 'users', component: UsersPage },
-            { path: 'user/create', component: CreateUserPage },
-            { path: 'user/:id', component: CreateUserPage },
+            { path: 'users', loadComponent: () => import('./pages/users-page/users-page').then(m => m.UsersPage) },
+            { path: 'user/create', loadComponent: () => import('./pages/create-user-page/create-user-page').then(m => m.CreateUserPage) },
+            { path: 'user/:id', loadComponent: () => import('./pages/create-user-page/create-user-page').then(m => m.CreateUserPage) },
 
-            { path: 'wholesalers', component: WholesalersPage },
-            { path: 'wholesaler/create', component: CreateWholesalerPage },
-            { path: 'wholesaler/:id', component: CreateWholesalerPage },
+            { path: 'wholesalers', loadComponent: () => import('./pages/wholesalers-page/wholesalers-page').then(m => m.WholesalersPage) },
+            { path: 'wholesaler/create', loadComponent: () => import('./pages/create-wholesaler-page/create-wholesaler-page').then(m => m.CreateWholesalerPage) },
+            { path: 'wholesaler/:id', loadComponent: () => import('./pages/create-wholesaler-page/create-wholesaler-page').then(m => m.CreateWholesalerPage) },
         ]
     },
 

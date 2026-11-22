@@ -8,8 +8,10 @@ import { Card } from 'primeng/card';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
-import { Order, OrdersService } from '../../services/orders.service';
-import { AuthService } from '../../services/auth.service';
+import { OrdersService } from '../../services/orders.service';
+import { Order, OrderSortBy } from '../../types/order';
+import { SortOrder } from '../../types/api-response';
+import { OrderStatusTag } from '../../components/order-status-tag/order-status-tag';
 import { debounceTime } from 'rxjs';
 import { DatePipe } from '@angular/common';
 import { CurrencyPipe } from '@angular/common';
@@ -17,13 +19,13 @@ import { RouterLink } from "@angular/router";
 
 
 type OrderFilterForm = FormGroup<{
-  sortBy: FormControl<'createdAt' | 'total' | 'status'>;
-  sortOrder: FormControl<'asc' | 'desc'>;
+  sortBy: FormControl<OrderSortBy>;
+  sortOrder: FormControl<SortOrder>;
 }>
 
 @Component({
   selector: 'app-orders-page',
-  imports: [CurrencyPipe, DatePipe, Card, TableModule, ButtonModule, TagModule, ProgressSpinnerModule, InputGroupModule, ReactiveFormsModule, SelectModule, InputTextModule, RouterLink],
+  imports: [CurrencyPipe, DatePipe, Card, TableModule, ButtonModule, TagModule, ProgressSpinnerModule, InputGroupModule, ReactiveFormsModule, SelectModule, InputTextModule, RouterLink, OrderStatusTag],
   templateUrl: './orders-page.html',
   styleUrl: './orders-page.sass',
 })
@@ -31,7 +33,6 @@ export class OrdersPage implements OnInit, AfterViewInit, OnDestroy {
 
   private fb = inject(FormBuilder);
   private ordersService = inject(OrdersService);
-  private authService = inject(AuthService);
 
   orders = signal<Order[]>([]);
 
@@ -42,8 +43,8 @@ export class OrdersPage implements OnInit, AfterViewInit, OnDestroy {
   hasNextPage = signal(true);
 
   filterForm: OrderFilterForm = this.fb.group({
-    sortBy: this.fb.nonNullable.control<'createdAt' | 'total' | 'status'>('createdAt'),
-    sortOrder: this.fb.nonNullable.control<'asc' | 'desc'>('desc')
+    sortBy: this.fb.nonNullable.control<OrderSortBy>('createdAt'),
+    sortOrder: this.fb.nonNullable.control<SortOrder>('desc')
   })
 
   private observer!: IntersectionObserver;
@@ -69,11 +70,11 @@ export class OrdersPage implements OnInit, AfterViewInit, OnDestroy {
 
         this.orders.update(prev => [...prev, ...orders]);
         this.hasNextPage.set(meta.pages > meta.page);
-        this.page.set(meta.page);
+        this.page.set(meta.page + 1);
 
         this.isLoading.set(false);
       },
-      error: (error) => {
+      error: () => {
         this.isLoading.set(false);
       }
     })
@@ -90,9 +91,7 @@ export class OrdersPage implements OnInit, AfterViewInit, OnDestroy {
   ngOnInit(): void {
     this.filterForm.valueChanges
       .pipe(debounceTime(300))
-      .subscribe(values => {
-        this.resetAndReload()
-      });
+      .subscribe(() => this.resetAndReload());
     this.loadOrders();
   }
 
@@ -112,11 +111,7 @@ export class OrdersPage implements OnInit, AfterViewInit, OnDestroy {
     this.observer?.disconnect();
   }
 
-  get Role() {
-    return this.authService.currentUser()?.globalRole;
-  }
-
-  sortByOptions = [
+  sortByOptions: { label: string; value: OrderSortBy }[] = [
     { label: 'Status', value: 'status' },
     { label: 'Total price', value: 'total' },
     { label: 'Creation Date', value: 'createdAt' }

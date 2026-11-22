@@ -1,6 +1,9 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
-import { CreateUser, UpdateUser, UsersService } from '../../services/users.service';
-import { StoresService, StoreSummary } from '../../services/stores.service';
+import { UsersService } from '../../services/users.service';
+import { StoresService } from '../../services/stores.service';
+import { CreateUser, UpdateUser } from '../../types/user';
+import { StoreSummary } from '../../types/store';
+import { GlobalRole, StoreRole } from '../../types/enums';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -26,6 +29,7 @@ export class CreateUserPage implements OnInit {
   private readonly storesService = inject(StoresService);
   private readonly fb = inject(FormBuilder);
   private readonly route = inject(ActivatedRoute);
+  private readonly messageService = inject(MessageService);
 
   id: string | null = null;
   isEditMode = false;
@@ -39,35 +43,31 @@ export class CreateUserPage implements OnInit {
     name: this.fb.nonNullable.control('', [Validators.required]),
     email: this.fb.nonNullable.control('', [Validators.required, Validators.email]),
     password: this.fb.control<string | null>(null),
-    globalRole: this.fb.nonNullable.control('USER', [Validators.required]),
+    globalRole: this.fb.nonNullable.control<GlobalRole>('USER', [Validators.required]),
     storeId: this.fb.control<string | null>(null),
-    storeRole: this.fb.control<string | null>(null),
+    storeRole: this.fb.control<StoreRole | null>(null),
   });
 
   ngOnInit(): void {
     this.id = this.route.snapshot.paramMap.get('id');
     this.isEditMode = !!this.id;
 
-    this.storesService.getStoreSummeries().subscribe({
-      next: payload => {
-        this.stores.set(payload);
-        console.log(payload)
-      }
+    this.storesService.getStoreSummaries().subscribe({
+      next: payload => this.stores.set(payload),
     });
 
     if (this.isEditMode && this.id) {
-      this.form.controls.password.setValidators([Validators.minLength(8)]);
+      this.form.controls.password.setValidators([Validators.minLength(6)]);
 
       this.usersService.getUserData(this.id).subscribe({
         next: (user) => {
-          console.log(user.storeMembership?.id)
           this.form.patchValue({
             name: user.name,
             email: user.email,
             globalRole: user.globalRole,
-            storeId: user.storeMembership?.storeId,
-            storeRole: user.storeMembership?.role
-          })
+            storeId: user.storeMembership?.storeId ?? null,
+            storeRole: user.storeMembership?.role ?? null,
+          });
         }
       })
     }
@@ -85,6 +85,9 @@ export class CreateUserPage implements OnInit {
       return;
     }
 
+    this.isLoading.set(true);
+    this.errorMessage.set('');
+
     if (this.isEditMode && this.id) {
       const raw = this.form.getRawValue();
       const payload: UpdateUser = {
@@ -100,20 +103,21 @@ export class CreateUserPage implements OnInit {
           : null,
       };
 
-      console.log(payload);
-
       this.usersService.updateUser(payload, this.id).subscribe({
         next: user => {
           this.isLoading.set(false);
+          this.messageService.add({
+            severity: 'success',
+            summary: 'User updated',
+            detail: `${user.name} updated successfully`,
+          });
         },
         error: (error) => {
           const serverError = error?.error?.message;
 
-          if (typeof (serverError) === 'string') {
-            this.errorMessage.set(serverError)
-          }
-
-          if (serverError) {
+          if (typeof serverError === 'string') {
+            this.errorMessage.set(serverError);
+          } else if (serverError && typeof serverError === 'object') {
             this.applyBackendErrors(serverError);
           }
 
@@ -129,28 +133,31 @@ export class CreateUserPage implements OnInit {
         email: raw.email,
         password: raw.password!,
         globalRole: raw.globalRole,
-        ...(raw.storeId && {
-          storeMembership: {
-            storeId: raw.storeId,
-            ...(raw.storeRole ? { role: raw.storeRole } : { storeMembership: null }),
-          },
-        }),
+        ...(raw.storeId
+          ? {
+            storeMembership: {
+              storeId: raw.storeId,
+              ...(raw.storeRole ? { role: raw.storeRole } : {}),
+            },
+          }
+          : {}),
       };
-
-      console.log(payload);
 
       this.usersService.createUser(payload).subscribe({
         next: user => {
           this.isLoading.set(false);
+          this.messageService.add({
+            severity: 'success',
+            summary: 'User created',
+            detail: `${user.name} created successfully`,
+          });
         },
         error: (error) => {
           const serverError = error?.error?.message;
 
-          if (typeof (serverError) === 'string') {
-            this.errorMessage.set(serverError)
-          }
-
-          if (serverError) {
+          if (typeof serverError === 'string') {
+            this.errorMessage.set(serverError);
+          } else if (serverError && typeof serverError === 'object') {
             this.applyBackendErrors(serverError);
           }
 
@@ -172,7 +179,7 @@ export class CreateUserPage implements OnInit {
     });
   }
 
-  roleOptions = [
+  roleOptions: { label: string; value: GlobalRole }[] = [
     { label: 'Administrator', value: 'SYSADMIN' },
     { label: 'Moderator', value: 'MODERATOR' },
     { label: 'User', value: 'USER' },
@@ -185,7 +192,7 @@ export class CreateUserPage implements OnInit {
     }))
   );
 
-  storeRoleOptions = [
+  storeRoleOptions: { label: string; value: StoreRole }[] = [
     { label: 'Administrator', value: 'ADMIN' },
     { label: 'Moderator', value: 'MODERATOR' },
     { label: 'Viewer', value: 'VIEWER' },

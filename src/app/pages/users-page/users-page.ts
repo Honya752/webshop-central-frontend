@@ -1,5 +1,6 @@
 import { AfterViewInit, Component, ElementRef, inject, OnDestroy, OnInit, signal, ViewChild } from '@angular/core';
-import { User, UsersService } from '../../services/users.service';
+import { UsersService } from '../../services/users.service';
+import { User } from '../../types/user';
 import { Card } from 'primeng/card';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
@@ -41,17 +42,17 @@ export class UsersPage implements OnInit, AfterViewInit, OnDestroy {
 
     this.isLoading.set(true);
 
-    this.usersService.getAllUsers(this.page(), this.limit).subscribe({
+    this.usersService.getAllUsers({ page: this.page(), limit: this.limit }).subscribe({
       next: (payload) => {
         const { users, meta } = payload;
 
         this.users.update(prev => [...prev, ...users]);
         this.hasNextPage.set(meta.pages > meta.page);
-        this.page.set(meta.page);
+        this.page.set(meta.page + 1);
 
         this.isLoading.set(false);
       },
-      error: (error) => {
+      error: () => {
         this.messageService.add({
           severity: 'error',
           summary: 'Error',

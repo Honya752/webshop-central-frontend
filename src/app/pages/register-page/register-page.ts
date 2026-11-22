@@ -1,5 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
 import { Router, RouterLink } from '@angular/router';
 import { passwordMatchValidator } from '../../validators/password-match';
@@ -31,8 +31,8 @@ export class RegisterPage {
 
   form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
-    name: ['', [Validators.required]],
-    password: ['', [Validators.required]],
+    name: ['', [Validators.required, Validators.minLength(3)]],
+    password: ['', [Validators.required, Validators.minLength(6)]],
     passwordConfirm: ['', [Validators.required]]
   },
     {
@@ -58,11 +58,9 @@ export class RegisterPage {
       error: (error) => {
         const serverError = error?.error?.message;
 
-        if (typeof (serverError) === 'string') {
-          this.errorMessage.set(serverError)
-        }
-
-        if (serverError) {
+        if (typeof serverError === 'string') {
+          this.errorMessage.set(serverError);
+        } else if (serverError && typeof serverError === 'object') {
           this.applyBackendErrors(serverError);
         }
 

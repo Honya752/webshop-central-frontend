@@ -1,7 +1,9 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { Card } from 'primeng/card';
-import { ProductDetail, ProductsService } from '../../services/product.service';
-import { StoresService, StoreSummary } from '../../services/stores.service';
+import { ProductsService } from '../../services/product.service';
+import { StoresService } from '../../services/stores.service';
+import { ProductChannelMapping, ProductDetail } from '../../types/product';
+import { StoreSummary } from '../../types/store';
 import { CommonModule } from '@angular/common';
 import { MessageService } from 'primeng/api';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -51,11 +53,10 @@ export class ProductDetailPage implements OnInit {
 
     this.productService.getAllProductData(id).subscribe({
       next: (payload) => {
-        console.log(payload)
         this.product.set(payload);
         this.isLoading.set(false);
       },
-      error: (error) => {
+      error: () => {
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
@@ -67,11 +68,11 @@ export class ProductDetailPage implements OnInit {
   }
 
   loadStoreSummaries() {
-    this.storesService.getStoreSummeries().subscribe({
+    this.storesService.getStoreSummaries().subscribe({
       next: (payload) => {
         this.stores.set(payload);
       },
-      error: (error) => {
+      error: () => {
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
@@ -92,6 +93,11 @@ export class ProductDetailPage implements OnInit {
   }
 
   addToWebshop() {
+    if (this.webshopForm.invalid) {
+      this.webshopForm.markAllAsTouched();
+      return;
+    }
+
     const storeId = this.webshopForm.controls.storeId.getRawValue();
     this.syncWithStore(storeId, this.id);
   }
@@ -99,8 +105,8 @@ export class ProductDetailPage implements OnInit {
   syncWithStore(storeId: string, productId: string | null) {
     if (!productId) return;
 
-    this.storesService.addProductToStore(storeId, productId).subscribe({
-      next: (payload) => {
+    this.storesService.syncProductToStore(storeId, productId).subscribe({
+      next: () => {
         this.messageService.add({
           severity: 'success',
           summary: 'Product updated',
@@ -108,7 +114,7 @@ export class ProductDetailPage implements OnInit {
         });
         if (this.id) this.loadProduct(this.id);
       },
-      error: (error) => {
+      error: () => {
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
@@ -125,11 +131,11 @@ export class ProductDetailPage implements OnInit {
     }))
   );
 
-  isInSync(map: any) {
+  isInSync(mapping: ProductChannelMapping): boolean {
     const updatedAt = this.product()?.updatedAt;
-    const syncedAt: Date = map.lastSyncedAt;
+    const syncedAt = mapping.lastSyncedAt;
 
-    if (updatedAt && syncedAt && syncedAt >= updatedAt) return true;
-    return false;
+    if (!updatedAt || !syncedAt) return false;
+    return new Date(syncedAt).getTime() >= new Date(updatedAt).getTime();
   }
 }

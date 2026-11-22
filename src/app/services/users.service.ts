@@ -1,72 +1,27 @@
-import { HttpClient } from "@angular/common/http";
-import { inject, Injectable } from "@angular/core";
-import { ApiPaginationResponse, ApiResponse } from "../types/api-response";
-import { environment } from "../../environment";
-import { map } from "rxjs";
-
-export type StoreMembership = {
-    id: string;
-    storeId: string;
-    role: string;
-    name: string;
-    baseUrl: string;
-};
-
-export type User = {
-    id: string;
-    name: string;
-    email: string;
-    globalRole: string;
-    storeMembership?: StoreMembership;
-};
-
-export type CreateStoreMembership = {
-    storeId: string;
-    role?: string;
-};
-
-export type UpdateStoreMembership = {
-    storeId?: string;
-    role?: string;
-};
-
-export type CreateUser = {
-    name: string;
-    email: string;
-    password: string;
-    globalRole: string;
-    storeMembership?: CreateStoreMembership;
-};
-
-export type UpdateUser = {
-    name?: string;
-    email?: string;
-    password?: string;
-    globalRole?: string;
-    storeMembership?: UpdateStoreMembership | null;
-};
+import { HttpClient } from '@angular/common/http';
+import { inject, Injectable } from '@angular/core';
+import { map } from 'rxjs';
+import { environment } from '../../environment';
+import { ApiPaginationResponse, ApiResponse, PaginationQuery } from '../types/api-response';
+import { CreateUser, UpdateUser, User } from '../types/user';
+import { toHttpParams } from '../utils/http-params';
 
 @Injectable({
     providedIn: 'root'
 })
 export class UsersService {
-    private http = inject(HttpClient);
+    private readonly http = inject(HttpClient);
 
-    getAllUsers(page: number, limit: number) {
+    getAllUsers(query: PaginationQuery) {
         return this.http
-            .get<ApiPaginationResponse<User>>(`${environment.apiUrl}/users`, { params: { page, limit } })
-            .pipe(map(respose => {
-                const { data: users, meta } = respose;
-                return { users, meta };
-            }))
+            .get<ApiPaginationResponse<User>>(`${environment.apiUrl}/users`, { params: toHttpParams(query) })
+            .pipe(map(({ data: users, meta }) => ({ users, meta })));
     }
 
     getUserData(id: string) {
         return this.http
             .get<ApiResponse<User>>(`${environment.apiUrl}/users/${id}`)
-            .pipe(map(response => {
-                return response.data;
-            }))
+            .pipe(map(response => response.data));
     }
 
     createUser(payload: CreateUser) {

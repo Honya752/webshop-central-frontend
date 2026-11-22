@@ -1,48 +1,25 @@
-import { HttpClient } from "@angular/common/http";
-import { inject, Injectable, signal } from "@angular/core";
-import { switchMap, tap } from "rxjs";
-import { environment } from "../../environment";
-import { ApiResponse } from "../types/api-response";
-
-type LoginRequest = {
-    email: string;
-    password: string;
-}
-
-type RegisterRequest = {
-    email: string;
-    name: string;
-    password: string;
-}
-
-type UserData = {
-    id: string;
-    name: string;
-    email: string;
-    globalRole: string;
-}
-
-type LoginResponse = {
-    token: string;
-}
+import { HttpClient } from '@angular/common/http';
+import { computed, inject, Injectable, signal } from '@angular/core';
+import { map, switchMap, tap } from 'rxjs';
+import { environment } from '../../environment';
+import { ApiResponse } from '../types/api-response';
+import { LoginRequest, LoginResponse, Profile, RegisterRequest } from '../types/auth';
 
 @Injectable({
     providedIn: 'root'
 })
 export class AuthService {
-    private http = inject(HttpClient);
+    private readonly http = inject(HttpClient);
     private readonly tokenKey = 'token';
 
-    currentUser = signal<UserData | null>(null);
+    readonly currentUser = signal<Profile | null>(null);
+    readonly isSysadmin = computed(() => this.currentUser()?.globalRole === 'SYSADMIN');
 
     login(payload: LoginRequest) {
         return this.http
             .post<ApiResponse<LoginResponse>>(`${environment.apiUrl}/auth/login`, payload)
             .pipe(
-                tap((response) => {
-                    const token = response.data.token;
-                    localStorage.setItem(this.tokenKey, token);
-                }),
+                tap(response => localStorage.setItem(this.tokenKey, response.data.token)),
                 switchMap(() => this.loadCurrentUser())
             );
     }
@@ -51,24 +28,18 @@ export class AuthService {
         return this.http
             .post<ApiResponse<LoginResponse>>(`${environment.apiUrl}/auth/register`, payload)
             .pipe(
-                tap((response) => {
-                    const token = response.data.token;
-                    localStorage.setItem(this.tokenKey, token);
-                }),
+                tap(response => localStorage.setItem(this.tokenKey, response.data.token)),
                 switchMap(() => this.loadCurrentUser())
-            )
+            );
     }
 
     loadCurrentUser() {
         return this.http
-            .get<ApiResponse<UserData>>(`${environment.apiUrl}/auth/profile`)
+            .get<ApiResponse<Profile>>(`${environment.apiUrl}/auth/profile`)
             .pipe(
-                tap((response) => {
-                    const user = response.data
-                    this.currentUser.set(user);
-                })
-            )
-
+                map(response => response.data),
+                tap(user => this.currentUser.set(user))
+            );
     }
 
     logout(): void {

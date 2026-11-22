@@ -1,77 +1,33 @@
-import { HttpClient } from "@angular/common/http";
-import { inject, Injectable } from "@angular/core";
-import { environment } from "../../environment";
-import { ApiPaginationResponse, ApiResponse } from "../types/api-response";
-import { map } from "rxjs";
-
-type OrderStore = {
-    id: string;
-    name: string;
-    baseUrl: string;
-};
-
-type OrderItem = {
-    id: string;
-    sku: string;
-    quantity: string;
-    unitPrice: number;
-    total: number;
-};
-
-export type Order = {
-    id: string;
-    status: string;
-    currency: string;
-    total: number;
-    paymentMethod: string;
-    createdAtExternal: Date;
-    createdAt: Date;
-    store: OrderStore;
-}
-
-export type OrderData = Order & {
-    name: string;
-    email: string;
-    updatedAt: Date;
-    orderItems: OrderItem[];
-}
-
-type OrderFilterParam = {
-    page: number,
-    limit: number,
-    sortBy: string,
-    sortOrder: string
-}
-
+import { HttpClient } from '@angular/common/http';
+import { inject, Injectable } from '@angular/core';
+import { map } from 'rxjs';
+import { environment } from '../../environment';
+import { ApiPaginationResponse, ApiResponse } from '../types/api-response';
+import { OrderStatus } from '../types/enums';
+import { Order, OrderDetail, OrderFilterQuery, OrderStatusResponse } from '../types/order';
+import { toHttpParams } from '../utils/http-params';
 
 @Injectable({
     providedIn: 'root'
 })
 export class OrdersService {
-    private http = inject(HttpClient)
+    private readonly http = inject(HttpClient);
 
-    getAllOrders(param: OrderFilterParam) {
+    getAllOrders(query: OrderFilterQuery) {
         return this.http
-            .get<ApiPaginationResponse<Order>>(`${environment.apiUrl}/orders`, { params: param })
-            .pipe(map((response) => {
-                const { data: orders, meta } = response;
-                console.log(response);
-                return { orders, meta };
-            }))
+            .get<ApiPaginationResponse<Order>>(`${environment.apiUrl}/orders`, { params: toHttpParams(query) })
+            .pipe(map(({ data: orders, meta }) => ({ orders, meta })));
     }
 
     getOrderById(id: string) {
         return this.http
-            .get<ApiResponse<OrderData>>(`${environment.apiUrl}/orders/${id}`)
-            .pipe(map((response) => {
-                console.log(response)
-                return response.data
-            }));
+            .get<ApiResponse<OrderDetail>>(`${environment.apiUrl}/orders/${id}`)
+            .pipe(map(response => response.data));
     }
 
-    setOrderStatus(id: string, status: string) {
+    setOrderStatus(id: string, status: OrderStatus) {
         return this.http
-            .post<ApiResponse<{ status: string }>>(`${environment.apiUrl}/orders/${id}/status`, { status })
-            .pipe(map(response => { response.data.status }));
+            .post<ApiResponse<OrderStatusResponse>>(`${environment.apiUrl}/orders/${id}/status`, { status })
+            .pipe(map(response => response.data.status));
     }
 }
