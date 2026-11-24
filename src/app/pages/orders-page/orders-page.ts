@@ -23,6 +23,8 @@ type OrderFilterForm = FormGroup<{
   sortOrder: FormControl<SortOrder>;
 }>
 
+import { getApiErrorMessage } from '../../utils/api-error';
+import { MessageService } from 'primeng/api';
 @Component({
   selector: 'app-orders-page',
   imports: [CurrencyPipe, DatePipe, Card, TableModule, ButtonModule, TagModule, ProgressSpinnerModule, InputGroupModule, ReactiveFormsModule, SelectModule, InputTextModule, RouterLink, OrderStatusTag],
@@ -33,6 +35,7 @@ export class OrdersPage implements OnInit, AfterViewInit, OnDestroy {
 
   private fb = inject(FormBuilder);
   private ordersService = inject(OrdersService);
+  private readonly messageService = inject(MessageService);
 
   orders = signal<Order[]>([]);
 
@@ -74,7 +77,13 @@ export class OrdersPage implements OnInit, AfterViewInit, OnDestroy {
 
         this.isLoading.set(false);
       },
-      error: () => {
+      error: (error) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: getApiErrorMessage(error, 'Failed to load orders!'),
+        });
+        this.hasNextPage.set(false);
         this.isLoading.set(false);
       }
     })

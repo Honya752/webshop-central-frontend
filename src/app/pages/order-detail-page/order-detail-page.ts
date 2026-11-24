@@ -9,15 +9,14 @@ import { TagModule } from 'primeng/tag';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { BarcodeComponent } from '../../components/barcode/barcode';
 import { MessageService } from 'primeng/api';
-import { ToastModule } from 'primeng/toast';
 import { OrderDetail } from '../../types/order';
 import { OrderItemIssue, OrderStatus } from '../../types/enums';
 import { OrderStatusTag } from '../../components/order-status-tag/order-status-tag';
 
+import { getApiErrorMessage } from '../../utils/api-error';
 @Component({
   selector: 'app-order-detail-page',
-  imports: [CurrencyPipe, DatePipe, Card, TableModule, ButtonModule, TagModule, ProgressSpinnerModule, BarcodeComponent, ToastModule, RouterLink, OrderStatusTag],
-  providers: [MessageService],
+  imports: [CurrencyPipe, DatePipe, Card, TableModule, ButtonModule, TagModule, ProgressSpinnerModule, BarcodeComponent, RouterLink, OrderStatusTag],
   templateUrl: './order-detail-page.html',
   styleUrl: './order-detail-page.sass',
 })
@@ -59,12 +58,12 @@ export class OrderDetailPage implements OnInit {
         this.order.set(payload);
         this.isLoading.set(false);
       },
-      error: () => {
-        this.error.set('Failed to load order');
+      error: (error) => {
+        this.error.set(getApiErrorMessage(error, 'Failed to load order'));
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
-          detail: 'Failed to load order!',
+          detail: getApiErrorMessage(error, 'Failed to load order!'),
         });
         this.isLoading.set(false);
       }
@@ -84,11 +83,11 @@ export class OrderDetailPage implements OnInit {
         });
         this.loadOrder(id);
       },
-      error: () => {
+      error: (error) => {
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
-          detail: 'Failed to update order status!',
+          detail: getApiErrorMessage(error, 'Failed to update order status!'),
         });
       }
     });

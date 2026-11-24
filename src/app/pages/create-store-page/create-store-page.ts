@@ -5,18 +5,19 @@ import { Card } from 'primeng/card';
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
 import { SelectModule } from 'primeng/select';
-import { ToastModule } from 'primeng/toast';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
+import { applyServerErrors } from '../../utils/form-errors';
+import { getApiErrorMessage } from '../../utils/api-error';
 import { StoresService } from '../../services/stores.service';
 import { CreateStore, UpdateStore } from '../../types/store';
 import { IntegrationType } from '../../types/enums';
 
 @Component({
   selector: 'app-create-store-page',
-  imports: [CommonModule, ReactiveFormsModule, Card, InputTextModule, ButtonModule, SelectModule, ConfirmDialogModule, ToastModule,],
-  providers: [MessageService, ConfirmationService],
+  imports: [CommonModule, ReactiveFormsModule, Card, InputTextModule, ButtonModule, SelectModule, ConfirmDialogModule,],
+  providers: [ConfirmationService],
   templateUrl: './create-store-page.html',
   styleUrl: './create-store-page.sass',
 })
@@ -25,6 +26,7 @@ export class CreateStorePage implements OnInit {
   private readonly messageService = inject(MessageService);
   private readonly fb = inject(FormBuilder);
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
 
   id: string | null = null;
   isEditMode = false;
@@ -57,8 +59,15 @@ export class CreateStorePage implements OnInit {
             baseUrl: store.baseUrl,
             integrationType: store.integrationType,
           });
-        }
-      })
+        },
+        error: (error) => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: getApiErrorMessage(error, 'Failed to load the store!'),
+          });
+        },
+      });
     }
   }
 
@@ -82,22 +91,18 @@ export class CreateStorePage implements OnInit {
 
       this.storesService.updateStore(payload, this.id).subscribe({
         next: (store) => {
-          this.isLoading.set(false)
+          this.isLoading.set(false);
+          this.router.navigate(['/store', store.id]);
           this.messageService.add({
             severity: 'success',
             summary: 'Store updated',
             detail: `${store.name} updated successfully`,
           });
-        }, error: (error) => {
-          const serverError = error?.error?.message;
-
-          if (typeof serverError === 'string') {
-            this.errorMessage.set(serverError);
-          } else if (serverError && typeof serverError === 'object') {
-            this.applyBackendErrors(serverError);
-          }
-
+        },
+        error: (error) => {
+          this.errorMessage.set(applyServerErrors(this.form, error, 'Failed to update the store'));
           this.isLoading.set(false);
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: this.errorMessage() });
         },
       })
     }
@@ -112,36 +117,21 @@ export class CreateStorePage implements OnInit {
 
       this.storesService.createStore(payload).subscribe({
         next: (store) => {
-          this.isLoading.set(false)
+          this.isLoading.set(false);
+          this.router.navigate(['/store', store.id]);
           this.messageService.add({
             severity: 'success',
             summary: 'Store created',
             detail: `${store.name} created successfully`,
           });
-        }, error: (error) => {
-          const serverError = error?.error?.message;
-
-          if (typeof serverError === 'string') {
-            this.errorMessage.set(serverError);
-          } else if (serverError && typeof serverError === 'object') {
-            this.applyBackendErrors(serverError);
-          }
-
+        },
+        error: (error) => {
+          this.errorMessage.set(applyServerErrors(this.form, error, 'Failed to create the store'));
           this.isLoading.set(false);
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: this.errorMessage() });
         },
       })
     }
-  }
-  applyBackendErrors(errors: Record<string, string[]>) {
-    Object.keys(errors).forEach((field) => {
-      const control = this.form.get(field);
-
-      if (control) {
-        control.setErrors({
-          server: errors[field][0],
-        });
-      }
-    });
   }
 
   integrations: { label: string; value: IntegrationType }[] = [

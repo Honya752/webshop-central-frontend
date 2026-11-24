@@ -10,11 +10,11 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { SelectModule } from 'primeng/select';
 import { ButtonModule } from 'primeng/button';
-import { ToastModule } from 'primeng/toast';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 import { BarcodeComponent } from '../../components/barcode/barcode';
 
+import { getApiErrorMessage } from '../../utils/api-error';
 @Component({
   selector: 'app-product-detail-page',
   imports: [
@@ -23,13 +23,11 @@ import { BarcodeComponent } from '../../components/barcode/barcode';
     ReactiveFormsModule,
     SelectModule,
     ButtonModule,
-    ToastModule,
     TableModule,
     RouterLink,
     TagModule,
     BarcodeComponent,
   ],
-  providers: [MessageService],
   templateUrl: './product-detail-page.html',
   styleUrl: './product-detail-page.sass',
 })
@@ -66,11 +64,11 @@ export class ProductDetailPage implements OnInit {
         this.product.set(payload);
         this.isLoading.set(false);
       },
-      error: () => {
+      error: (error) => {
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
-          detail: 'Failed to load product!',
+          detail: getApiErrorMessage(error, 'Failed to load product!'),
         });
         this.isLoading.set(false);
       }
@@ -82,11 +80,11 @@ export class ProductDetailPage implements OnInit {
       next: (payload) => {
         this.stores.set(payload);
       },
-      error: () => {
+      error: (error) => {
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
-          detail: 'Failed to load stores!',
+          detail: getApiErrorMessage(error, 'Failed to load stores!'),
         });
       }
     });
@@ -124,11 +122,11 @@ export class ProductDetailPage implements OnInit {
         });
         if (this.id) this.loadProduct(this.id);
       },
-      error: () => {
+      error: (error) => {
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
-          detail: 'Failed to sync product to the store!',
+          detail: getApiErrorMessage(error, 'Failed to sync product to the store!'),
         })
       }
     })

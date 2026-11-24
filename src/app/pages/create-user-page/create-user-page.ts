@@ -5,21 +5,22 @@ import { CreateUser, UpdateUser } from '../../types/user';
 import { StoreSummary } from '../../types/store';
 import { GlobalRole, StoreRole } from '../../types/enums';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
+import { applyServerErrors } from '../../utils/form-errors';
+import { getApiErrorMessage } from '../../utils/api-error';
 import { CommonModule } from '@angular/common';
 import { Card } from 'primeng/card';
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
 import { SelectModule } from 'primeng/select';
 import { PasswordModule } from 'primeng/password';
-import { ToastModule } from 'primeng/toast';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 
 @Component({
   selector: 'app-create-user-page',
-  imports: [CommonModule, PasswordModule, ReactiveFormsModule, Card, InputTextModule, ButtonModule, SelectModule, ConfirmDialogModule, ToastModule,],
-  providers: [MessageService, ConfirmationService],
+  imports: [CommonModule, PasswordModule, ReactiveFormsModule, Card, InputTextModule, ButtonModule, SelectModule, ConfirmDialogModule,],
+  providers: [ConfirmationService],
   templateUrl: './create-user-page.html',
   styleUrl: './create-user-page.sass',
 })
@@ -29,6 +30,7 @@ export class CreateUserPage implements OnInit {
   private readonly storesService = inject(StoresService);
   private readonly fb = inject(FormBuilder);
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly messageService = inject(MessageService);
 
   id: string | null = null;
@@ -54,6 +56,13 @@ export class CreateUserPage implements OnInit {
 
     this.storesService.getStoreSummaries().subscribe({
       next: payload => this.stores.set(payload),
+      error: (error) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: getApiErrorMessage(error, 'Failed to load the stores!'),
+        });
+      },
     });
 
     if (this.isEditMode && this.id) {
@@ -68,8 +77,15 @@ export class CreateUserPage implements OnInit {
             storeId: user.storeMembership?.storeId ?? null,
             storeRole: user.storeMembership?.role ?? null,
           });
-        }
-      })
+        },
+        error: (error) => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: getApiErrorMessage(error, 'Failed to load the user!'),
+          });
+        },
+      });
     }
     else {
       this.form.controls.password.setValidators([
@@ -106,6 +122,7 @@ export class CreateUserPage implements OnInit {
       this.usersService.updateUser(payload, this.id).subscribe({
         next: user => {
           this.isLoading.set(false);
+          this.router.navigate(['/users']);
           this.messageService.add({
             severity: 'success',
             summary: 'User updated',
@@ -113,15 +130,9 @@ export class CreateUserPage implements OnInit {
           });
         },
         error: (error) => {
-          const serverError = error?.error?.message;
-
-          if (typeof serverError === 'string') {
-            this.errorMessage.set(serverError);
-          } else if (serverError && typeof serverError === 'object') {
-            this.applyBackendErrors(serverError);
-          }
-
+          this.errorMessage.set(applyServerErrors(this.form, error, 'Failed to update the user'));
           this.isLoading.set(false);
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: this.errorMessage() });
         },
       });
     }
@@ -146,6 +157,7 @@ export class CreateUserPage implements OnInit {
       this.usersService.createUser(payload).subscribe({
         next: user => {
           this.isLoading.set(false);
+          this.router.navigate(['/users']);
           this.messageService.add({
             severity: 'success',
             summary: 'User created',
@@ -153,31 +165,14 @@ export class CreateUserPage implements OnInit {
           });
         },
         error: (error) => {
-          const serverError = error?.error?.message;
-
-          if (typeof serverError === 'string') {
-            this.errorMessage.set(serverError);
-          } else if (serverError && typeof serverError === 'object') {
-            this.applyBackendErrors(serverError);
-          }
-
+          this.errorMessage.set(applyServerErrors(this.form, error, 'Failed to create the user'));
           this.isLoading.set(false);
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: this.errorMessage() });
         },
       })
     }
   }
 
-  applyBackendErrors(errors: Record<string, string[]>) {
-    Object.keys(errors).forEach((field) => {
-      const control = this.form.get(field);
-
-      if (control) {
-        control.setErrors({
-          server: errors[field][0],
-        });
-      }
-    });
-  }
 
   roleOptions: { label: string; value: GlobalRole }[] = [
     { label: 'Administrator', value: 'SYSADMIN' },

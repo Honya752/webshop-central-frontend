@@ -15,7 +15,6 @@ import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { ToastModule } from 'primeng/toast';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { DecimalPipe } from '@angular/common';
 
@@ -25,11 +24,12 @@ type ProductFilterForm = FormGroup<{
   sortOrder: FormControl<SortOrder>;
 }>;
 
+import { getApiErrorMessage } from '../../utils/api-error';
 @Component({
   selector: 'app-products-page',
-  imports: [ConfirmDialogModule, DecimalPipe, ToastModule, Card, TableModule, ButtonModule, TagModule, RouterLink, ProgressSpinnerModule, InputGroupModule, ReactiveFormsModule, SelectModule, InputTextModule],
+  imports: [ConfirmDialogModule, DecimalPipe, Card, TableModule, ButtonModule, TagModule, RouterLink, ProgressSpinnerModule, InputGroupModule, ReactiveFormsModule, SelectModule, InputTextModule],
   templateUrl: './products-page.html',
-  providers: [MessageService, ConfirmationService],
+  providers: [ConfirmationService],
   styleUrl: './products-page.sass',
 })
 export class ProductsPage implements OnInit, AfterViewInit, OnDestroy {
@@ -82,7 +82,13 @@ export class ProductsPage implements OnInit, AfterViewInit, OnDestroy {
 
         this.isLoading.set(false);
       },
-      error: () => {
+      error: (error) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: getApiErrorMessage(error, 'Failed to load products!'),
+        });
+        this.hasNextPage.set(false);
         this.isLoading.set(false);
       },
     })
@@ -102,11 +108,11 @@ export class ProductsPage implements OnInit, AfterViewInit, OnDestroy {
 
         this.isLoading.set(false);
       },
-      error: () => {
+      error: (error) => {
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
-          detail: 'Failed to delete product',
+          detail: getApiErrorMessage(error, 'Failed to delete product!'),
         });
 
         this.isLoading.set(false);

@@ -1,4 +1,4 @@
-<p-toast />
+<p-confirmdialog />
 
 <p-card>
     <p-table [value]="wholesalers()" [loading]="isLoading()">
@@ -20,15 +20,21 @@
         <ng-template #body let-wholesaler>
             <tr>
                 <td>
-                    <a [href]="wholesaler.baseUrl">{{wholesaler.name}}</a>
+                    <a class="link-text" [routerLink]="['/wholesaler', wholesaler.id]">{{wholesaler.name}}</a>
                 </td>
-                <td>{{wholesaler.baseUrl}}</td>
+                <td>
+                    <a [href]="wholesaler.baseUrl">{{wholesaler.baseUrl}}</a>
+                </td>
                 <td>{{wholesaler.integrationType}}</td>
                 <td>
-                    <p-button class="float-right" icon="pi pi-sync" [rounded]="true" severity="secondary"
-                        [outlined]="true" (click)="syncWholesalerCatalog(wholesaler.id)" />
-                    <p-button class="float-right mr-2" icon="pi pi-pencil" [rounded]="true" severity="success"
+                    <p-button class="float-right" icon="pi pi-chevron-right" [rounded]="true" severity="secondary"
                         [outlined]="true" [routerLink]="['/wholesaler', wholesaler.id]" />
+                    <p-button class="float-right mr-2" icon="pi pi-sync" [rounded]="true" severity="secondary"
+                        [outlined]="true" [loading]="syncingId() === wholesaler.id" (click)="syncWholesalerCatalog(wholesaler.id)" />
+                    <p-button class="float-right mr-2" icon="pi pi-pencil" [rounded]="true" severity="success"
+                        [outlined]="true" [routerLink]="['/wholesaler', wholesaler.id, 'edit']" />
+                    <p-button class="float-right mr-2" icon="pi pi-trash" [rounded]="true" severity="danger"
+                        [outlined]="true" (click)="confirmDelete($event, wholesaler)" />
                 </td>
             </tr>
         </ng-template>

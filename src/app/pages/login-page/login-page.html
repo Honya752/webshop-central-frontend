@@ -7,6 +7,9 @@
         @if (errorMessage()) {
         <p class="form-error">{{ errorMessage() }}</p>
         }
+        @else if (sessionExpired) {
+        <p class="form-error">Your session has expired, please log in again.</p>
+        }
 
         <div class="field">
             <div class="flex items-center justify-between">

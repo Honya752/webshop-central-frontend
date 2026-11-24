@@ -1,5 +1,5 @@
 import { IsoDateString } from './api-response';
-import { IntegrationJobStatus } from './enums';
+import { IntegrationJobStatus, IntegrationJobType } from './enums';
 
 // Credentials this system uses to call the webshop (`/stores/:id/integration-credentials`)
 
@@ -25,6 +25,7 @@ export type SetStoreCredentials = {
 
 export type IntegrationJob = {
     id: string;
+    type: IntegrationJobType;
     status: IntegrationJobStatus;
     productId: string | null;
     payload: unknown;

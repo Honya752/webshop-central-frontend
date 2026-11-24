@@ -1,6 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
+import { applyServerErrors } from '../../utils/form-errors';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
@@ -29,6 +30,8 @@ export class LoginPage {
 
   isSubmitting = signal(false);
   errorMessage = signal('');
+  /** Set when the user was sent back here because the session expired. */
+  readonly sessionExpired = this.route.snapshot.queryParamMap.get('reason') === 'expired';
 
   form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
@@ -50,14 +53,7 @@ export class LoginPage {
         this.router.navigateByUrl(returnUrl || '/dashboard');
       },
       error: (error) => {
-        const serverError = error?.error?.message;
-
-        if (typeof serverError === 'string') {
-          this.errorMessage.set(serverError);
-        } else if (serverError && typeof serverError === 'object') {
-          this.applyBackendErrors(serverError);
-        }
-
+        this.errorMessage.set(applyServerErrors(this.form, error, 'Login failed'));
         this.isSubmitting.set(false);
       },
       complete: () => {
@@ -66,17 +62,6 @@ export class LoginPage {
     })
   }
 
-  applyBackendErrors(errors: Record<string, string[]>) {
-    Object.keys(errors).forEach((field) => {
-      const control = this.form.get(field);
-
-      if (control) {
-        control.setErrors({
-          server: errors[field][0],
-        });
-      }
-    });
-  }
 
   get email() { return this.form.controls.email }
   get password() { return this.form.controls.password }

@@ -1,0 +1,67 @@
+@if (loadError()) {
+<p-message severity="error" [text]="loadError()!" />
+}
+@else {
+<p-table [value]="jobs()" [loading]="isLoading()">
+    <ng-template #caption>
+        <div class="flex items-center justify-between gap-4">
+            <span class="text-xl font-bold">Jobs</span>
+            <div class="flex items-center gap-2">
+                <p-select [options]="statusOptions" [(ngModel)]="statusFilter" (onChange)="loadJobs()"
+                    optionLabel="label" optionValue="value" placeholder="All statuses" [showClear]="true"
+                    class="w-56" />
+                <p-button icon="pi pi-refresh" [rounded]="true" [text]="true" severity="secondary"
+                    (onClick)="loadJobs()" />
+            </div>
+        </div>
+    </ng-template>
+
+    <ng-template #header>
+        <tr>
+            <th>Created at</th>
+            <th>Type</th>
+            <th>Status</th>
+            <th>Attempts</th>
+            <th>Product</th>
+            <th>Last error</th>
+            <th>Finished at</th>
+            <th></th>
+        </tr>
+    </ng-template>
+
+    <ng-template #body let-job>
+        <tr>
+            <td>{{ job.createdAt | date:'yyyy. MM. dd. HH:mm:ss' }}</td>
+            <td>{{ typeLabel(job.type) }}</td>
+            <td>
+                <p-tag [severity]="statusTag(job.status).severity" [value]="statusTag(job.status).label" />
+            </td>
+            <td class="font-mono">{{ job.attempts }}</td>
+            <td>
+                @if (job.productId) {
+                <a class="link-text" [routerLink]="['/product', job.productId]">Open</a>
+                }
+                @else {-}
+            </td>
+            <td class="text-red-600 break-all">{{ job.lastError ?? '' }}</td>
+            <td>{{ (job.finishedAt | date:'yyyy. MM. dd. HH:mm:ss') ?? '-' }}</td>
+            <td>
+                @if (job.status === 'FAILED') {
+                <p-button icon="pi pi-replay" label="Retry" severity="secondary" [outlined]="true" size="small"
+                    [loading]="retrying() === job.id" (onClick)="retry(job)" class="float-right" />
+                }
+            </td>
+        </tr>
+    </ng-template>
+
+    <ng-template #emptymessage>
+        <tr>
+            <td colspan="8">No jobs found.</td>
+        </tr>
+    </ng-template>
+
+    <ng-template #summary>
+        <small>Showing the latest {{ limit }} jobs.</small>
+    </ng-template>
+</p-table>
+}

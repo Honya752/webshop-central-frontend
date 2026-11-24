@@ -1,10 +1,22 @@
-<p-toast />
+<p-confirmdialog />
 
 <p-card>
-    <div class="flex justify-evenly text-lg px-4 ">
+    <div class="flex items-start justify-between px-4 mb-6">
+        <h1 class="header">{{ store()?.name }}</h1>
+        @if (store(); as s) {
+        <div class="flex gap-2">
+            <p-button icon="pi pi-pencil" label="Edit" severity="success" [outlined]="true"
+                [routerLink]="['/store', s.id, 'edit']" />
+            <p-button icon="pi pi-trash" label="Delete" severity="danger" [outlined]="true"
+                (onClick)="confirmDelete($event)" />
+        </div>
+        }
+    </div>
+
+    <div class="flex justify-evenly text-lg px-4">
         <div class="w-full">
-            <p>Name: <span class="font-bold">{{ store()?.name }}</span></p>
-            <p>Store page: <a class="font-bold link-text" [href]="store()?.baseUrl">{{store()?.baseUrl}}</a></p>
+            <p>Store page: <a class="font-bold link-text" [href]="store()?.baseUrl">{{ store()?.baseUrl }}</a></p>
+            <p>Slug: <span class="font-bold font-mono">{{ store()?.slug }}</span></p>
         </div>
         <div class="w-full">
             <p>Type: <span class="font-bold">{{ store()?.integrationType }}</span></p>
@@ -14,102 +26,142 @@
 </p-card>
 
 <p-card class="mt-6">
-    <p-table [value]="store()?.orders ?? []" [loading]="isLoading()">
+    <p-tabs [value]="activeTab()" (valueChange)="onTabChange($event)">
+        <p-tablist>
+            <p-tab value="orders"><i class="pi pi-shopping-cart"></i> Orders</p-tab>
+            <p-tab value="products"><i class="pi pi-box"></i> Products</p-tab>
+            <p-tab value="integration"><i class="pi pi-link"></i> Integration</p-tab>
+            <p-tab value="api-keys"><i class="pi pi-key"></i> API keys</p-tab>
+            <p-tab value="jobs"><i class="pi pi-history"></i> Jobs</p-tab>
+        </p-tablist>
 
-        <ng-template #caption>
-            <div class="flex items-center justify-between">
-                <span class="text-xl font-bold">Recent Orders</span>
-            </div>
-        </ng-template>
+        <p-tabpanels>
+            <p-tabpanel value="orders">
+                <p-table [value]="store()?.orders ?? []" [loading]="isLoading()">
+                    <ng-template #caption>
+                        <div class="flex items-center justify-between">
+                            <span class="text-xl font-bold">Recent orders</span>
+                        </div>
+                    </ng-template>
 
-        <ng-template #header>
-            <tr>
-                <th>Order date</th>
-                <th>Status</th>
-                <th>Total price</th>
-                <th>Payment Method</th>
-                <th></th>
-            </tr>
-        </ng-template>
+                    <ng-template #header>
+                        <tr>
+                            <th>Order date</th>
+                            <th>Status</th>
+                            <th>Total price</th>
+                            <th>Payment method</th>
+                            <th></th>
+                        </tr>
+                    </ng-template>
 
-        <ng-template #body let-order>
-            <tr>
-                <td>{{ order.createdAt | date:'yyyy. MM. dd. HH:mm' }}</td>
-                <td>
-                    <app-order-status-tag [status]="order.status" /></td>
-                <td>{{ order.total | currency:order.currency:'symbol':'1.0-0' }}</td>
-                <td>{{order.paymentMethod}}</td>
-                <td>
-                    <p-button icon="pi pi-chevron-right" [rounded]="true" severity="secondary" [outlined]="true"
-                        [routerLink]="['/order', order.id]" />
-                </td>
-            </tr>
-        </ng-template>
+                    <ng-template #body let-order>
+                        <tr>
+                            <td>{{ order.createdAt | date:'yyyy. MM. dd. HH:mm' }}</td>
+                            <td><app-order-status-tag [status]="order.status" /></td>
+                            <td>{{ order.total | currency:order.currency:'symbol':'1.0-0' }}</td>
+                            <td>{{ order.paymentMethod ?? '-' }}</td>
+                            <td>
+                                <p-button icon="pi pi-chevron-right" [rounded]="true" severity="secondary"
+                                    [outlined]="true" [routerLink]="['/order', order.id]" class="float-right" />
+                            </td>
+                        </tr>
+                    </ng-template>
 
-    </p-table>
-</p-card>
+                    <ng-template #emptymessage>
+                        <tr>
+                            <td colspan="5">This store has no orders yet.</td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+            </p-tabpanel>
 
-<p-card class="mt-6">
-    <p-table [value]="store()?.products ?? []" [loading]="isLoading()">
-        <ng-template #caption>
-            <div class="flex items-center justify-between">
-                <span class="text-xl font-bold">Products</span>
-            </div>
-        </ng-template>
+            <p-tabpanel value="products">
+                <p-table [value]="store()?.products ?? []" [loading]="isLoading()">
+                    <ng-template #caption>
+                        <div class="flex items-center justify-between">
+                            <span class="text-xl font-bold">Products</span>
+                            <p-button icon="pi pi-sync" label="Sync all products" severity="secondary"
+                                [outlined]="true" [loading]="isSyncingAll()"
+                                [disabled]="!store()?.products?.length" (onClick)="syncAllProducts()" />
+                        </div>
+                    </ng-template>
 
-        <ng-template #header>
-            <tr>
-                <th>Image</th>
-                <th>Name</th>
-                <th>Brand</th>
-                <th>Category</th>
-                <th>Status</th>
-                <th>SKU</th>
-                <th>EAN</th>
-                <th>Price</th>
-                <th>Last synced at</th>
-                <th class="flex gap-2 justify-end">Actions</th>
-            </tr>
-        </ng-template>
+                    <ng-template #header>
+                        <tr>
+                            <th>Image</th>
+                            <th>Name</th>
+                            <th>Brand</th>
+                            <th>Category</th>
+                            <th>Status</th>
+                            <th>SKU</th>
+                            <th>EAN</th>
+                            <th>Price</th>
+                            <th>Last synced at</th>
+                            <th class="flex gap-2 justify-end">Actions</th>
+                        </tr>
+                    </ng-template>
 
-        <ng-template #body let-product>
-            <tr class="hover:cursor-pointer">
-                <td>
-                    <img [src]="product.data.images?.[0]?.url" [alt]="product.data.name" class="w-24 rounded" />
-                </td>
+                    <ng-template #body let-product>
+                        <tr>
+                            <td>
+                                <img [src]="product.data.images?.[0]?.url" [alt]="product.data.name"
+                                    class="w-24 rounded" />
+                            </td>
+                            <td>
+                                <a class="link-text" [routerLink]="['/product', product.data.id]">
+                                    {{ product.data.name }}
+                                </a>
+                            </td>
+                            <td>{{ product.data.brand }}</td>
+                            <td>{{ product.data.category }}</td>
+                            <td>
+                                @if (isInSync(product)) {
+                                <p-tag severity="success" value="In sync" />
+                                }
+                                @else {
+                                <p-tag severity="warn" value="Out of sync" />
+                                }
+                            </td>
+                            <td class="font-mono">{{ product.data.sku }}</td>
+                            <td class="font-mono">{{ product.data.ean }}</td>
+                            <td>{{ product.data.stock?.price ?? product.data.price | number }} Ft</td>
+                            <td>{{ product.mapping.lastSyncedAt | date:'yyyy. MM. dd. HH:mm' }}</td>
+                            <td>
+                                <p-button icon="pi pi-chevron-right" [rounded]="true" severity="secondary"
+                                    [outlined]="true" [routerLink]="['/product', product.data.id]"
+                                    class="ml-2 float-right" />
+                                <p-button class="float-right" icon="pi pi-sync" [rounded]="true"
+                                    severity="secondary" [outlined]="true" (click)="syncWithStore(product.data.id)" />
+                            </td>
+                        </tr>
+                    </ng-template>
 
-                <td>{{ product.data.name }}</td>
+                    <ng-template #emptymessage>
+                        <tr>
+                            <td colspan="10">No products are uploaded to this store yet. Add products from the
+                                product page.</td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+            </p-tabpanel>
 
-                <td>{{ product.data.brand }}</td>
+            <p-tabpanel value="integration">
+                @if (activeTab() === 'integration' && store(); as s) {
+                <app-store-integration-credentials [storeId]="s.id" [integrationType]="s.integrationType" />
+                }
+            </p-tabpanel>
 
-                <td>{{ product.data.category }}</td>
+            <p-tabpanel value="api-keys">
+                @if (activeTab() === 'api-keys' && store(); as s) {
+                <app-store-api-credentials [storeId]="s.id" />
+                }
+            </p-tabpanel>
 
-                <td>
-                    @if (isInSync(product)) {
-                    <p-tag severity="success" value="In sync" />
-                    }
-                    @else {
-                    <p-tag severity="warn" value="Out of sync" />
-                    }
-                </td>
-
-                <td class="font-mono">{{ product.data.sku }}</td>
-
-                <td class="font-mono">{{ product.data.ean }}</td>
-
-                <td>{{ product.data.stock?.price ?? product.data.price | number }} Ft</td>
-
-                <td>
-                    <span class="my-auto">{{ product.mapping.lastSyncedAt | date:'yyyy. MM. dd. HH:mm' }}</span>
-                </td>
-
-                <td>
-                    <p-button icon="pi pi-chevron-right" [rounded]="true" severity="secondary" [outlined]="true"
-                        [routerLink]="['/product', product.data.id]" class="ml-2 float-right" />
-                    <p-button class="float-right" icon="pi pi-sync" [rounded]="true" severity="secondary"
-                        [outlined]="true" (click)="syncWithStore(product.data.id)" />
-                </td>
-            </tr>
-        </ng-template>
-    </p-table>
+            <p-tabpanel value="jobs">
+                @if (activeTab() === 'jobs' && store(); as s) {
+                <app-store-jobs [storeId]="s.id" />
+                }
+            </p-tabpanel>
+        </p-tabpanels>
+    </p-tabs>
 </p-card>

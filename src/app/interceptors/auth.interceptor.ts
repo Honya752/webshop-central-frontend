@@ -33,7 +33,7 @@ export const unauthorizeInterceptor: HttpInterceptorFn = (req, next) => {
                 authService.logout();
 
                 router.navigate(['/login'], {
-                    queryParams: { returnUrl: router.url }
+                    queryParams: { returnUrl: router.url, reason: 'expired' }
                 });
             }
 

@@ -1,4 +1,3 @@
-<p-toast />
 <p-confirmdialog />
 
 <p-card>
@@ -44,7 +43,9 @@
                     <img [src]="product.images?.[0]?.url" [alt]="product.name" class="w-24 rounded" />
                 </td>
 
-                <td>{{ product.name }}</td>
+                <td>
+                    <a class="link-text" [routerLink]="['/product', product.id]">{{ product.name }}</a>
+                </td>
 
                 <td>{{ product.brand }}</td>
 

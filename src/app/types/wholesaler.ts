@@ -8,9 +8,21 @@ export type Wholesaler = {
     integrationType: WholesalerIntegrationType;
 };
 
+export type WholesalerStock = {
+    productId: string;
+    sku: string;
+    ean: string;
+    name: string | null;
+    imageUrl: string | null;
+    stock: number;
+    price: number;
+    updatedAt: IsoDateString;
+};
+
 export type WholesalerDetail = Wholesaler & {
     createdAt: IsoDateString;
     updatedAt: IsoDateString;
+    stocks: WholesalerStock[];
 };
 
 export type CreateWholesaler = {

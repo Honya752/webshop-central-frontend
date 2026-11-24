@@ -8,16 +8,16 @@ import { TagModule } from 'primeng/tag';
 import { RouterLink } from '@angular/router';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { ToastModule } from 'primeng/toast';
 import { MessageService, ConfirmationService } from 'primeng/api';
 
+import { getApiErrorMessage } from '../../utils/api-error';
 @Component({
   selector: 'app-users-page',
   imports: [Card, TableModule, ButtonModule, TagModule, RouterLink, ProgressSpinnerModule,
-    ConfirmDialogModule, ToastModule,
+    ConfirmDialogModule,
   ],
   templateUrl: './users-page.html',
-  providers: [MessageService, ConfirmationService],
+  providers: [ConfirmationService],
   styleUrl: './users-page.sass',
 })
 export class UsersPage implements OnInit, AfterViewInit, OnDestroy {
@@ -52,12 +52,13 @@ export class UsersPage implements OnInit, AfterViewInit, OnDestroy {
 
         this.isLoading.set(false);
       },
-      error: () => {
+      error: (error) => {
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
-          detail: 'Failed to load users',
+          detail: getApiErrorMessage(error, 'Failed to load users!'),
         });
+        this.hasNextPage.set(false);
 
         this.isLoading.set(false);
       }
@@ -78,11 +79,11 @@ export class UsersPage implements OnInit, AfterViewInit, OnDestroy {
 
         this.isLoading.set(false);
       },
-      error: () => {
+      error: (error) => {
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
-          detail: 'Failed to delete user',
+          detail: getApiErrorMessage(error, 'Failed to delete user!'),
         });
 
         this.isLoading.set(false);

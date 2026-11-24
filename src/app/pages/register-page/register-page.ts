@@ -1,6 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
+import { applyServerErrors } from '../../utils/form-errors';
 import { Router, RouterLink } from '@angular/router';
 import { passwordMatchValidator } from '../../validators/password-match';
 import { InputTextModule } from 'primeng/inputtext';
@@ -56,14 +57,7 @@ export class RegisterPage {
         this.router.navigateByUrl('/dashboard');
       },
       error: (error) => {
-        const serverError = error?.error?.message;
-
-        if (typeof serverError === 'string') {
-          this.errorMessage.set(serverError);
-        } else if (serverError && typeof serverError === 'object') {
-          this.applyBackendErrors(serverError);
-        }
-
+        this.errorMessage.set(applyServerErrors(this.form, error, 'Registration failed'));
         this.isSubmitting.set(false);
       },
       complete: () => {
@@ -72,17 +66,6 @@ export class RegisterPage {
     })
   }
 
-  applyBackendErrors(errors: Record<string, string[]>) {
-    Object.keys(errors).forEach((field) => {
-      const control = this.form.get(field);
-
-      if (control) {
-        control.setErrors({
-          server: errors[field][0],
-        });
-      }
-    });
-  }
 
   get name() { return this.form.controls.name }
   get email() { return this.form.controls.email }

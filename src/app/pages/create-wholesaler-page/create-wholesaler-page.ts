@@ -5,18 +5,19 @@ import { Card } from 'primeng/card';
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
 import { SelectModule } from 'primeng/select';
-import { ToastModule } from 'primeng/toast';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
+import { applyServerErrors } from '../../utils/form-errors';
+import { getApiErrorMessage } from '../../utils/api-error';
 import { WholesalersService } from '../../services/wholesalers.service';
 import { CreateWholesaler, UpdateWholesaler } from '../../types/wholesaler';
 import { WholesalerIntegrationType } from '../../types/enums';
 
 @Component({
   selector: 'app-create-wholesaler-page',
-  imports: [CommonModule, ReactiveFormsModule, Card, InputTextModule, ButtonModule, SelectModule, ConfirmDialogModule, ToastModule,],
-  providers: [MessageService, ConfirmationService],
+  imports: [CommonModule, ReactiveFormsModule, Card, InputTextModule, ButtonModule, SelectModule, ConfirmDialogModule,],
+  providers: [ConfirmationService],
   templateUrl: './create-wholesaler-page.html',
   styleUrl: './create-wholesaler-page.sass',
 })
@@ -25,6 +26,7 @@ export class CreateWholesalerPage implements OnInit {
   private readonly messageService = inject(MessageService);
   private readonly fb = inject(FormBuilder);
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
 
   id: string | null = null;
   isEditMode = false;
@@ -49,10 +51,17 @@ export class CreateWholesalerPage implements OnInit {
           this.form.patchValue({
             name: wholesaler.name,
             baseUrl: wholesaler.baseUrl,
-            integrationType: wholesaler.integrationType
-          })
-        }
-      })
+            integrationType: wholesaler.integrationType,
+          });
+        },
+        error: (error) => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: getApiErrorMessage(error, 'Failed to load the wholesaler!'),
+          });
+        },
+      });
     }
   }
 
@@ -75,22 +84,18 @@ export class CreateWholesalerPage implements OnInit {
 
       this.wholesalersService.updateWholesaler(payload, this.id).subscribe({
         next: (wholesaler) => {
-          this.isLoading.set(false)
+          this.isLoading.set(false);
+          this.router.navigate(['/wholesaler', wholesaler.id]);
           this.messageService.add({
             severity: 'success',
             summary: 'Wholesaler updated',
             detail: `${wholesaler.name} updated successfully`,
           });
-        }, error: (error) => {
-          const serverError = error?.error?.message;
-
-          if (typeof serverError === 'string') {
-            this.errorMessage.set(serverError);
-          } else if (serverError && typeof serverError === 'object') {
-            this.applyBackendErrors(serverError);
-          }
-
+        },
+        error: (error) => {
+          this.errorMessage.set(applyServerErrors(this.form, error, 'Failed to update the wholesaler'));
           this.isLoading.set(false);
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: this.errorMessage() });
         },
       })
     }
@@ -103,36 +108,21 @@ export class CreateWholesalerPage implements OnInit {
 
       this.wholesalersService.createWholesaler(payload).subscribe({
         next: (wholesaler) => {
-          this.isLoading.set(false)
+          this.isLoading.set(false);
+          this.router.navigate(['/wholesaler', wholesaler.id]);
           this.messageService.add({
             severity: 'success',
             summary: 'Wholesaler created',
             detail: `${wholesaler.name} created successfully`,
           });
-        }, error: (error) => {
-          const serverError = error?.error?.message;
-
-          if (typeof serverError === 'string') {
-            this.errorMessage.set(serverError);
-          } else if (serverError && typeof serverError === 'object') {
-            this.applyBackendErrors(serverError);
-          }
-
+        },
+        error: (error) => {
+          this.errorMessage.set(applyServerErrors(this.form, error, 'Failed to create the wholesaler'));
           this.isLoading.set(false);
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: this.errorMessage() });
         },
       })
     }
-  }
-  applyBackendErrors(errors: Record<string, string[]>) {
-    Object.keys(errors).forEach((field) => {
-      const control = this.form.get(field);
-
-      if (control) {
-        control.setErrors({
-          server: errors[field][0],
-        });
-      }
-    });
   }
 
   integrations: { label: string; value: WholesalerIntegrationType }[] = [

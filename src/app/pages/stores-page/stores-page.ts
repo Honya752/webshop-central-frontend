@@ -7,16 +7,22 @@ import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
 import { RouterLink } from '@angular/router';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { ConfirmationService, MessageService } from 'primeng/api';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { getApiErrorMessage } from '../../utils/api-error';
 
 @Component({
   selector: 'app-stores-page',
-  imports: [Card, TableModule, ButtonModule, TagModule, RouterLink, ProgressSpinnerModule],
+  imports: [Card, TableModule, ButtonModule, TagModule, RouterLink, ProgressSpinnerModule, ConfirmDialogModule],
+  providers: [ConfirmationService],
   templateUrl: './stores-page.html',
   styleUrl: './stores-page.sass',
 })
 export class StoresPage implements OnInit, AfterViewInit, OnDestroy {
 
   private readonly storesService = inject(StoresService);
+  private readonly messageService = inject(MessageService);
+  private readonly confirmationService = inject(ConfirmationService);
 
   stores = signal<Store[]>([]);
   isLoading = signal(false);
@@ -44,7 +50,13 @@ export class StoresPage implements OnInit, AfterViewInit, OnDestroy {
 
         this.isLoading.set(false);
       },
-      error: () => {
+      error: (error) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: getApiErrorMessage(error, 'Failed to load stores!'),
+        });
+        this.hasNextPage.set(false);
         this.isLoading.set(false);
       },
     })
@@ -78,4 +90,42 @@ export class StoresPage implements OnInit, AfterViewInit, OnDestroy {
       );
   }
 
+  confirmDelete(event: Event, store: Store) {
+    this.confirmationService.confirm({
+      target: event.target as EventTarget,
+      message: `Are you sure you want to delete ${store.name}?`,
+      header: 'Delete confirmation',
+      icon: 'pi pi-exclamation-triangle',
+      rejectButtonProps: {
+        label: 'Cancel',
+        severity: 'secondary',
+        outlined: true,
+      },
+      acceptButtonProps: {
+        label: 'Delete',
+        severity: 'danger',
+      },
+      accept: () => this.deleteStore(store.id),
+    });
+  }
+
+  private deleteStore(id: string) {
+    this.storesService.deleteStore(id).subscribe({
+      next: () => {
+        this.stores.update(items => items.filter(item => item.id !== id));
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Deleted',
+          detail: 'Store deleted successfully',
+        });
+      },
+      error: (error) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: getApiErrorMessage(error, 'Failed to delete store!'),
+        });
+      }
+    });
+  }
 }

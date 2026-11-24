@@ -9,9 +9,10 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { PanelModule } from 'primeng/panel';
 import { ButtonModule } from 'primeng/button';
 import { TextareaModule } from 'primeng/textarea';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
+import { applyServerErrors } from '../../utils/form-errors';
+import { getApiErrorMessage } from '../../utils/api-error';
 import { ConfirmationService, MessageService } from 'primeng/api';
-import { ToastModule } from 'primeng/toast';
 import { ImageModule } from 'primeng/image';
 
 type LocalizationForm = FormGroup<{
@@ -37,14 +38,15 @@ type ProductForm = FormGroup<{
 
 @Component({
   selector: 'app-create-product-page',
-  imports: [CommonModule, ReactiveFormsModule, Card, ImageModule, InputTextModule, InputNumberModule, PanelModule, ButtonModule, TextareaModule, ToastModule],
-  providers: [MessageService, ConfirmationService],
+  imports: [CommonModule, ReactiveFormsModule, Card, ImageModule, InputTextModule, InputNumberModule, PanelModule, ButtonModule, TextareaModule],
+  providers: [ConfirmationService],
   templateUrl: './create-product-page.html',
   styleUrl: './create-product-page.sass',
 })
 export class CreateProductPage implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly productsService = inject(ProductsService);
   private readonly messageService = inject(MessageService);
 
@@ -114,9 +116,16 @@ export class CreateProductPage implements OnInit {
             });
 
             this.images.push(group);
-          })
-        }
-      })
+          });
+        },
+        error: (error) => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: getApiErrorMessage(error, 'Failed to load the product!'),
+          });
+        },
+      });
     }
     else {
       this.localizations.push(this.createLocalizationGroup());
@@ -182,6 +191,7 @@ export class CreateProductPage implements OnInit {
       this.productsService.updateProduct(payload, this.id).subscribe({
         next: (product) => {
           this.isLoading.set(false);
+          this.router.navigate(['/product', product.id]);
           this.messageService.add({
             severity: 'success',
             summary: 'Product updated',
@@ -189,15 +199,9 @@ export class CreateProductPage implements OnInit {
           });
         },
         error: (error) => {
-          const serverError = error?.error?.message;
-
-          if (typeof serverError === 'string') {
-            this.errorMessage.set(serverError);
-          } else if (serverError && typeof serverError === 'object') {
-            this.applyBackendErrors(serverError);
-          }
-
+          this.errorMessage.set(applyServerErrors(this.form, error, 'Failed to update the product'));
           this.isLoading.set(false);
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: this.errorMessage() });
         },
       })
     }
@@ -215,6 +219,7 @@ export class CreateProductPage implements OnInit {
       this.productsService.createProduct(payload).subscribe({
         next: (product) => {
           this.isLoading.set(false);
+          this.router.navigate(['/product', product.id]);
           this.messageService.add({
             severity: 'success',
             summary: 'Product created',
@@ -223,31 +228,14 @@ export class CreateProductPage implements OnInit {
         },
 
         error: (error) => {
-          const serverError = error?.error?.message;
-
-          if (typeof serverError === 'string') {
-            this.errorMessage.set(serverError);
-          } else if (serverError && typeof serverError === 'object') {
-            this.applyBackendErrors(serverError);
-          }
-
+          this.errorMessage.set(applyServerErrors(this.form, error, 'Failed to create the product'));
           this.isLoading.set(false);
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: this.errorMessage() });
         },
       })
     }
   }
 
-  applyBackendErrors(errors: Record<string, string[]>) {
-    Object.keys(errors).forEach((field) => {
-      const control = this.form.get(field);
-
-      if (control) {
-        control.setErrors({
-          server: errors[field][0],
-        });
-      }
-    });
-  }
 
   getFlagEmoji(region: string): string {
     return region
