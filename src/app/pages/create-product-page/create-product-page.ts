@@ -14,6 +14,7 @@ import { applyServerErrors } from '../../utils/form-errors';
 import { getApiErrorMessage } from '../../utils/api-error';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ImageModule } from 'primeng/image';
+import { SelectModule } from 'primeng/select';
 
 type LocalizationForm = FormGroup<{
   region: FormControl<string>;
@@ -30,15 +31,17 @@ type ProductForm = FormGroup<{
   sku: FormControl<string>;
   ean: FormControl<string>;
   price: FormControl<number | null>;
+  currency: FormControl<string>;
   brand: FormControl<string>;
   category: FormControl<string>;
   localizations: FormArray<LocalizationForm>;
   images: FormArray<ProductImageForm>;
 }>;
 
+import { CURRENCY_OPTIONS, DEFAULT_CURRENCY } from '../../utils/currencies';
 @Component({
   selector: 'app-create-product-page',
-  imports: [CommonModule, ReactiveFormsModule, Card, ImageModule, InputTextModule, InputNumberModule, PanelModule, ButtonModule, TextareaModule],
+  imports: [CommonModule, ReactiveFormsModule, Card, ImageModule, InputTextModule, InputNumberModule, PanelModule, ButtonModule, TextareaModule, SelectModule],
   providers: [ConfirmationService],
   templateUrl: './create-product-page.html',
   styleUrl: './create-product-page.sass',
@@ -52,6 +55,7 @@ export class CreateProductPage implements OnInit {
 
   readonly maxLocalizations = 20;
   readonly maxImages = 20;
+  readonly currencies = CURRENCY_OPTIONS;
 
   id: string | null = null;
   isEditMode = false;
@@ -64,6 +68,7 @@ export class CreateProductPage implements OnInit {
     ean: this.fb.nonNullable.control('', [Validators.required]),
     brand: this.fb.nonNullable.control('', [Validators.required]),
     category: this.fb.nonNullable.control('', [Validators.required]),
+    currency: this.fb.nonNullable.control(DEFAULT_CURRENCY, [Validators.required]),
     price: this.fb.control<number | null>(null, [
       Validators.required,
       Validators.min(0)
@@ -91,6 +96,7 @@ export class CreateProductPage implements OnInit {
             sku: product.sku,
             ean: product.ean,
             price: product.price,
+            currency: product.currency,
             category: product.category,
             brand: product.brand
           });
@@ -184,6 +190,7 @@ export class CreateProductPage implements OnInit {
         brand: this.form.controls.brand.getRawValue(),
         category: this.form.controls.category.getRawValue(),
         price: this.form.controls.price.getRawValue()!,
+        currency: this.form.controls.currency.getRawValue(),
         localizations: this.localizations.getRawValue(),
         images: this.images.getRawValue()
       };
@@ -212,6 +219,7 @@ export class CreateProductPage implements OnInit {
         brand: this.form.controls.brand.getRawValue(),
         category: this.form.controls.category.getRawValue(),
         price: this.form.controls.price.getRawValue()!,
+        currency: this.form.controls.currency.getRawValue(),
         localizations: this.localizations.getRawValue(),
         images: this.images.getRawValue()
       };

@@ -70,6 +70,26 @@
                 placeholder="Integration type" class="w-full" />
         </div>
 
+        <div class="field w-full">
+            <div class="flex items-center justify-between">
+                <label for="currency">Catalog currency</label>
+                <div>
+                    @if (form.controls.currency.touched && form.controls.currency.hasError('required')) {
+                    <small class="error">Currency is required</small>
+                    }
+
+                    @if (form.controls.currency.hasError('server')) {
+                    <small class="error">
+                        {{ form.controls.currency.getError('server') }}
+                    </small>
+                    }
+                </div>
+            </div>
+            <p-select [options]="currencies" inputId="currency" formControlName="currency" optionLabel="label"
+                optionValue="value" placeholder="Currency" class="w-full" [filter]="true" />
+            <small>Currency of the prices in the catalog of the wholesaler.</small>
+        </div>
+
         <div class="flex items-center justify-between">
             <div></div>
 

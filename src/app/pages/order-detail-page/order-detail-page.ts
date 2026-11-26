@@ -1,7 +1,8 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
+import { ExternalLink } from '../../components/external-link/external-link';
 import { OrdersService } from '../../services/orders.service';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { CurrencyPipe, DatePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { Card } from 'primeng/card';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
@@ -14,9 +15,10 @@ import { OrderItemIssue, OrderStatus } from '../../types/enums';
 import { OrderStatusTag } from '../../components/order-status-tag/order-status-tag';
 
 import { getApiErrorMessage } from '../../utils/api-error';
+import { MoneyPipe } from '../../pipes/money.pipe';
 @Component({
   selector: 'app-order-detail-page',
-  imports: [CurrencyPipe, DatePipe, Card, TableModule, ButtonModule, TagModule, ProgressSpinnerModule, BarcodeComponent, RouterLink, OrderStatusTag],
+  imports: [ExternalLink, MoneyPipe, DatePipe, Card, TableModule, ButtonModule, TagModule, ProgressSpinnerModule, BarcodeComponent, RouterLink, OrderStatusTag],
   templateUrl: './order-detail-page.html',
   styleUrl: './order-detail-page.sass',
 })

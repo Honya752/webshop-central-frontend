@@ -1,4 +1,244 @@
 <p-card>
-    <h1>Dashboard</h1>
-    <p>Welcome to Webshop Central admin.</p>
+    <div class="flex items-center justify-between gap-4 px-4">
+        <h1 class="header">Dashboard</h1>
+        <div class="flex items-center gap-2">
+            <p-select [options]="periodOptions" [(ngModel)]="period" (onChange)="load()" optionLabel="label"
+                optionValue="value" class="w-48" />
+            <p-select [options]="currencyOptions" [(ngModel)]="currency" (onChange)="load()" optionLabel="value"
+                optionValue="value" class="w-28" />
+            <p-button icon="pi pi-refresh" [rounded]="true" [text]="true" severity="secondary" [loading]="isLoading()"
+                (onClick)="load()" />
+        </div>
+    </div>
+    @if (summary(); as s) {
+    <p class="px-4 text-sm">
+        {{ s.meta.from }} – {{ s.meta.to }}, amounts in {{ s.meta.currency }} (other currencies converted with the ECB
+        rate of the order's day). Cancelled orders are not counted.
+    </p>
+    }
+</p-card>
+
+@if ((summary()?.totals?.needsAttention ?? 0) > 0) {
+<p-card class="mt-6">
+    <div class="flex items-center justify-between px-4">
+        <span>
+            <i class="pi pi-exclamation-triangle"></i>
+            <span class="font-bold"> {{ summary()?.totals?.needsAttention }} order(s) need attention</span>
+            – some items could not be fulfilled automatically.
+        </span>
+        <p-button label="Open orders" icon="pi pi-chevron-right" iconPos="right" severity="secondary"
+            [outlined]="true" routerLink="/orders" />
+    </div>
+</p-card>
+}
+
+<!-- KPI tiles -->
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mt-6">
+    @for (kpi of kpis; track kpi.metric) {
+    <p-card>
+        <div class="flex flex-col gap-2 px-2">
+            <span class="text-sm">{{ kpi.label }}</span>
+            @if (kpiValue(kpi.metric) === null) {
+            <p-skeleton width="8rem" height="2rem" />
+            }
+            @else {
+            <span class="text-3xl font-bold">
+                @if (kpi.money) {{{ kpiValue(kpi.metric) | money:dataCurrency() }}}
+                @else {{{ kpiValue(kpi.metric) | number:'1.0-0' }}}
+            </span>
+            }
+            <div class="flex items-center gap-2 text-sm">
+                @if (kpiChange(kpi.metric); as change) {
+                @if (change > 0) {
+                <p-tag severity="success" icon="pi pi-arrow-up" [value]="'+' + (change | number:'1.0-1') + '%'" />
+                }
+                @else {
+                <p-tag severity="danger" icon="pi pi-arrow-down" [value]="(change | number:'1.0-1') + '%'" />
+                }
+                <span>vs previous period</span>
+                }
+                @else if (kpiChange(kpi.metric) === 0) {
+                <p-tag severity="secondary" value="0%" />
+                <span>vs previous period</span>
+                }
+                @else if (summary()) {
+                <span>No data in the previous period</span>
+                }
+            </div>
+            @if (kpi.metric === 'profit' && summary()) {
+            <span class="text-sm">Margin: {{ summary()?.totals?.margin ?? 0 | number:'1.0-1' }}%</span>
+            }
+        </div>
+    </p-card>
+    }
+</div>
+
+<!-- Time series -->
+<div class="grid grid-cols-1 xl:grid-cols-2 gap-6 mt-6">
+    <p-card>
+        <div class="px-2">
+            <h2 class="text-xl font-bold">Revenue</h2>
+            <div class="chart-box">
+                <p-chart type="line" [data]="revenueChart()" [options]="moneyLineOptions()" height="100%" />
+            </div>
+        </div>
+    </p-card>
+
+    <p-card>
+        <div class="px-2">
+            <h2 class="text-xl font-bold">Orders</h2>
+            <div class="chart-box">
+                <p-chart type="bar" [data]="ordersChart()" [options]="countBarOptions()" height="100%" />
+            </div>
+        </div>
+    </p-card>
+</div>
+
+<!-- Rankings -->
+<div class="grid grid-cols-1 xl:grid-cols-2 gap-6 mt-6">
+    <p-card>
+        <div class="px-2">
+            <h2 class="text-xl font-bold">Top 10 products by revenue</h2>
+            @if (topProducts()?.rows?.length) {
+            <div class="chart-box chart-box-tall">
+                <p-chart type="bar" [data]="topProductsChart()" [options]="topProductsOptions()" height="100%" />
+            </div>
+            }
+            @else if (!isLoading()) {
+            <p class="py-6">No sales in this period.</p>
+            }
+        </div>
+    </p-card>
+
+    <p-card>
+        <div class="px-2">
+            <h2 class="text-xl font-bold">Revenue by store</h2>
+            @if (byStore()?.rows?.length) {
+            <div class="chart-box chart-box-tall">
+                <p-chart type="bar" [data]="byStoreChart()" [options]="byStoreOptions()" height="100%" />
+            </div>
+            }
+            @else if (!isLoading()) {
+            <p class="py-6">No sales in this period.</p>
+            }
+        </div>
+    </p-card>
+</div>
+
+<!-- Stock alerts -->
+<p-card class="mt-6">
+    <p-table [value]="stockAlerts()" [loading]="isLoading()">
+        <ng-template #caption>
+            <div class="flex items-center justify-between">
+                <span class="text-xl font-bold">Products running out</span>
+                <small>Out of stock, or lasts at most 14 days at the sales speed of the last 30 days</small>
+            </div>
+        </ng-template>
+
+        <ng-template #header>
+            <tr>
+                <th>Product</th>
+                <th>SKU</th>
+                <th>Stock</th>
+                <th>Sold (30 days)</th>
+                <th>Daily sales</th>
+                <th>Days left</th>
+                <th>Last sold</th>
+            </tr>
+        </ng-template>
+
+        <ng-template #body let-alert>
+            <tr>
+                <td><a class="link-text" [routerLink]="['/product', alert.productId]">{{ alert.name }}</a></td>
+                <td class="font-mono">{{ alert.sku }}</td>
+                <td class="font-mono">{{ alert.stock }}</td>
+                <td class="font-mono">{{ alert.soldInPeriod }}</td>
+                <td class="font-mono">{{ alert.dailySales | number:'1.0-1' }}</td>
+                <td>
+                    @if (alert.daysLeft <= 0) {
+                    <p-tag severity="danger" icon="pi pi-times-circle" value="Out of stock" />
+                    }
+                    @else if (alert.daysLeft <= 7) {
+                    <p-tag severity="warn" icon="pi pi-exclamation-triangle" [value]="(alert.daysLeft | number:'1.0-0') + ' days'" />
+                    }
+                    @else {
+                    <p-tag severity="info" icon="pi pi-clock" [value]="(alert.daysLeft | number:'1.0-0') + ' days'" />
+                    }
+                </td>
+                <td>{{ (alert.lastSoldAt | date:'yyyy. MM. dd.') ?? 'Never' }}</td>
+            </tr>
+        </ng-template>
+
+        <ng-template #emptymessage>
+            <tr>
+                <td colspan="7">No product is running out.</td>
+            </tr>
+        </ng-template>
+    </p-table>
+</p-card>
+
+<!-- Integration health -->
+<p-card class="mt-6">
+    <p-table [value]="storeHealth()" [loading]="isLoading()">
+        <ng-template #caption>
+            <div class="flex items-center justify-between">
+                <span class="text-xl font-bold">Webshop connections</span>
+            </div>
+        </ng-template>
+
+        <ng-template #header>
+            <tr>
+                <th>Store</th>
+                <th>Credentials</th>
+                <th>Uploaded products</th>
+                <th>Last sync</th>
+                <th>Last order</th>
+                <th>Last webhook</th>
+                <th>Needs attention</th>
+                <th>Jobs</th>
+            </tr>
+        </ng-template>
+
+        <ng-template #body let-store>
+            <tr>
+                <td>
+                    <a class="link-text" [routerLink]="['/store', store.storeId]">{{ store.name }}</a>
+                    <div class="text-sm">{{ store.integrationType }}</div>
+                </td>
+                <td>
+                    @if (store.credentialsConfigured) {
+                    <p-tag severity="success" icon="pi pi-check" value="Configured" />
+                    }
+                    @else {
+                    <p-tag severity="danger" icon="pi pi-times" value="Missing" />
+                    }
+                </td>
+                <td class="font-mono">{{ store.uploadedProducts }}</td>
+                <td>{{ (store.lastSyncedAt | date:'yyyy. MM. dd. HH:mm') ?? '-' }}</td>
+                <td>{{ (store.lastOrderAt | date:'yyyy. MM. dd. HH:mm') ?? '-' }}</td>
+                <td>{{ (store.lastWebhookAt | date:'yyyy. MM. dd. HH:mm') ?? '-' }}</td>
+                <td>
+                    @if (store.needsAttentionOrders > 0) {
+                    <p-tag severity="warn" icon="pi pi-exclamation-triangle" [value]="store.needsAttentionOrders + ' order(s)'" />
+                    }
+                    @else {-}
+                </td>
+                <td>
+                    @if (store.failedJobs > 0) {
+                    <p-tag severity="danger" icon="pi pi-times-circle" [value]="store.failedJobs + ' failed'" />
+                    }
+                    @if (store.pendingJobs > 0) {
+                    <p-tag severity="secondary" icon="pi pi-clock" [value]="store.pendingJobs + ' waiting'" class="ml-1" />
+                    }
+                    @if (!store.failedJobs && !store.pendingJobs) {-}
+                </td>
+            </tr>
+        </ng-template>
+
+        <ng-template #emptymessage>
+            <tr>
+                <td colspan="8">No stores yet.</td>
+            </tr>
+        </ng-template>
+    </p-table>
 </p-card>

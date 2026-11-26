@@ -32,7 +32,7 @@
                 <th>Status</th>
                 <th>SKU</th>
                 <th>EAN</th>
-                <th>Price</th>
+                <th>Base price</th>
                 <th class="flex gap-2 justify-end">Actions</th>
             </tr>
         </ng-template>
@@ -67,7 +67,7 @@
 
                 <td class="font-mono">{{ product.ean }}</td>
 
-                <td>{{ product.stock?.price ?? product.price | number }} Ft</td>
+                <td>{{ product.price | money:product.currency }}</td>
 
                 <td>
                     <p-button icon="pi pi-chevron-right" [rounded]="true" severity="secondary" [outlined]="true"

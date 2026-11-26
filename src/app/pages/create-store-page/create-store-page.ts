@@ -14,6 +14,7 @@ import { StoresService } from '../../services/stores.service';
 import { CreateStore, UpdateStore } from '../../types/store';
 import { IntegrationType } from '../../types/enums';
 
+import { CURRENCY_OPTIONS, DEFAULT_CURRENCY } from '../../utils/currencies';
 @Component({
   selector: 'app-create-store-page',
   imports: [CommonModule, ReactiveFormsModule, Card, InputTextModule, ButtonModule, SelectModule, ConfirmDialogModule,],
@@ -40,7 +41,10 @@ export class CreateStorePage implements OnInit {
     region: this.fb.nonNullable.control('', [Validators.required]),
     baseUrl: this.fb.nonNullable.control('', [Validators.required]),
     integrationType: this.fb.control<IntegrationType | null>(null, [Validators.required]),
+    currency: this.fb.nonNullable.control(DEFAULT_CURRENCY, [Validators.required]),
   });
+
+  readonly currencies = CURRENCY_OPTIONS;
 
   ngOnInit(): void {
     this.id = this.route.snapshot.paramMap.get('id');
@@ -58,6 +62,7 @@ export class CreateStorePage implements OnInit {
             region: store.region,
             baseUrl: store.baseUrl,
             integrationType: store.integrationType,
+            currency: store.currency,
           });
         },
         error: (error) => {
@@ -87,6 +92,7 @@ export class CreateStorePage implements OnInit {
         ...(raw.region ? { region: raw.region } : {}),
         ...(raw.baseUrl ? { baseUrl: raw.baseUrl } : {}),
         ...(raw.integrationType ? { integrationType: raw.integrationType } : {}),
+        currency: raw.currency,
       };
 
       this.storesService.updateStore(payload, this.id).subscribe({
@@ -113,6 +119,7 @@ export class CreateStorePage implements OnInit {
         region: raw.region,
         baseUrl: raw.baseUrl,
         integrationType: raw.integrationType!,
+        currency: raw.currency,
       };
 
       this.storesService.createStore(payload).subscribe({

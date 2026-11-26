@@ -17,7 +17,7 @@
             <p>Brand: <span class="font-bold">{{ product()?.brand }}</span></p>
             <p>Category: <span class="font-bold">{{ product()?.category }}</span></p>
             <p>SKU: <span class="font-bold font-mono">{{ product()?.sku }}</span></p>
-            <p>Price: <span class="font-bold">{{ product()?.price | number }} Ft</span></p>
+            <p>Base price: <span class="font-bold">{{ product()?.price | money:product()?.currency }}</span></p>
             <p>Available stock: <span class="font-bold">{{ totalStock() | number }} pcs</span>
                 @if (totalStock() <= 0) {
                 <p-tag severity="danger" value="Out of stock" class="ml-2" />
@@ -103,10 +103,10 @@
         <ng-template #body let-stock>
             <tr>
                 <td>
-                    <a [routerLink]="['/wholesaler', stock.wholesalerId]">{{ stock.name }}</a>
+                    <a class="link-text" [routerLink]="['/wholesaler', stock.wholesalerId]">{{ stock.name }}</a>
                 </td>
                 <td class="font-mono">{{stock.stock}}</td>
-                <td>{{ stock.price | number }} Ft</td>
+                <td>{{ stock.price | money:stock.currency }}</td>
                 <td>{{ stock.updatedAt | date:'yyyy. MM. dd. HH:mm' }}</td>
             </tr>
         </ng-template>
@@ -136,7 +136,7 @@
         <ng-template #body let-map>
             <tr>
                 <td>
-                    <a [routerLink]="['/store', map.storeId]">{{ map.storeName }}</a>
+                    <a class="link-text" [routerLink]="['/store', map.storeId]">{{ map.storeName }}</a>
                 </td>
                 <td>
                     @if (isInSync(map)) {
@@ -148,10 +148,7 @@
                 </td>
                 <td class="font-mono">{{map.externalId ?? '-'}}</td>
                 <td>
-                    @if (map.externalUrl !== null) {
-                    <a [href]="map.externalUrl" class="link">link</a>
-                    }
-                    @else {-}
+                    <app-external-link [href]="map.externalUrl">Open in the webshop</app-external-link>
                 </td>
                 <td>
                     <span class="my-auto">{{ map.lastSyncedAt | date:'yyyy. MM. dd. HH:mm' }}</span>
@@ -187,10 +184,10 @@
         <ng-template #body let-order>
             <tr>
                 <td>
-                    <a [routerLink]="['/store', order.storeId]">{{ order.storeName }}</a>
+                    <a class="link-text" [routerLink]="['/store', order.storeId]">{{ order.storeName }}</a>
                 </td>
                 <td class="font-mono">{{order.quantity}}</td>
-                <td>{{ order.unitPrice | currency:order.currency:'symbol':'1.0-0' }}</td>
+                <td>{{ order.unitPrice | money:order.currency }}</td>
                 <td>{{ order.createdAt | date:'yyyy. MM. dd. HH:mm' }}</td>
                 <td>
                     <p-button icon="pi pi-chevron-right" [rounded]="true" severity="secondary" [outlined]="true"

@@ -10,6 +10,8 @@ export type Store = {
     region: string;
     baseUrl: string;
     integrationType: IntegrationType;
+    /** Currency the prices are sent to the webshop in. */
+    currency: string;
 };
 
 export type StoreDetail = Store & {
@@ -29,6 +31,8 @@ export type CreateStore = {
     region: string;
     baseUrl: string;
     integrationType: IntegrationType;
+    /** Must match the currency set in the webshop. Defaults to HUF. */
+    currency?: string;
 };
 
 /** The slug cannot be changed after creation. */
@@ -37,6 +41,7 @@ export type UpdateStore = {
     region?: string;
     baseUrl?: string;
     integrationType?: IntegrationType;
+    currency?: string;
 };
 
 // API credentials the webshop uses to call this system (`/stores/:id/api-credentials`)

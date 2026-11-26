@@ -1,4 +1,5 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { ExternalLink } from '../../components/external-link/external-link';
 import { Card } from 'primeng/card';
 import { ProductsService } from '../../services/product.service';
 import { StoresService } from '../../services/stores.service';
@@ -15,9 +16,10 @@ import { TagModule } from 'primeng/tag';
 import { BarcodeComponent } from '../../components/barcode/barcode';
 
 import { getApiErrorMessage } from '../../utils/api-error';
+import { MoneyPipe } from '../../pipes/money.pipe';
 @Component({
   selector: 'app-product-detail-page',
-  imports: [
+  imports: [ExternalLink, MoneyPipe, 
     CommonModule,
     Card,
     ReactiveFormsModule,

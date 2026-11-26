@@ -200,9 +200,10 @@
             </div>
         </div>
 
-        <div class="field">
+        <div class="flex items-start justify-between gap-6">
+        <div class="field w-full">
             <div class="flex items-center justify-between">
-                <label for="price">Price</label>
+                <label for="price">Base price</label>
                 <div>
                     @if (form.controls.price.touched && form.controls.price.hasError('required')) {
                     <small class="error">Price is required</small>
@@ -219,8 +220,29 @@
                     }
                 </div>
             </div>
-            <p-inputnumber inputId="price" mode="currency" currency="HUF" locale="hu-HU" formControlName="price"
-                [maxFractionDigits]="0" />
+            <p-inputnumber inputId="price" mode="decimal" locale="hu-HU" formControlName="price"
+                [minFractionDigits]="0" [maxFractionDigits]="2" fluid />
+            <small>The selling price of each store is calculated from it, converted to the currency of the store.</small>
+        </div>
+
+        <div class="field w-80">
+            <div class="flex items-center justify-between">
+                <label for="currency">Currency</label>
+                <div>
+                    @if (form.controls.currency.touched && form.controls.currency.hasError('required')) {
+                    <small class="error">Currency is required</small>
+                    }
+
+                    @if (form.controls.currency.hasError('server')) {
+                    <small class="error">
+                        {{ form.controls.currency.getError('server') }}
+                    </small>
+                    }
+                </div>
+            </div>
+            <p-select [options]="currencies" inputId="currency" formControlName="currency" optionLabel="label"
+                optionValue="value" placeholder="Currency" class="w-full" [filter]="true" />
+        </div>
         </div>
 
         <div class="flex items-center justify-between">

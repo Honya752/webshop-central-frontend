@@ -2,14 +2,25 @@
     <div class="flex justify-evenly text-lg mb-6 px-4 ">
         <div class="w-full">
             <p>Order date: <span class="font-bold">{{ order()?.createdAt | date:'yyyy. MM. dd. HH:mm' }}</span></p>
-            <p>Store: <a class="link-text font-bold" [href]="order()?.store?.baseUrl">{{order()?.store?.name}}</a></p>
+            <p>Store:
+                @if (order()?.store; as store) {
+                <a class="link-text font-bold" [routerLink]="['/store', store.id]">{{ store.name }}</a>
+                }
+            </p>
+            <p>Webshop order: <span class="font-bold font-mono">#{{ order()?.externalOrderId }}</span>
+                <app-external-link class="ml-2" [href]="order()?.externalUrl" fallback="">Open in the webshop</app-external-link>
+            </p>
             <p>Order status:
                 <app-order-status-tag [status]="order()?.status" />
             </p>
         </div>
         <div class="w-full">
             <p>Customer name: <span class="font-bold">{{order()?.name ?? ''}}</span></p>
-            <p>Customer email: <span class="font-bold">{{order()?.email ?? ''}}</span></p>
+            <p>Customer email:
+                @if (order()?.email) {
+                <a class="link-text font-bold" [href]="'mailto:' + order()?.email">{{ order()?.email }}</a>
+                }
+            </p>
         </div>
     </div>
 
@@ -63,8 +74,8 @@
                         {{item.quantity}}
                     </p>
                 </td>
-                <td>{{ item.unitPrice | currency:order()?.currency:'symbol':'1.0-0' }}</td>
-                <td>{{ item.total | currency:order()?.currency:'symbol':'1.0-0' }}</td>
+                <td>{{ item.unitPrice | money:order()?.currency }}</td>
+                <td>{{ item.total | money:order()?.currency }}</td>
                 <td>
                     <div class="flex justify-center">
                         @if (item.product?.ean; as ean) {
@@ -84,7 +95,7 @@
                 <td></td>
                 <td></td>
                 <td>
-                    {{ order()?.total | currency:order()?.currency:'symbol':'1.0-0' }}
+                    {{ order()?.total | money:order()?.currency }}
                 </td>
                 <td></td>
             </tr>

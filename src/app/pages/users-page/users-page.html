@@ -20,14 +20,14 @@
 
         <ng-template #body let-user>
             <tr>
-                <td class="font-bold">{{user.name}}</td>
-                <td>{{user.email}}</td>
+                <td><a class="link-text font-bold" [routerLink]="['/user', user.id]">{{ user.name }}</a></td>
+                <td><a class="link-text" [href]="'mailto:' + user.email">{{ user.email }}</a></td>
                 <td>{{roles[user.globalRole]}}</td>
                 <td>
                     @if (user.storeMembership) {
                     <span>{{storeRoles[user.storeMembership.role]}}</span>
                     <span class="text-gray-500"> @
-                        <a [routerLink]="['/store', user.storeMembership.storeId]" class="text-link">
+                        <a [routerLink]="['/store', user.storeMembership.storeId]" class="link-text">
                             {{user.storeMembership.name}}
                         </a>
                     </span>

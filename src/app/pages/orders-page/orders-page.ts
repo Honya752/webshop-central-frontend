@@ -1,4 +1,5 @@
 import { AfterViewInit, Component, ElementRef, inject, OnDestroy, OnInit, signal, ViewChild } from '@angular/core';
+import { ExternalLink } from '../../components/external-link/external-link';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputTextModule } from 'primeng/inputtext';
@@ -14,7 +15,6 @@ import { SortOrder } from '../../types/api-response';
 import { OrderStatusTag } from '../../components/order-status-tag/order-status-tag';
 import { debounceTime } from 'rxjs';
 import { DatePipe } from '@angular/common';
-import { CurrencyPipe } from '@angular/common';
 import { RouterLink } from "@angular/router";
 
 
@@ -25,9 +25,10 @@ type OrderFilterForm = FormGroup<{
 
 import { getApiErrorMessage } from '../../utils/api-error';
 import { MessageService } from 'primeng/api';
+import { MoneyPipe } from '../../pipes/money.pipe';
 @Component({
   selector: 'app-orders-page',
-  imports: [CurrencyPipe, DatePipe, Card, TableModule, ButtonModule, TagModule, ProgressSpinnerModule, InputGroupModule, ReactiveFormsModule, SelectModule, InputTextModule, RouterLink, OrderStatusTag],
+  imports: [ExternalLink, MoneyPipe, DatePipe, Card, TableModule, ButtonModule, TagModule, ProgressSpinnerModule, InputGroupModule, ReactiveFormsModule, SelectModule, InputTextModule, RouterLink, OrderStatusTag],
   templateUrl: './orders-page.html',
   styleUrl: './orders-page.sass',
 })

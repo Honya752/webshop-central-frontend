@@ -15,12 +15,13 @@
 
     <div class="flex justify-evenly text-lg px-4">
         <div class="w-full">
-            <p>Store page: <a class="font-bold link-text" [href]="store()?.baseUrl">{{ store()?.baseUrl }}</a></p>
+            <p>Store page: <app-external-link class="font-bold" [href]="store()?.baseUrl">{{ store()?.baseUrl }}</app-external-link></p>
             <p>Slug: <span class="font-bold font-mono">{{ store()?.slug }}</span></p>
         </div>
         <div class="w-full">
             <p>Type: <span class="font-bold">{{ store()?.integrationType }}</span></p>
             <p>Region: <span class="font-bold">{{ store()?.region }}</span></p>
+            <p>Currency: <span class="font-bold">{{ store()?.currency }}</span></p>
         </div>
     </div>
 </p-card>
@@ -46,7 +47,9 @@
 
                     <ng-template #header>
                         <tr>
+                            <th>Order</th>
                             <th>Order date</th>
+                            <th>Customer</th>
                             <th>Status</th>
                             <th>Total price</th>
                             <th>Payment method</th>
@@ -56,9 +59,13 @@
 
                     <ng-template #body let-order>
                         <tr>
+                            <td>
+                                <a class="link-text font-mono" [routerLink]="['/order', order.id]">#{{ order.externalOrderId }}</a>
+                            </td>
                             <td>{{ order.createdAt | date:'yyyy. MM. dd. HH:mm' }}</td>
+                            <td>{{ order.name }}</td>
                             <td><app-order-status-tag [status]="order.status" /></td>
-                            <td>{{ order.total | currency:order.currency:'symbol':'1.0-0' }}</td>
+                            <td>{{ order.total | money:order.currency }}</td>
                             <td>{{ order.paymentMethod ?? '-' }}</td>
                             <td>
                                 <p-button icon="pi pi-chevron-right" [rounded]="true" severity="secondary"
@@ -69,7 +76,7 @@
 
                     <ng-template #emptymessage>
                         <tr>
-                            <td colspan="5">This store has no orders yet.</td>
+                            <td colspan="7">This store has no orders yet.</td>
                         </tr>
                     </ng-template>
                 </p-table>
@@ -95,7 +102,7 @@
                             <th>Status</th>
                             <th>SKU</th>
                             <th>EAN</th>
-                            <th>Price</th>
+                            <th>Base price</th>
                             <th>Last synced at</th>
                             <th class="flex gap-2 justify-end">Actions</th>
                         </tr>
@@ -111,6 +118,8 @@
                                 <a class="link-text" [routerLink]="['/product', product.data.id]">
                                     {{ product.data.name }}
                                 </a>
+                                <app-external-link class="ml-1" [href]="product.mapping.externalUrl"
+                                    title="Open in the webshop" fallback="" />
                             </td>
                             <td>{{ product.data.brand }}</td>
                             <td>{{ product.data.category }}</td>
@@ -124,7 +133,7 @@
                             </td>
                             <td class="font-mono">{{ product.data.sku }}</td>
                             <td class="font-mono">{{ product.data.ean }}</td>
-                            <td>{{ product.data.stock?.price ?? product.data.price | number }} Ft</td>
+                            <td>{{ product.data.price | money:product.data.currency }}</td>
                             <td>{{ product.mapping.lastSyncedAt | date:'yyyy. MM. dd. HH:mm' }}</td>
                             <td>
                                 <p-button icon="pi pi-chevron-right" [rounded]="true" severity="secondary"

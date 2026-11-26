@@ -1,4 +1,5 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { ExternalLink } from '../../components/external-link/external-link';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { ConfirmationService, MessageService } from 'primeng/api';
@@ -12,9 +13,10 @@ import { WholesalersService } from '../../services/wholesalers.service';
 import { WholesalerDetail } from '../../types/wholesaler';
 import { WholesalerIntegrationType } from '../../types/enums';
 
+import { MoneyPipe } from '../../pipes/money.pipe';
 @Component({
   selector: 'app-wholesaler-detail-page',
-  imports: [DatePipe, DecimalPipe, Card, TableModule, ButtonModule, TagModule, ConfirmDialogModule, RouterLink],
+  imports: [ExternalLink, MoneyPipe, DatePipe, DecimalPipe, Card, TableModule, ButtonModule, TagModule, ConfirmDialogModule, RouterLink],
   providers: [ConfirmationService],
   templateUrl: './wholesaler-detail-page.html',
   styleUrl: './wholesaler-detail-page.sass',

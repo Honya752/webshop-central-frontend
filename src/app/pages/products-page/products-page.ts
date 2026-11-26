@@ -16,7 +16,6 @@ import { SelectModule } from 'primeng/select';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ConfirmationService, MessageService } from 'primeng/api';
-import { DecimalPipe } from '@angular/common';
 
 type ProductFilterForm = FormGroup<{
   search: FormControl<string>;
@@ -25,9 +24,10 @@ type ProductFilterForm = FormGroup<{
 }>;
 
 import { getApiErrorMessage } from '../../utils/api-error';
+import { MoneyPipe } from '../../pipes/money.pipe';
 @Component({
   selector: 'app-products-page',
-  imports: [ConfirmDialogModule, DecimalPipe, Card, TableModule, ButtonModule, TagModule, RouterLink, ProgressSpinnerModule, InputGroupModule, ReactiveFormsModule, SelectModule, InputTextModule],
+  imports: [MoneyPipe, ConfirmDialogModule, Card, TableModule, ButtonModule, TagModule, RouterLink, ProgressSpinnerModule, InputGroupModule, ReactiveFormsModule, SelectModule, InputTextModule],
   templateUrl: './products-page.html',
   providers: [ConfirmationService],
   styleUrl: './products-page.sass',

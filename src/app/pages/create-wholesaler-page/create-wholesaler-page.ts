@@ -14,6 +14,7 @@ import { WholesalersService } from '../../services/wholesalers.service';
 import { CreateWholesaler, UpdateWholesaler } from '../../types/wholesaler';
 import { WholesalerIntegrationType } from '../../types/enums';
 
+import { CURRENCY_OPTIONS, DEFAULT_CURRENCY } from '../../utils/currencies';
 @Component({
   selector: 'app-create-wholesaler-page',
   imports: [CommonModule, ReactiveFormsModule, Card, InputTextModule, ButtonModule, SelectModule, ConfirmDialogModule,],
@@ -38,7 +39,10 @@ export class CreateWholesalerPage implements OnInit {
     name: this.fb.nonNullable.control('', [Validators.required, Validators.minLength(3)]),
     baseUrl: this.fb.nonNullable.control('', [Validators.required]),
     integrationType: this.fb.control<WholesalerIntegrationType | null>(null, [Validators.required]),
+    currency: this.fb.nonNullable.control(DEFAULT_CURRENCY, [Validators.required]),
   });
+
+  readonly currencies = CURRENCY_OPTIONS;
 
   ngOnInit(): void {
     this.id = this.route.snapshot.paramMap.get('id');
@@ -52,6 +56,7 @@ export class CreateWholesalerPage implements OnInit {
             name: wholesaler.name,
             baseUrl: wholesaler.baseUrl,
             integrationType: wholesaler.integrationType,
+            currency: wholesaler.currency,
           });
         },
         error: (error) => {
@@ -80,6 +85,7 @@ export class CreateWholesalerPage implements OnInit {
         ...(raw.name ? { name: raw.name } : {}),
         ...(raw.baseUrl ? { baseUrl: raw.baseUrl } : {}),
         ...(raw.integrationType ? { integrationType: raw.integrationType } : {}),
+        currency: raw.currency,
       }
 
       this.wholesalersService.updateWholesaler(payload, this.id).subscribe({
@@ -104,6 +110,7 @@ export class CreateWholesalerPage implements OnInit {
         name: raw.name,
         baseUrl: raw.baseUrl,
         integrationType: raw.integrationType!,
+        currency: raw.currency,
       };
 
       this.wholesalersService.createWholesaler(payload).subscribe({

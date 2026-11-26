@@ -6,6 +6,8 @@ export type Wholesaler = {
     name: string;
     baseUrl: string;
     integrationType: WholesalerIntegrationType;
+    /** Currency of the catalog prices. */
+    currency: string;
 };
 
 export type WholesalerStock = {
@@ -15,6 +17,7 @@ export type WholesalerStock = {
     name: string | null;
     imageUrl: string | null;
     stock: number;
+    /** Wholesale price, in the currency of the wholesaler. */
     price: number;
     updatedAt: IsoDateString;
 };
@@ -29,10 +32,13 @@ export type CreateWholesaler = {
     name: string;
     baseUrl: string;
     integrationType: WholesalerIntegrationType;
+    /** Defaults to HUF. */
+    currency?: string;
 };
 
 export type UpdateWholesaler = {
     name?: string;
     baseUrl?: string;
     integrationType?: WholesalerIntegrationType;
+    currency?: string;
 };

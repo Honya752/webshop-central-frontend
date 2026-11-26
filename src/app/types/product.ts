@@ -17,7 +17,10 @@ export type ProductStock = {
     name: string;
     baseUrl: string;
     stock: number;
+    /** Purchase price at the wholesaler, in `currency`. */
     price: number;
+    /** Currency of the wholesaler. */
+    currency: string;
     updatedAt?: IsoDateString;
 };
 
@@ -45,7 +48,10 @@ export type Product = {
     id: string;
     sku: string;
     ean: string;
+    /** Base price in `currency`; the selling price of a store is calculated from it. */
     price: number;
+    /** ISO 4217 code, e.g. HUF. */
+    currency: string;
     brand: string;
     category: string;
     name: string;
@@ -61,7 +67,10 @@ export type ProductDetail = {
     id: string;
     sku: string;
     ean: string;
+    /** Base price in `currency`; the selling price of a store is calculated from it. */
     price: number;
+    /** ISO 4217 code, e.g. HUF. */
+    currency: string;
     brand: string;
     category: string;
     createdAt: IsoDateString;
@@ -94,7 +103,10 @@ export type CreateProductImage = {
 export type CreateProduct = {
     sku: string;
     ean: string;
+    /** At most 2 decimals. */
     price: number;
+    /** Defaults to HUF. */
+    currency?: string;
     brand: string;
     category: string;
     localizations: ProductLocalization[];
@@ -116,6 +128,7 @@ export type UpdateProduct = {
     sku?: string;
     ean?: string;
     price?: number;
+    currency?: string;
     brand?: string;
     category?: string;
     localizations?: UpdateProductLocalization[];

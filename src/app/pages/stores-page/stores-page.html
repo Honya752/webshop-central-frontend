@@ -13,6 +13,7 @@
                 <th>Name</th>
                 <th>Region</th>
                 <th>Store Type</th>
+                <th>Currency</th>
                 <th class="flex gap-2 justify-end">Actions</th>
             </tr>
         </ng-template>
@@ -24,6 +25,7 @@
                 </td>
                 <td class="text-2xl">{{getFlagEmoji(store.region)}}</td>
                 <td>{{store.integrationType}}</td>
+                <td class="font-mono">{{store.currency}}</td>
                 <td>
                     <p-button icon="pi pi-chevron-right" [rounded]="true" severity="secondary" [outlined]="true"
                         [routerLink]="['/store', store.id]" class="ml-4 float-right" />

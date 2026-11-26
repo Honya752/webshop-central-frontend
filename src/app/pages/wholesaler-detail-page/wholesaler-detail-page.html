@@ -17,8 +17,9 @@
 
     <div class="flex justify-evenly text-lg px-4">
         <div class="w-full">
-            <p>URL: <a class="font-bold link-text" [href]="wholesaler()?.baseUrl">{{ wholesaler()?.baseUrl }}</a></p>
+            <p>URL: <app-external-link class="font-bold" [href]="wholesaler()?.baseUrl">{{ wholesaler()?.baseUrl }}</app-external-link></p>
             <p>Integration type: <span class="font-bold">{{ integrationLabel(wholesaler()?.integrationType) }}</span></p>
+            <p>Currency: <span class="font-bold">{{ wholesaler()?.currency }}</span></p>
             <p>Created at: <span class="font-bold">{{ wholesaler()?.createdAt | date:'yyyy. MM. dd. HH:mm' }}</span></p>
             <p>Last updated: <span class="font-bold">{{ wholesaler()?.updatedAt | date:'yyyy. MM. dd. HH:mm' }}</span></p>
         </div>
@@ -76,7 +77,7 @@
                 <td class="font-mono">{{ stock.sku }}</td>
                 <td class="font-mono">{{ stock.ean }}</td>
                 <td class="font-mono">{{ stock.stock }}</td>
-                <td>{{ stock.price | number }} Ft</td>
+                <td>{{ stock.price | money:wholesaler()?.currency }}</td>
                 <td>{{ stock.updatedAt | date:'yyyy. MM. dd. HH:mm' }}</td>
                 <td>
                     <p-button icon="pi pi-chevron-right" [rounded]="true" severity="secondary" [outlined]="true"

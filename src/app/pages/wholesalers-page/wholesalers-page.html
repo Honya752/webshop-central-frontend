@@ -13,6 +13,7 @@
                 <th>Name</th>
                 <th>URL</th>
                 <th>Integration type</th>
+                <th>Currency</th>
                 <th></th>
             </tr>
         </ng-template>
@@ -23,9 +24,10 @@
                     <a class="link-text" [routerLink]="['/wholesaler', wholesaler.id]">{{wholesaler.name}}</a>
                 </td>
                 <td>
-                    <a [href]="wholesaler.baseUrl">{{wholesaler.baseUrl}}</a>
+                    <app-external-link [href]="wholesaler.baseUrl">{{ wholesaler.baseUrl }}</app-external-link>
                 </td>
                 <td>{{wholesaler.integrationType}}</td>
+                <td class="font-mono">{{wholesaler.currency}}</td>
                 <td>
                     <p-button class="float-right" icon="pi pi-chevron-right" [rounded]="true" severity="secondary"
                         [outlined]="true" [routerLink]="['/wholesaler', wholesaler.id]" />

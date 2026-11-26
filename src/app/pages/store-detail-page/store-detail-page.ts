@@ -1,6 +1,7 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
+import { ExternalLink } from '../../components/external-link/external-link';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { Card } from 'primeng/card';
 import { TableModule } from 'primeng/table';
@@ -19,10 +20,11 @@ import { getApiErrorMessage } from '../../utils/api-error';
 
 type StoreTab = 'orders' | 'products' | 'integration' | 'api-keys' | 'jobs';
 
+import { MoneyPipe } from '../../pipes/money.pipe';
 @Component({
   selector: 'app-store-detail-page',
-  imports: [
-    CurrencyPipe, DatePipe, DecimalPipe, RouterLink,
+  imports: [ExternalLink, MoneyPipe, 
+    DatePipe, RouterLink,
     Card, TableModule, ButtonModule, TagModule, TabsModule, ConfirmDialogModule,
     OrderStatusTag, StoreIntegrationCredentials, StoreApiCredentials, StoreJobs,
   ],

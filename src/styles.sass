@@ -29,9 +29,17 @@ body
   &:hover
     @apply underline cursor-pointer
 
-.text-link
+// links to detail pages and outside pages
+.link-text, .text-link
+  @apply text-blue-600 cursor-pointer
   &:hover
-    @apply cursor-pointer underline
+    @apply underline
+
+// opens in a new tab: arrow icon after the text
+.external-link
+  @apply inline-flex items-center gap-1
+  .pi
+    @apply text-xs
 
 .form-error
   @apply text-red-600 font-bold

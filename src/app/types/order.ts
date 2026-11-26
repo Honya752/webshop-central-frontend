@@ -21,7 +21,15 @@ export type OrderItem = {
 
 export type Order = {
     id: string;
+    /** Order number in the webshop. */
+    externalOrderId: string;
+    /** Page of the order in the webshop admin. */
+    externalUrl: string | null;
+    name: string;
+    email: string;
     status: OrderStatus;
+    /** Statuses the order can be changed to. */
+    nextStatuses: OrderStatus[];
     currency: string;
     total: number;
     paymentMethod: string | null;
@@ -31,8 +39,6 @@ export type Order = {
 };
 
 export type OrderDetail = Order & {
-    name: string;
-    email: string;
     updatedAt: IsoDateString;
     orderItems: OrderItem[];
 };

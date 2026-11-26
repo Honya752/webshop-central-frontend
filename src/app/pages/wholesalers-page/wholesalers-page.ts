@@ -1,4 +1,5 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
+import { ExternalLink } from '../../components/external-link/external-link';
 import { RouterLink } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { Card } from 'primeng/card';
@@ -13,7 +14,7 @@ import { getApiErrorMessage } from '../../utils/api-error';
 
 @Component({
   selector: 'app-wholesalers-page',
-  imports: [Card, TableModule, ButtonModule, TagModule, RouterLink, ProgressSpinnerModule, ConfirmDialogModule],
+  imports: [ExternalLink, Card, TableModule, ButtonModule, TagModule, RouterLink, ProgressSpinnerModule, ConfirmDialogModule],
   providers: [ConfirmationService],
   templateUrl: './wholesalers-page.html',
   styleUrl: './wholesalers-page.sass',
