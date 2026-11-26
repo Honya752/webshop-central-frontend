@@ -2,6 +2,8 @@ import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { ExternalLink } from '../../components/external-link/external-link';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DatePipe, DecimalPipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { InputTextModule } from 'primeng/inputtext';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { getApiErrorMessage } from '../../utils/api-error';
@@ -10,13 +12,13 @@ import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
 import { WholesalersService } from '../../services/wholesalers.service';
-import { WholesalerDetail } from '../../types/wholesaler';
+import { WholesalerCredentialsStatus, WholesalerDetail } from '../../types/wholesaler';
 import { WholesalerIntegrationType } from '../../types/enums';
 
 import { MoneyPipe } from '../../pipes/money.pipe';
 @Component({
   selector: 'app-wholesaler-detail-page',
-  imports: [ExternalLink, MoneyPipe, DatePipe, DecimalPipe, Card, TableModule, ButtonModule, TagModule, ConfirmDialogModule, RouterLink],
+  imports: [ExternalLink, MoneyPipe, DatePipe, DecimalPipe, Card, TableModule, ButtonModule, TagModule, ConfirmDialogModule, RouterLink, FormsModule, InputTextModule],
   providers: [ConfirmationService],
   templateUrl: './wholesaler-detail-page.html',
   styleUrl: './wholesaler-detail-page.sass',
@@ -34,6 +36,9 @@ export class WholesalerDetailPage implements OnInit {
   readonly isSyncing = signal(false);
   readonly error = signal<string | null>(null);
   readonly wholesaler = signal<WholesalerDetail | null>(null);
+  readonly credentials = signal<WholesalerCredentialsStatus | null>(null);
+  readonly isSavingKey = signal(false);
+  apiKey = '';
 
   readonly totalStock = computed(() =>
     (this.wholesaler()?.stocks ?? []).reduce((sum, stock) => sum + stock.stock, 0)
@@ -56,6 +61,46 @@ export class WholesalerDetailPage implements OnInit {
       throw new Error('Missing Id');
 
     this.loadWholesaler(this.id);
+    this.loadCredentials(this.id);
+  }
+
+  loadCredentials(id: string) {
+    this.wholesalersService.getCredentials(id).subscribe({
+      next: status => this.credentials.set(status),
+      error: error => this.messageService.add({ severity: 'error', summary: 'Error', detail: getApiErrorMessage(error, 'Failed to load the API key status!') }),
+    });
+  }
+
+  saveApiKey() {
+    const id = this.id;
+    if (!id || !this.apiKey.trim() || this.isSavingKey()) return;
+    this.isSavingKey.set(true);
+
+    this.wholesalersService.setCredentials(id, this.apiKey.trim()).subscribe({
+      next: status => {
+        this.credentials.set(status);
+        this.apiKey = '';
+        this.isSavingKey.set(false);
+        this.messageService.add({ severity: 'success', summary: 'API key saved', detail: 'Purchase orders can be sent to this wholesaler' });
+      },
+      error: error => {
+        this.isSavingKey.set(false);
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: getApiErrorMessage(error, 'Failed to save the API key!') });
+      },
+    });
+  }
+
+  deleteApiKey() {
+    const id = this.id;
+    if (!id) return;
+
+    this.wholesalersService.deleteCredentials(id).subscribe({
+      next: () => {
+        this.loadCredentials(id);
+        this.messageService.add({ severity: 'info', summary: 'API key deleted', detail: 'Purchase orders to this wholesaler will fail until a new key is set' });
+      },
+      error: error => this.messageService.add({ severity: 'error', summary: 'Error', detail: getApiErrorMessage(error, 'Failed to delete the API key!') }),
+    });
   }
 
   loadWholesaler(id: string) {

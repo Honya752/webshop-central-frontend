@@ -1,5 +1,5 @@
 import { IsoDateString, PaginationQuery, SortOrder } from './api-response';
-import { OrderItemIssue, OrderStatus } from './enums';
+import { OrderItemIssue, OrderStatus, WholesalerOrderStatus } from './enums';
 import { Product } from './product';
 
 export type OrderStore = {
@@ -17,6 +17,10 @@ export type OrderItem = {
     issue: OrderItemIssue | null;
     /** Missing when the ordered SKU is unknown to the system. */
     product?: Product;
+    /** Wholesaler the stock was taken from (order details only). */
+    wholesaler?: { id: string; name: string } | null;
+    /** Purchase order this line is ordered with (order details only). */
+    wholesalerOrder?: { id: string; status: WholesalerOrderStatus; externalOrderId: string | null } | null;
 };
 
 export type Order = {

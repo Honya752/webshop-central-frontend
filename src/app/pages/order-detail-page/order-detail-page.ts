@@ -13,12 +13,13 @@ import { MessageService } from 'primeng/api';
 import { OrderDetail } from '../../types/order';
 import { OrderItemIssue, OrderStatus } from '../../types/enums';
 import { OrderStatusTag } from '../../components/order-status-tag/order-status-tag';
+import { WholesalerOrderStatusTag } from '../../components/wholesaler-order-status-tag/wholesaler-order-status-tag';
 
 import { getApiErrorMessage } from '../../utils/api-error';
 import { MoneyPipe } from '../../pipes/money.pipe';
 @Component({
   selector: 'app-order-detail-page',
-  imports: [ExternalLink, MoneyPipe, DatePipe, Card, TableModule, ButtonModule, TagModule, ProgressSpinnerModule, BarcodeComponent, RouterLink, OrderStatusTag],
+  imports: [ExternalLink, MoneyPipe, DatePipe, Card, TableModule, ButtonModule, TagModule, ProgressSpinnerModule, BarcodeComponent, RouterLink, OrderStatusTag, WholesalerOrderStatusTag],
   templateUrl: './order-detail-page.html',
   styleUrl: './order-detail-page.sass',
 })
@@ -36,6 +37,7 @@ export class OrderDetailPage implements OnInit {
   private readonly issueLabels: Record<OrderItemIssue, string> = {
     OUT_OF_STOCK: 'Out of stock',
     UNKNOWN_PRODUCT: 'Unknown product',
+    WHOLESALER_REJECTED: 'Refused by the wholesaler',
   };
 
   issueLabel(issue: OrderItemIssue): string {

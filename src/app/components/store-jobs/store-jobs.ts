@@ -53,6 +53,8 @@ export class StoreJobs implements OnInit {
     WEBHOOK_EVENT: 'Webhook',
     STOCK_SYNC: 'Stock sync',
     PRODUCT_SYNC: 'Product sync',
+    WHOLESALER_ORDER_SEND: 'Purchase order',
+    WEBSHOP_ORDER_NOTE: 'Webshop order note',
   };
 
   ngOnInit(): void {

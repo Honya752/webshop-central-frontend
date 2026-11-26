@@ -90,6 +90,33 @@
             <small>Currency of the prices in the catalog of the wholesaler.</small>
         </div>
 
+        <div class="flex gap-4">
+            <div class="field w-full">
+                <label for="orderMode">Purchase orders</label>
+                <p-select [options]="orderModes" inputId="orderMode" formControlName="orderMode" optionLabel="label"
+                    optionValue="value" class="w-full" />
+            </div>
+
+            @if (form.controls.orderMode.value === 'AUTOMATIC') {
+            <div class="field w-full">
+                <div class="flex items-center justify-between">
+                    <label for="orderDelayMinutes">Waiting time (minutes)</label>
+                    @if (form.controls.orderDelayMinutes.invalid && form.controls.orderDelayMinutes.touched) {
+                    <small class="error">0 – 1440 minutes</small>
+                    }
+                    @if (form.controls.orderDelayMinutes.hasError('server')) {
+                    <small class="error">{{ form.controls.orderDelayMinutes.getError('server') }}</small>
+                    }
+                </div>
+                <input pInputText id="orderDelayMinutes" type="number" min="0" max="1440" formControlName="orderDelayMinutes" />
+            </div>
+            }
+        </div>
+        <small class="-mt-2">
+            The lines of the incoming orders are collected; an automatic wholesaler gets them when the first line has
+            waited this long (more orders can join, cancellations are still possible), a manual one when you send them.
+        </small>
+
         <div class="flex items-center justify-between">
             <div></div>
 

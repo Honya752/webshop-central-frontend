@@ -20,6 +20,15 @@
             <p>URL: <app-external-link class="font-bold" [href]="wholesaler()?.baseUrl">{{ wholesaler()?.baseUrl }}</app-external-link></p>
             <p>Integration type: <span class="font-bold">{{ integrationLabel(wholesaler()?.integrationType) }}</span></p>
             <p>Currency: <span class="font-bold">{{ wholesaler()?.currency }}</span></p>
+            <p>Purchase orders:
+                <span class="font-bold">
+                    @if (wholesaler()?.orderMode === 'AUTOMATIC') { automatic, after {{ wholesaler()?.orderDelayMinutes }} min }
+                    @else { manual }
+                </span>
+                @if (wholesaler(); as w) {
+                <a class="link-text text-sm ml-2" [routerLink]="['/wholesaler-orders']" [queryParams]="{ wholesalerId: w.id }">show orders</a>
+                }
+            </p>
             <p>Created at: <span class="font-bold">{{ wholesaler()?.createdAt | date:'yyyy. MM. dd. HH:mm' }}</span></p>
             <p>Last updated: <span class="font-bold">{{ wholesaler()?.updatedAt | date:'yyyy. MM. dd. HH:mm' }}</span></p>
         </div>
@@ -28,6 +37,28 @@
             <p>Total stock: <span class="font-bold">{{ totalStock() | number }} pcs</span></p>
             <p>Out of stock products: <span class="font-bold">{{ outOfStockCount() }}</span></p>
         </div>
+    </div>
+</p-card>
+
+<p-card class="mt-6">
+    <div class="px-4">
+        <h2 class="text-xl font-bold mb-2">API key</h2>
+        <p class="mb-3">
+            @if (credentials()?.configured) {
+            Set: <span class="font-bold font-mono">{{ credentials()?.apiKeyHint }}</span>
+            <span class="text-sm"> (updated {{ credentials()?.updatedAt | date:'yyyy. MM. dd. HH:mm' }})</span>
+            } @else {
+            <span class="text-red-600">Not set — purchase orders to this wholesaler cannot be sent.</span>
+            }
+        </p>
+        <div class="flex gap-2 items-center">
+            <input pInputText type="password" [(ngModel)]="apiKey" placeholder="New API key" autocomplete="off" class="w-full md:w-80" />
+            <p-button icon="pi pi-save" label="Save" [loading]="isSavingKey()" [disabled]="!apiKey.trim()" (onClick)="saveApiKey()" />
+            @if (credentials()?.configured) {
+            <p-button icon="pi pi-trash" label="Delete" severity="danger" [outlined]="true" (onClick)="deleteApiKey()" />
+            }
+        </div>
+        <small>Sent in the X-Api-Key header with the purchase orders. Stored encrypted, never shown again.</small>
     </div>
 </p-card>
 

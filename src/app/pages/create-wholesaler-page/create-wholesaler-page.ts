@@ -12,7 +12,7 @@ import { applyServerErrors } from '../../utils/form-errors';
 import { getApiErrorMessage } from '../../utils/api-error';
 import { WholesalersService } from '../../services/wholesalers.service';
 import { CreateWholesaler, UpdateWholesaler } from '../../types/wholesaler';
-import { WholesalerIntegrationType } from '../../types/enums';
+import { WholesalerIntegrationType, WholesalerOrderMode } from '../../types/enums';
 
 import { CURRENCY_OPTIONS, DEFAULT_CURRENCY } from '../../utils/currencies';
 @Component({
@@ -40,6 +40,8 @@ export class CreateWholesalerPage implements OnInit {
     baseUrl: this.fb.nonNullable.control('', [Validators.required]),
     integrationType: this.fb.control<WholesalerIntegrationType | null>(null, [Validators.required]),
     currency: this.fb.nonNullable.control(DEFAULT_CURRENCY, [Validators.required]),
+    orderMode: this.fb.nonNullable.control<WholesalerOrderMode>('AUTOMATIC', [Validators.required]),
+    orderDelayMinutes: this.fb.nonNullable.control(15, [Validators.required, Validators.min(0), Validators.max(1440)]),
   });
 
   readonly currencies = CURRENCY_OPTIONS;
@@ -57,6 +59,8 @@ export class CreateWholesalerPage implements OnInit {
             baseUrl: wholesaler.baseUrl,
             integrationType: wholesaler.integrationType,
             currency: wholesaler.currency,
+            orderMode: wholesaler.orderMode,
+            orderDelayMinutes: wholesaler.orderDelayMinutes,
           });
         },
         error: (error) => {
@@ -86,6 +90,8 @@ export class CreateWholesalerPage implements OnInit {
         ...(raw.baseUrl ? { baseUrl: raw.baseUrl } : {}),
         ...(raw.integrationType ? { integrationType: raw.integrationType } : {}),
         currency: raw.currency,
+        orderMode: raw.orderMode,
+        orderDelayMinutes: raw.orderDelayMinutes,
       }
 
       this.wholesalersService.updateWholesaler(payload, this.id).subscribe({
@@ -111,6 +117,8 @@ export class CreateWholesalerPage implements OnInit {
         baseUrl: raw.baseUrl,
         integrationType: raw.integrationType!,
         currency: raw.currency,
+        orderMode: raw.orderMode,
+        orderDelayMinutes: raw.orderDelayMinutes,
       };
 
       this.wholesalersService.createWholesaler(payload).subscribe({
@@ -131,6 +139,11 @@ export class CreateWholesalerPage implements OnInit {
       })
     }
   }
+
+  readonly orderModes: { label: string; value: WholesalerOrderMode }[] = [
+    { label: 'Automatic, after a waiting time', value: 'AUTOMATIC' },
+    { label: 'Manual (Send now)', value: 'MANUAL' },
+  ];
 
   integrations: { label: string; value: WholesalerIntegrationType }[] = [
     { label: "JSON integration", value: "JSON_INTEGRATION" },

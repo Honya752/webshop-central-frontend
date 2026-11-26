@@ -36,6 +36,7 @@
                 <th>Name</th>
                 <th>Image</th>
                 <th>Issue</th>
+                <th>Wholesaler</th>
                 <th>SKU</th>
                 <th>
                     <p class="text-center w-full">Quantity</p>
@@ -68,6 +69,17 @@
                     <p-tag severity="danger" [value]="issueLabel(item.issue)" />
                     }
                 </td>
+                <td>
+                    @if (item.wholesaler) {
+                    <a class="link-text" [routerLink]="['/wholesaler', item.wholesaler.id]">{{ item.wholesaler.name }}</a>
+                    }
+                    @if (item.wholesalerOrder; as po) {
+                    <a class="flex items-center gap-1 mt-1" [routerLink]="['/wholesaler-order', po.id]" title="Purchase order">
+                        <app-wholesaler-order-status-tag [status]="po.status" />
+                        @if (po.externalOrderId) { <span class="font-mono text-sm">{{ po.externalOrderId }}</span> }
+                    </a>
+                    }
+                </td>
                 <td class="font-mono">{{ item.sku }}</td>
                 <td class="font-mono">
                     <p class="text-center w-full">
@@ -89,6 +101,7 @@
         <ng-template #footer>
             <tr>
                 <td class="font-bold">Total:</td>
+                <td></td>
                 <td></td>
                 <td></td>
                 <td></td>

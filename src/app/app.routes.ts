@@ -43,6 +43,9 @@ export const routes: Routes = [
             { path: 'wholesaler/create', loadComponent: () => import('./pages/create-wholesaler-page/create-wholesaler-page').then(m => m.CreateWholesalerPage) },
             { path: 'wholesaler/:id', loadComponent: () => import('./pages/wholesaler-detail-page/wholesaler-detail-page').then(m => m.WholesalerDetailPage) },
             { path: 'wholesaler/:id/edit', loadComponent: () => import('./pages/create-wholesaler-page/create-wholesaler-page').then(m => m.CreateWholesalerPage) },
+
+            { path: 'wholesaler-orders', loadComponent: () => import('./pages/wholesaler-orders-page/wholesaler-orders-page').then(m => m.WholesalerOrdersPage) },
+            { path: 'wholesaler-order/:id', loadComponent: () => import('./pages/wholesaler-order-detail-page/wholesaler-order-detail-page').then(m => m.WholesalerOrderDetailPage) },
         ]
     },
 
