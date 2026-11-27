@@ -52,6 +52,9 @@ export type OrderSortBy = 'createdAt' | 'total' | 'status';
 export type OrderFilterQuery = PaginationQuery & {
     sortBy?: OrderSortBy;
     sortOrder?: SortOrder;
+    status?: OrderStatus;
+    /** Searches the webshop order ID, customer name and email. */
+    search?: string;
 };
 
 export type OrderStatusResponse = {

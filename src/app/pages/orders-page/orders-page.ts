@@ -1,7 +1,10 @@
 import { AfterViewInit, Component, ElementRef, inject, OnDestroy, OnInit, signal, ViewChild } from '@angular/core';
+import { Subscription } from 'rxjs';
+import { IconFieldModule } from 'primeng/iconfield';
+import { InputIconModule } from 'primeng/inputicon';
+import { OrderStatus } from '../../types/enums';
 import { ExternalLink } from '../../components/external-link/external-link';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { InputGroupModule } from 'primeng/inputgroup';
 import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
@@ -19,6 +22,8 @@ import { RouterLink } from "@angular/router";
 
 
 type OrderFilterForm = FormGroup<{
+  search: FormControl<string>;
+  status: FormControl<OrderStatus | null>;
   sortBy: FormControl<OrderSortBy>;
   sortOrder: FormControl<SortOrder>;
 }>
@@ -28,7 +33,7 @@ import { MessageService } from 'primeng/api';
 import { MoneyPipe } from '../../pipes/money.pipe';
 @Component({
   selector: 'app-orders-page',
-  imports: [ExternalLink, MoneyPipe, DatePipe, Card, TableModule, ButtonModule, TagModule, ProgressSpinnerModule, InputGroupModule, ReactiveFormsModule, SelectModule, InputTextModule, RouterLink, OrderStatusTag],
+  imports: [ExternalLink, MoneyPipe, DatePipe, Card, TableModule, ButtonModule, TagModule, ProgressSpinnerModule, IconFieldModule, InputIconModule, ReactiveFormsModule, SelectModule, InputTextModule, RouterLink, OrderStatusTag],
   templateUrl: './orders-page.html',
   styleUrl: './orders-page.sass',
 })
@@ -39,6 +44,10 @@ export class OrdersPage implements OnInit, AfterViewInit, OnDestroy {
   private readonly messageService = inject(MessageService);
 
   orders = signal<Order[]>([]);
+  /** Number of all matching orders (from the pagination meta). */
+  readonly total = signal<number | null>(null);
+  /** The running page request, cancelled when the filters change. */
+  private loadSubscription?: Subscription;
 
   page = signal(1);
   limit = 30;
@@ -47,6 +56,8 @@ export class OrdersPage implements OnInit, AfterViewInit, OnDestroy {
   hasNextPage = signal(true);
 
   filterForm: OrderFilterForm = this.fb.group({
+    search: this.fb.nonNullable.control(''),
+    status: this.fb.control<OrderStatus | null>(null),
     sortBy: this.fb.nonNullable.control<OrderSortBy>('createdAt'),
     sortOrder: this.fb.nonNullable.control<SortOrder>('desc')
   })
@@ -61,18 +72,22 @@ export class OrdersPage implements OnInit, AfterViewInit, OnDestroy {
 
     this.isLoading.set(true);
 
+    const filters = this.filterForm.getRawValue();
     const param = {
       page: this.page(),
       limit: this.limit,
-      sortBy: this.filterForm.controls.sortBy.getRawValue(),
-      sortOrder: this.filterForm.controls.sortOrder.getRawValue()
-    }
+      sortBy: filters.sortBy,
+      sortOrder: filters.sortOrder,
+      ...(filters.status ? { status: filters.status } : {}),
+      ...(filters.search.trim() ? { search: filters.search.trim() } : {}),
+    };
 
-    this.ordersService.getAllOrders(param).subscribe({
+    this.loadSubscription = this.ordersService.getAllOrders(param).subscribe({
       next: (payload) => {
         const { orders, meta } = payload;
 
         this.orders.update(prev => [...prev, ...orders]);
+        this.total.set(meta.total);
         this.hasNextPage.set(meta.pages > meta.page);
         this.page.set(meta.page + 1);
 
@@ -91,6 +106,10 @@ export class OrdersPage implements OnInit, AfterViewInit, OnDestroy {
   }
 
   resetAndReload(): void {
+    // A request with the old filters must not add its rows to the new list
+    this.loadSubscription?.unsubscribe();
+    this.isLoading.set(false);
+
     this.orders.set([]);
     this.page.set(1);
     this.hasNextPage.set(true);
@@ -119,17 +138,32 @@ export class OrdersPage implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.observer?.disconnect();
+    this.loadSubscription?.unsubscribe();
   }
 
-  sortByOptions: { label: string; value: OrderSortBy }[] = [
-    { label: 'Status', value: 'status' },
-    { label: 'Total price', value: 'total' },
-    { label: 'Creation Date', value: 'createdAt' }
+  hasFilter(): boolean {
+    const { search, status } = this.filterForm.getRawValue();
+    return !!search.trim() || !!status;
+  }
+
+  readonly statusOptions: { label: string; value: OrderStatus }[] = [
+    { label: 'Needs attention', value: 'NEEDS_ATTENTION' },
+    { label: 'Processing', value: 'PROCESSING' },
+    { label: 'Ordered', value: 'ORDERED_FROM_WHOLESALER' },
+    { label: 'Shipping', value: 'SHIPPING_TO_STORE' },
+    { label: 'Completed', value: 'COMPLETED' },
+    { label: 'Cancelled', value: 'CANCELLED' },
   ];
 
-  sortOrderOptions = [
+  sortByOptions: { label: string; value: OrderSortBy }[] = [
+    { label: 'Date', value: 'createdAt' },
+    { label: 'Total', value: 'total' },
+    { label: 'Status', value: 'status' },
+  ];
+
+  sortOrderOptions: { label: string; value: SortOrder }[] = [
+    { label: 'Descending', value: 'desc' },
     { label: 'Ascending', value: 'asc' },
-    { label: 'Descending', value: 'desc' }
   ];
 
 }

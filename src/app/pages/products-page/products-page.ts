@@ -10,7 +10,8 @@ import { AuthService } from '../../services/auth.service';
 import { RouterLink } from "@angular/router";
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { debounceTime } from 'rxjs';
-import { InputGroupModule } from 'primeng/inputgroup';
+import { IconFieldModule } from 'primeng/iconfield';
+import { InputIconModule } from 'primeng/inputicon';
 import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
@@ -27,7 +28,7 @@ import { getApiErrorMessage } from '../../utils/api-error';
 import { MoneyPipe } from '../../pipes/money.pipe';
 @Component({
   selector: 'app-products-page',
-  imports: [MoneyPipe, ConfirmDialogModule, Card, TableModule, ButtonModule, TagModule, RouterLink, ProgressSpinnerModule, InputGroupModule, ReactiveFormsModule, SelectModule, InputTextModule],
+  imports: [MoneyPipe, ConfirmDialogModule, Card, TableModule, ButtonModule, TagModule, RouterLink, ProgressSpinnerModule, IconFieldModule, InputIconModule, ReactiveFormsModule, SelectModule, InputTextModule],
   templateUrl: './products-page.html',
   providers: [ConfirmationService],
   styleUrl: './products-page.sass',
@@ -41,9 +42,11 @@ export class ProductsPage implements OnInit, AfterViewInit, OnDestroy {
   readonly authService = inject(AuthService);
 
   products = signal<Product[]>([]);
+  /** Number of all matching products (from the pagination meta). */
+  readonly total = signal<number | null>(null);
 
   page = signal(1);
-  limit = 20;
+  limit = 25;
 
   isLoading = signal(false);
   hasNextPage = signal(true);
@@ -77,6 +80,7 @@ export class ProductsPage implements OnInit, AfterViewInit, OnDestroy {
         const { products, meta } = payload;
 
         this.products.update(prev => [...prev, ...products]);
+        this.total.set(meta.total);
         this.hasNextPage.set(meta.pages > meta.page);
         this.page.update(p => p + 1);
 
@@ -99,14 +103,14 @@ export class ProductsPage implements OnInit, AfterViewInit, OnDestroy {
 
     this.productService.deleteProduct(id).subscribe({
       next: () => {
+        // Reset the flag first: loadProducts() does nothing while a request is running
+        this.isLoading.set(false);
         this.resetAndReload();
         this.messageService.add({
           severity: 'success',
           summary: 'Deleted',
           detail: 'Product deleted successfully',
         });
-
-        this.isLoading.set(false);
       },
       error: (error) => {
         this.messageService.add({
@@ -151,11 +155,11 @@ export class ProductsPage implements OnInit, AfterViewInit, OnDestroy {
     this.observer?.disconnect();
   }
 
-  confirmDelete(event: Event, id: string) {
+  confirmDelete(event: Event, product: Product) {
     this.confirmationService.confirm({
       target: event.target as EventTarget,
-      message: 'Are you sure you want to delete this product?',
-      header: 'Delete confirmation',
+      message: `Are you sure you want to delete ${product.name}? Its images, localizations, wholesaler stocks and store mappings are deleted too`,
+      header: 'Delete product',
       icon: 'pi pi-exclamation-triangle', rejectButtonProps: {
         label: 'Cancel',
         severity: 'secondary',
@@ -166,7 +170,7 @@ export class ProductsPage implements OnInit, AfterViewInit, OnDestroy {
         severity: 'danger',
       },
       accept: () => {
-        this.deleteProduct(id);
+        this.deleteProduct(product.id);
       },
     });
   }

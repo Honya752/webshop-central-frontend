@@ -1,54 +1,88 @@
 <p-card>
-    <div class="flex items-start justify-between px-4 mb-6">
-        <h1 class="header">Purchase order</h1>
+    <div class="flex items-start justify-between gap-6 px-4 mb-6">
+        <div class="flex flex-col gap-1">
+            <div class="flex items-center gap-3">
+                <h1 class="header text-left!">Purchase order</h1>
+                <app-wholesaler-order-status-tag [status]="order()?.status" />
+            </div>
+            @if (order(); as o) {
+            <div class="flex items-center gap-2 text-gray-500">
+                <span>{{ o.createdAt | date:'yyyy. MM. dd. HH:mm' }}</span>
+                <span>to</span>
+                <a class="link-text" [routerLink]="['/wholesaler', o.wholesaler.id]">{{ o.wholesaler.name }}</a>
+            </div>
+            }
+        </div>
         <div class="flex gap-2">
             @if (canSend()) {
             <p-button icon="pi pi-send" label="Send now" [loading]="isSending()" (onClick)="send()" />
             }
-            <p-button icon="pi pi-refresh" severity="secondary" [outlined]="true" (onClick)="load()" />
+            <p-button icon="pi pi-refresh" [rounded]="true" [text]="true" severity="secondary" [loading]="isLoading()"
+                (onClick)="load()" ariaLabel="Refresh" title="Refresh" />
         </div>
     </div>
 
     @if (order(); as o) {
-    <div class="flex justify-evenly text-lg px-4">
-        <div class="w-full">
-            <p>Wholesaler: <a class="link-text font-bold" [routerLink]="['/wholesaler', o.wholesaler.id]">{{ o.wholesaler.name }}</a>
-                <span class="text-sm"> ({{ o.wholesaler.orderMode === 'AUTOMATIC' ? 'automatic' : 'manual' }} sending)</span>
-            </p>
-            <p>Status: <app-wholesaler-order-status-tag [status]="o.status" /></p>
-            @if (o.lastError) {
-            <p class="text-red-600">{{ o.status === 'REJECTED' ? 'Refused' : 'Last error' }}: {{ o.lastError }}</p>
-            }
-            <p>Order number at the wholesaler: <span class="font-bold font-mono">{{ o.externalOrderId ?? '-' }}</span></p>
+    @if (o.lastError) {
+    <div class="mx-4 mb-6">
+        <p-message severity="error" icon="pi pi-exclamation-triangle">
+            <span class="font-bold">{{ o.status === 'REJECTED' ? 'Refused by the wholesaler' : 'Sending failed' }}:</span>
+            {{ o.lastError }}
+        </p-message>
+    </div>
+    }
+
+    <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4 px-4">
+        <div class="flex flex-col">
+            <small class="text-gray-500">Wholesaler</small>
+            <a class="link-text font-bold" [routerLink]="['/wholesaler', o.wholesaler.id]">{{ o.wholesaler.name }}</a>
         </div>
-        <div class="w-full">
-            <p>Created: <span class="font-bold">{{ o.createdAt | date:'yyyy. MM. dd. HH:mm' }}</span></p>
+        <div class="flex flex-col">
+            <small class="text-gray-500">Sending</small>
+            <span class="font-bold">{{ o.wholesaler.orderMode === 'AUTOMATIC' ? 'Automatic' : 'Manual' }}</span>
+        </div>
+        <div class="flex flex-col">
+            <small class="text-gray-500">Order number at the wholesaler</small>
+            <span class="font-bold font-mono">{{ o.externalOrderId ?? '-' }}</span>
+        </div>
+        <div class="flex flex-col">
             @if (o.sentAt) {
-            <p>Sent: <span class="font-bold">{{ o.sentAt | date:'yyyy. MM. dd. HH:mm' }}</span></p>
-            } @else if (o.status === 'DRAFT' && o.sendAfter) {
-            <p>Sent automatically at: <span class="font-bold">{{ o.sendAfter | date:'yyyy. MM. dd. HH:mm' }}</span></p>
+            <small class="text-gray-500">Sent</small>
+            <span class="font-bold">{{ o.sentAt | date:'yyyy. MM. dd. HH:mm' }}</span>
             }
-            <p>Expected total: <span class="font-bold">{{ o.total | money:o.currency }}</span></p>
+            @else if (o.status === 'DRAFT' && o.sendAfter) {
+            <small class="text-gray-500">Sent automatically at</small>
+            <span class="font-bold">{{ o.sendAfter | date:'yyyy. MM. dd. HH:mm' }}</span>
+            }
+            @else {
+            <small class="text-gray-500">Sent</small>
+            <span class="font-bold">-</span>
+            }
+        </div>
+        <div class="flex flex-col">
+            <small class="text-gray-500">Expected total</small>
+            <span class="font-bold">{{ o.total | money:o.currency }}</span>
         </div>
     </div>
     }
 </p-card>
 
 <p-card class="mt-6">
-    <p-table [value]="order()?.items ?? []" [loading]="isLoading()">
+    <p-table [value]="order()?.items ?? []" [loading]="isLoading()" [rowHover]="true">
         <ng-template #caption>
-            <span class="text-xl font-bold">Lines</span>
+            <div class="flex items-baseline gap-2">
+                <span class="text-xl font-bold">Lines</span>
+                <span class="text-sm text-gray-500">{{ linesSummary() }}</span>
+            </div>
         </ng-template>
 
         <ng-template #header>
             <tr>
                 <th>Product</th>
-                <th>SKU</th>
-                <th>Quantity</th>
-                <th>Purchase price</th>
-                <th>Total</th>
                 <th>For order</th>
-                <th>Store</th>
+                <th class="text-center!">Quantity</th>
+                <th class="text-right!">Purchase price</th>
+                <th class="text-right!">Subtotal</th>
             </tr>
         </ng-template>
 
@@ -56,29 +90,49 @@
             <tr>
                 <td>
                     @if (item.productId) {
-                    <a class="link-text" [routerLink]="['/product', item.productId]">{{ item.name }}</a>
-                    } @else { {{ item.name }} }
+                    <a class="link-text font-bold" [routerLink]="['/product', item.productId]">{{ item.name }}</a>
+                    }
+                    @else {
+                    <span class="font-bold">{{ item.name }}</span>
+                    }
+                    <div><small class="text-gray-500 font-mono">SKU {{ item.sku }}</small></div>
                 </td>
-                <td class="font-mono">{{ item.sku }}</td>
-                <td class="font-mono">{{ item.quantity }}</td>
-                <td>{{ item.unitPrice | money:order()?.currency }}</td>
-                <td>{{ item.total | money:order()?.currency }}</td>
                 <td>
                     @if (item.customerOrderId) {
                     <a class="link-text font-mono" [routerLink]="['/order', item.customerOrderId]">#{{ item.customerOrderNumber }}</a>
-                    } @else { - }
-                </td>
-                <td>
+                    }
+                    @else {-}
                     @if (item.store) {
-                    <a class="link-text" [routerLink]="['/store', item.store.id]">{{ item.store.name }}</a>
-                    } @else { - }
+                    <div>
+                        <a class="text-sm text-gray-500 hover:underline" [routerLink]="['/store', item.store.id]">
+                            {{ item.store.name }}
+                        </a>
+                    </div>
+                    }
                 </td>
+                <td class="text-center! font-mono">{{ item.quantity }}</td>
+                <td class="text-right! whitespace-nowrap text-gray-500">{{ item.unitPrice | money:order()?.currency }}</td>
+                <td class="text-right! whitespace-nowrap font-bold">{{ item.total | money:order()?.currency }}</td>
             </tr>
+        </ng-template>
+
+        <ng-template #footer>
+            @if (order()?.items?.length) {
+            <tr>
+                <td colspan="4" class="text-right! font-bold">Expected total</td>
+                <td class="text-right! whitespace-nowrap font-bold text-lg">{{ order()?.total | money:order()?.currency }}</td>
+            </tr>
+            }
         </ng-template>
 
         <ng-template #emptymessage>
             <tr>
-                <td colspan="7">Every line was cancelled.</td>
+                <td colspan="5">
+                    <div class="flex flex-col items-center gap-2 py-8 text-gray-500">
+                        <i class="pi pi-ban text-3xl"></i>
+                        <span>Every line was cancelled</span>
+                    </div>
+                </td>
             </tr>
         </ng-template>
     </p-table>

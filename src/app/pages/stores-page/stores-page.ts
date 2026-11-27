@@ -10,10 +10,12 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { getApiErrorMessage } from '../../utils/api-error';
+import { ExternalLink } from '../../components/external-link/external-link';
+import { platformLabel } from '../../utils/labels';
 
 @Component({
   selector: 'app-stores-page',
-  imports: [Card, TableModule, ButtonModule, TagModule, RouterLink, ProgressSpinnerModule, ConfirmDialogModule],
+  imports: [Card, TableModule, ButtonModule, TagModule, RouterLink, ProgressSpinnerModule, ConfirmDialogModule, ExternalLink],
   providers: [ConfirmationService],
   templateUrl: './stores-page.html',
   styleUrl: './stores-page.sass',
@@ -25,10 +27,12 @@ export class StoresPage implements OnInit, AfterViewInit, OnDestroy {
   private readonly confirmationService = inject(ConfirmationService);
 
   stores = signal<Store[]>([]);
+  /** Number of all stores (from the pagination meta). */
+  readonly total = signal<number | null>(null);
   isLoading = signal(false);
   hasNextPage = signal(true);
   page = signal(1);
-  limit = 5;
+  limit = 25;
 
   private observer!: IntersectionObserver;
 
@@ -45,6 +49,7 @@ export class StoresPage implements OnInit, AfterViewInit, OnDestroy {
 
         const { stores, meta } = payload;
         this.stores.update(prev => [...prev, ...stores]);
+        this.total.set(meta.total);
         this.hasNextPage.set(meta.pages > meta.page);
         this.page.update(p => p + 1);
 
@@ -82,19 +87,13 @@ export class StoresPage implements OnInit, AfterViewInit, OnDestroy {
     this.observer?.disconnect();
   }
 
-  getFlagEmoji(region: string): string {
-    return region
-      .toUpperCase()
-      .replace(/./g, char =>
-        String.fromCodePoint(127397 + char.charCodeAt(0))
-      );
-  }
+  readonly platformLabel = platformLabel;
 
   confirmDelete(event: Event, store: Store) {
     this.confirmationService.confirm({
       target: event.target as EventTarget,
-      message: `Are you sure you want to delete ${store.name}?`,
-      header: 'Delete confirmation',
+      message: `Are you sure you want to delete ${store.name}? Its API keys, product mappings and memberships are deleted too`,
+      header: 'Delete store',
       icon: 'pi pi-exclamation-triangle',
       rejectButtonProps: {
         label: 'Cancel',
@@ -113,6 +112,7 @@ export class StoresPage implements OnInit, AfterViewInit, OnDestroy {
     this.storesService.deleteStore(id).subscribe({
       next: () => {
         this.stores.update(items => items.filter(item => item.id !== id));
+        this.total.update(total => total === null ? null : total - 1);
         this.messageService.add({
           severity: 'success',
           summary: 'Deleted',

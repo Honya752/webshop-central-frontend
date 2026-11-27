@@ -1,96 +1,130 @@
 <p-confirmdialog />
 
 <p-card>
-    <form [formGroup]="filterForm" class="flex flex-row gap-4">
-        <p-inputgroup>
-            <p-button label="Search" severity="contrast" />
-            <input pInputText type="search" formControlName="search" placeholder="Search by name, EAN or SKU code" />
-        </p-inputgroup>
-
-        <p-select [options]="sortByOptions" formControlName="sortBy" optionLabel="label" optionValue="value"
-            placeholder="Sort by" class="w-full md:w-56" />
-
-        <p-select [options]="sortOrderOptions" formControlName="sortOrder" optionLabel="label" optionValue="value"
-            placeholder="Sort order" class="w-full md:w-56" />
-    </form>
-</p-card>
-
-<p-card class="w-full mt-6">
-    <p-table [value]="products()" [loading]="isLoading()">
+    <p-table [value]="products()" [loading]="isLoading()" [rowHover]="true">
         <ng-template #caption>
-            <div class="flex items-center justify-between">
-                <span class="text-xl font-bold">Products</span>
+            <div class="flex flex-col gap-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-baseline gap-2">
+                        <span class="text-xl font-bold">Products</span>
+                        @if (total() !== null) {
+                        <span class="text-sm text-gray-500">{{ total() }} total</span>
+                        }
+                    </div>
+                    @if (authService.canManageProducts()) {
+                    <p-button icon="pi pi-plus" label="Add product" routerLink="/product/create" />
+                    }
+                </div>
+
+                <form [formGroup]="filterForm" class="flex flex-row items-center gap-3">
+                    <p-iconfield class="flex-1">
+                        <p-inputicon class="pi pi-search" />
+                        <input pInputText type="search" formControlName="search" class="w-full"
+                            placeholder="Search by name, SKU or EAN" aria-label="Search products" />
+                    </p-iconfield>
+
+                    <p-select [options]="sortByOptions" formControlName="sortBy" optionLabel="label" optionValue="value"
+                        placeholder="Sort by" class="w-48" ariaLabel="Sort by" />
+
+                    <p-select [options]="sortOrderOptions" formControlName="sortOrder" optionLabel="label"
+                        optionValue="value" placeholder="Sort order" class="w-44" ariaLabel="Sort order" />
+                </form>
             </div>
         </ng-template>
 
         <ng-template #header>
             <tr>
-                <th>Image</th>
-                <th>Name</th>
+                <th class="w-0"><span class="sr-only">Image</span></th>
+                <th>Product</th>
                 <th>Brand</th>
-                <th>Category</th>
-                <th>Status</th>
-                <th>SKU</th>
-                <th>EAN</th>
-                <th>Base price</th>
-                <th class="flex gap-2 justify-end">Actions</th>
+                <th>Stock</th>
+                <th class="text-right!">Base price</th>
+                <th class="w-0 whitespace-nowrap text-right!">Actions</th>
             </tr>
         </ng-template>
 
         <ng-template #body let-product>
-            <tr class="hover:cursor-pointer">
-                <td>
-                    <img [src]="product.images?.[0]?.url" [alt]="product.name" class="w-24 rounded" />
+            <tr>
+                <td class="w-0">
+                    @if (product.images?.[0]; as image) {
+                    <img [src]="image.url" [alt]="image.alt || product.name"
+                        class="w-12 h-12 max-w-none object-cover rounded-md border border-gray-200" />
+                    }
+                    @else {
+                    <div class="w-12 h-12 rounded-md bg-gray-100 flex items-center justify-center text-gray-400">
+                        <i class="pi pi-image"></i>
+                    </div>
+                    }
                 </td>
 
                 <td>
                     @if (authService.isSysadmin()) {
-                    <a class="link-text" [routerLink]="['/product', product.id]">{{ product.name }}</a>
+                    <a class="link-text font-bold" [routerLink]="['/product', product.id]">{{ product.name }}</a>
                     }
                     @else {
-                    <span>{{ product.name }}</span>
+                    <span class="font-bold">{{ product.name }}</span>
                     }
+                    <div>
+                        <small class="text-gray-500 font-mono">SKU {{ product.sku }}, EAN {{ product.ean }}</small>
+                    </div>
                 </td>
 
-                <td>{{ product.brand }}</td>
-
-                <td>{{ product.category }}</td>
+                <td>
+                    <div>{{ product.brand }}</div>
+                    <small class="text-gray-500">{{ product.category }}</small>
+                </td>
 
                 <td>
                     @if (!product.stock || product.stock.stock <= 0) {
-                    <p-tag severity="danger" value="Out of stock" />
+                    <p-tag severity="danger" icon="pi pi-times-circle" value="Out of stock" class="whitespace-nowrap" />
                     }
                     @else if (product.stock.stock <= 5) {
-                    <p-tag severity="warn" value="Low stock" />
+                    <p-tag severity="warn" icon="pi pi-exclamation-triangle" value="Low stock" class="whitespace-nowrap" />
                     }
                     @else {
-                    <p-tag severity="success" value="In stock" />
+                    <p-tag severity="success" icon="pi pi-check" value="In stock" class="whitespace-nowrap" />
                     }
                 </td>
 
-                <td class="font-mono">{{ product.sku }}</td>
+                <td class="text-right! font-bold whitespace-nowrap">{{ product.price | money:product.currency }}</td>
 
-                <td class="font-mono">{{ product.ean }}</td>
+                <td class="w-0 whitespace-nowrap">
+                    <div class="flex gap-2 justify-end">
+                        @if (authService.isSysadmin()) {
+                        <p-button icon="pi pi-pencil" [rounded]="true" severity="success" [outlined]="true"
+                            [routerLink]="['/product', product.id, 'edit']" ariaLabel="Edit product"
+                            title="Edit product" />
+                        }
+                        @if (authService.canManageProducts()) {
+                        <p-button icon="pi pi-trash" [rounded]="true" severity="danger" [outlined]="true"
+                            (click)="confirmDelete($event, product)" ariaLabel="Delete product"
+                            title="Delete product" />
+                        }
+                        @if (authService.isSysadmin()) {
+                        <p-button icon="pi pi-chevron-right" [rounded]="true" severity="secondary" [outlined]="true"
+                            [routerLink]="['/product', product.id]" ariaLabel="Open product" title="Open product" />
+                        }
+                    </div>
+                </td>
+            </tr>
+        </ng-template>
 
-                <td>{{ product.price | money:product.currency }}</td>
-
-                <td>
-                    @if (authService.isSysadmin()) {
-                    <p-button icon="pi pi-chevron-right" [rounded]="true" severity="secondary" [outlined]="true"
-                        [routerLink]="['/product', product.id]" class="ml-2 float-right" />
-                    }
-                    @if (authService.canManageProducts()) {
-                    <p-button icon="pi pi-trash" [rounded]="true" severity="danger" [outlined]="true"
-                        (click)="confirmDelete($event, product.id)" class="ml-2 float-right" />
-                    }
-                    @if (authService.isSysadmin()) {
-                    <p-button icon="pi pi-pencil" [rounded]="true" severity="success" [outlined]="true"
-                        [routerLink]="['/product', product.id, 'edit']" class="ml-2 float-right" />
-                    }
+        <ng-template #emptymessage>
+            <tr>
+                <td colspan="6">
+                    <div class="flex flex-col items-center gap-2 py-8 text-gray-500">
+                        <i class="pi pi-box text-3xl"></i>
+                        @if (filterForm.controls.search.value) {
+                        <span>No product matches "{{ filterForm.controls.search.value }}"</span>
+                        }
+                        @else {
+                        <span>No products yet</span>
+                        }
+                    </div>
                 </td>
             </tr>
         </ng-template>
     </p-table>
 
-    <div #loadMoreTrigger class="h-4"></div>
+    <div #loadMoreTrigger></div>
 </p-card>

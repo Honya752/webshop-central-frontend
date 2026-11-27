@@ -109,7 +109,7 @@ export class StoreIntegrationCredentials implements OnInit {
   confirmDelete(event: Event) {
     this.confirmationService.confirm({
       target: event.target as EventTarget,
-      message: 'Product sync and webhooks stop working for this store until new credentials are set. Are you sure?',
+      message: 'Delete the credentials? Product sync and webhooks stop working for this store until new ones are set',
       header: 'Delete credentials',
       icon: 'pi pi-exclamation-triangle',
       rejectButtonProps: {

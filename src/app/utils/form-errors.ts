@@ -21,7 +21,7 @@ export function applyServerErrors(form: AbstractControl, error: unknown, fallbac
             }
         }
 
-        return appliedToField ? 'Please correct the highlighted fields.' : fallback;
+        return appliedToField ? 'Please correct the highlighted fields' : fallback;
     }
 
     return getApiErrorMessage(error, fallback);

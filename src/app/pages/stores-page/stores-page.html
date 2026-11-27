@@ -4,39 +4,58 @@
     <p-table [value]="stores()" [loading]="isLoading()">
         <ng-template #caption>
             <div class="flex items-center justify-between">
-                <span class="text-xl font-bold">Stores</span>
+                <div class="flex items-baseline gap-2">
+                    <span class="text-xl font-bold">Stores</span>
+                    @if (total() !== null) {
+                    <span class="text-sm text-gray-500">{{ total() }} total</span>
+                    }
+                </div>
+                <p-button icon="pi pi-plus" label="Add store" routerLink="/store/create" />
             </div>
         </ng-template>
 
         <ng-template #header>
             <tr>
                 <th>Name</th>
+                <th>Webshop</th>
+                <th>Platform</th>
                 <th>Region</th>
-                <th>Store Type</th>
                 <th>Currency</th>
-                <th class="flex gap-2 justify-end">Actions</th>
+                <th class="w-0 whitespace-nowrap text-right!">Actions</th>
             </tr>
         </ng-template>
 
         <ng-template #body let-store>
             <tr>
                 <td>
-                    <a class="link-text" [routerLink]="['/store', store.id]">{{store.name}}</a>
+                    <a class="link-text font-bold" [routerLink]="['/store', store.id]">{{ store.name }}</a>
+                    <div class="text-sm text-gray-500 font-mono">{{ store.slug }}</div>
                 </td>
-                <td class="text-2xl">{{getFlagEmoji(store.region)}}</td>
-                <td>{{store.integrationType}}</td>
-                <td class="font-mono">{{store.currency}}</td>
                 <td>
-                    <p-button icon="pi pi-chevron-right" [rounded]="true" severity="secondary" [outlined]="true"
-                        [routerLink]="['/store', store.id]" class="ml-4 float-right" />
-                    <p-button icon="pi pi-pencil" [rounded]="true" severity="success" [outlined]="true"
-                        [routerLink]="['/store', store.id, 'edit']" class="ml-4 float-right" />
-                    <p-button icon="pi pi-trash" [rounded]="true" severity="danger" [outlined]="true"
-                        (click)="confirmDelete($event, store)" class="ml-4 float-right" />
+                    <app-external-link [href]="store.baseUrl" title="Open the webshop">{{ store.baseUrl }}</app-external-link>
                 </td>
+                <td>{{ platformLabel(store.integrationType) }}</td>
+                <td class="font-mono">{{ store.region }}</td>
+                <td class="font-mono">{{ store.currency }}</td>
+                <td class="w-0 whitespace-nowrap">
+                    <div class="flex gap-2 justify-end">
+                        <p-button icon="pi pi-pencil" [rounded]="true" severity="success" [outlined]="true"
+                            [routerLink]="['/store', store.id, 'edit']" ariaLabel="Edit store" title="Edit store" />
+                        <p-button icon="pi pi-trash" [rounded]="true" severity="danger" [outlined]="true"
+                            (click)="confirmDelete($event, store)" ariaLabel="Delete store" title="Delete store" />
+                        <p-button icon="pi pi-chevron-right" [rounded]="true" severity="secondary" [outlined]="true"
+                            [routerLink]="['/store', store.id]" ariaLabel="Open store" title="Open store" />
+                    </div>
+                </td>
+            </tr>
+        </ng-template>
+
+        <ng-template #emptymessage>
+            <tr>
+                <td colspan="6">No stores yet, add one to connect a webshop</td>
             </tr>
         </ng-template>
     </p-table>
 
-    <div #loadMoreTrigger class="h-4"></div>
+    <div #loadMoreTrigger></div>
 </p-card>

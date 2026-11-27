@@ -142,12 +142,17 @@ export class CreateWholesalerPage implements OnInit {
 
   readonly orderModes: { label: string; value: WholesalerOrderMode }[] = [
     { label: 'Automatic, after a waiting time', value: 'AUTOMATIC' },
-    { label: 'Manual (Send now)', value: 'MANUAL' },
+    { label: 'Manual, when you send it', value: 'MANUAL' },
   ];
 
-  integrations: { label: string; value: WholesalerIntegrationType }[] = [
-    { label: "JSON integration", value: "JSON_INTEGRATION" },
-    { label: "XML integration", value: "XML_INTEGRATION" },
-  ]
+  readonly integrations: { label: string; value: WholesalerIntegrationType }[] = [
+    { label: 'JSON feed', value: 'JSON_INTEGRATION' },
+    { label: 'XML feed', value: 'XML_INTEGRATION' },
+  ];
+
+  /** Back to the wholesaler when editing, else to the list. */
+  cancel(): void {
+    this.router.navigate(this.isEditMode && this.id ? ['/wholesaler', this.id] : ['/wholesalers']);
+  }
 
 }

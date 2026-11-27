@@ -2,13 +2,15 @@
 
     <form [formGroup]="form" (ngSubmit)="submit()" class="form">
 
-        <h1 class="header">Webshop Central</h1>
+        <div class="flex justify-center py-4">
+            <app-logo />
+        </div>
 
         @if (errorMessage()) {
         <p class="form-error">{{ errorMessage() }}</p>
         }
         @else if (sessionExpired) {
-        <p class="form-error">Your session has expired, please log in again.</p>
+        <p class="form-error">Your session has expired, please log in again</p>
         }
 
         <div class="field">

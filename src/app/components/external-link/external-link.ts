@@ -6,9 +6,9 @@ import { Component, input } from '@angular/core';
     selector: 'app-external-link',
     template: `
         @if (href(); as url) {
-            <a class="link-text external-link" [href]="url" target="_blank" rel="noopener noreferrer"
+            <a class="external-link" [href]="url" target="_blank" rel="noopener noreferrer"
                 [attr.title]="title() ?? 'Opens in a new tab'" [attr.aria-label]="title() ?? null">
-                <ng-content /><i class="pi pi-external-link" aria-hidden="true"></i>
+                <span class="external-link-text"><ng-content /></span><i class="pi pi-external-link" aria-hidden="true"></i>
             </a>
         } @else {
             <span>{{ fallback() }}</span>

@@ -27,6 +27,8 @@ export class WholesalerOrdersPage implements OnInit {
   readonly orders = signal<WholesalerOrder[]>([]);
   readonly wholesalers = signal<Wholesaler[]>([]);
   readonly isLoading = signal(false);
+  /** Number of all matching purchase orders (from the pagination meta). */
+  readonly total = signal<number | null>(null);
   /** ID of the purchase order being sent. */
   readonly sendingId = signal<string | null>(null);
 
@@ -58,6 +60,7 @@ export class WholesalerOrdersPage implements OnInit {
     }).subscribe({
       next: response => {
         this.orders.set(response.data);
+        this.total.set(response.meta.total);
         this.isLoading.set(false);
       },
       error: error => {

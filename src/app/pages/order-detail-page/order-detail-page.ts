@@ -67,6 +67,14 @@ export class OrderDetailPage implements OnInit {
 
   readonly isChangingStatus = signal(false);
 
+  readonly itemsSummary = computed(() => {
+    const items = this.order()?.orderItems ?? [];
+    const pieces = items.reduce((sum, item) => sum + item.quantity, 0);
+    const issues = items.filter(item => item.issue).length;
+    const summary = `${items.length} ${items.length === 1 ? 'line' : 'lines'}, ${pieces} pcs`;
+    return issues ? `${summary}, ${issues} with a problem` : summary;
+  });
+
   private readonly issueLabels: Record<OrderItemIssue, string> = {
     OUT_OF_STOCK: 'Out of stock',
     UNKNOWN_PRODUCT: 'Unknown product',
@@ -116,7 +124,7 @@ export class OrderDetailPage implements OnInit {
 
     this.confirmationService.confirm({
       target: event.target as EventTarget,
-      message: 'The order is closed and its stock is given back to the wholesalers. This cannot be undone. Are you sure?',
+      message: 'Cancel this order? Its stock is given back to the wholesalers and this cannot be undone',
       header: 'Cancel order',
       icon: 'pi pi-exclamation-triangle',
       rejectButtonProps: {

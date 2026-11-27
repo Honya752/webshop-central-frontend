@@ -12,6 +12,7 @@ import { ConfirmationService, MessageService } from 'primeng/api';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { getApiErrorMessage } from '../../utils/api-error';
 
+import { wholesalerIntegrationLabel } from '../../utils/labels';
 @Component({
   selector: 'app-wholesalers-page',
   imports: [ExternalLink, Card, TableModule, ButtonModule, TagModule, RouterLink, ProgressSpinnerModule, ConfirmDialogModule],
@@ -20,6 +21,8 @@ import { getApiErrorMessage } from '../../utils/api-error';
   styleUrl: './wholesalers-page.sass',
 })
 export class WholesalersPage implements OnInit {
+
+  readonly integrationLabel = wholesalerIntegrationLabel;
 
   private readonly wholesalersService = inject(WholesalersService);
   private readonly messageService = inject(MessageService);

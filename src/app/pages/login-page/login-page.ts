@@ -8,10 +8,12 @@ import { PasswordModule } from 'primeng/password';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 
+import { Logo } from '../../components/logo/logo';
 @Component({
   selector: 'app-login-page',
   standalone: true,
   imports: [
+    Logo,
     ReactiveFormsModule,
     RouterLink,
     InputTextModule,

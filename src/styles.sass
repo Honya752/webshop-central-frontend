@@ -37,7 +37,10 @@ body
 
 // opens in a new tab: arrow icon after the text
 .external-link
-  @apply inline-flex items-center gap-1
+  @apply inline-flex items-baseline gap-1 text-blue-600 cursor-pointer no-underline
+  // only the text is underlined on hover, not the gap and the icon
+  &:hover .external-link-text
+    @apply underline
   .pi
     @apply text-xs
 
@@ -51,38 +54,39 @@ p-password.ng-invalid.ng-touched
   input
     border-color: #ef4444 !important
 
-.nav-profile
-  @apply bg-gray-200 p-2 rounded-full h-8 w-8 flex items-center justify-center
-
-.nav-item
-  @apply text-gray-800
-
-  &:hover
-    @apply text-black cursor-pointer
-
-.nav-logo
-  @apply font-bold text-lg
-
 .main-layout
   @apply relative flex min-h-0 w-full flex-1 gap-6 p-6
 
+// Sidebar: group titles are labels, the links below them can be selected
 .sidebar-item
-  @apply flex items-center justify-between
+  @apply flex items-center gap-2 pt-2 pb-0.5 text-sm font-semibold text-gray-500
 
-  .item-title
-    @apply flex flex-1 items-center gap-2
-
+// sub items are indented under their group title
 .sidebar-menu
-  @apply pl-6 flex flex-col gap-2
+  @apply flex flex-col pl-4
 
-  &>a
-    @apply flex flex-row gap-2 items-center
+.item-title
+  @apply flex items-center gap-2 rounded-md px-2 my-1 text-gray-700 whitespace-nowrap border-l-2 border-transparent transition-colors
+  &:hover
+    @apply bg-gray-100 text-gray-900
+  // current page (set by MainLayout.active)
+  &.active
+    @apply bg-emerald-50 text-emerald-700 font-semibold border-emerald-500
 
-    &:hover span
-      @apply cursor-pointer underline
+// Top level link (Dashboard): its icon lines up with the group titles, the padding and the
+// active bar move to the left instead
+.item-title.item-top
+  margin-left: calc(-0.5rem - 2px)
 
 .form-group
   .p-panel-header
     @apply p-0
   .p-panel-content
     @apply p-4
+
+// Tables: no border under the last row (the card already closes the table).
+// With a footer the body keeps its last border, as it separates the body from the footer.
+.p-datatable
+  .p-datatable-table:not(:has(.p-datatable-tfoot)) .p-datatable-tbody > tr:last-child > td,
+  .p-datatable-tfoot > tr:last-child > td
+    border-bottom-width: 0

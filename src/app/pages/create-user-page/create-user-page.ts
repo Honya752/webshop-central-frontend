@@ -5,7 +5,8 @@ import { CreateUser, UpdateUser } from '../../types/user';
 import { StoreSummary } from '../../types/store';
 import { GlobalRole, StoreRole } from '../../types/enums';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { UserAvatar } from '../../components/user-avatar/user-avatar';
 import { applyServerErrors } from '../../utils/form-errors';
 import { getApiErrorMessage } from '../../utils/api-error';
 import { CommonModule } from '@angular/common';
@@ -19,7 +20,7 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 
 @Component({
   selector: 'app-create-user-page',
-  imports: [CommonModule, PasswordModule, ReactiveFormsModule, Card, InputTextModule, ButtonModule, SelectModule, ConfirmDialogModule,],
+  imports: [RouterLink, UserAvatar, CommonModule, PasswordModule, ReactiveFormsModule, Card, InputTextModule, ButtonModule, SelectModule, ConfirmDialogModule,],
   providers: [ConfirmationService],
   templateUrl: './create-user-page.html',
   styleUrl: './create-user-page.sass',
@@ -41,6 +42,21 @@ export class CreateUserPage implements OnInit {
 
   stores = signal<StoreSummary[]>([]);
 
+  private readonly roleHints: Record<GlobalRole, string> = {
+    USER: 'Sees only the store they belong to',
+    MODERATOR: 'Can also create and delete products',
+    SYSADMIN: 'Full access to every store, user, wholesaler and setting',
+  };
+
+  private readonly storeRoleHints: Record<StoreRole, string> = {
+    VIEWER: 'Can see the orders, products and statistics of the store',
+    MODERATOR: 'Can also change order statuses, sync products and see the jobs',
+    ADMIN: 'Can also edit the store and manage its webshop and API keys',
+  };
+
+  readonly roleHint = signal(this.roleHints.USER);
+  readonly storeRoleHint = signal(this.storeRoleHints.VIEWER);
+
   form = this.fb.group({
     name: this.fb.nonNullable.control('', [Validators.required, Validators.minLength(3)]),
     email: this.fb.nonNullable.control('', [Validators.required, Validators.email]),
@@ -51,6 +67,16 @@ export class CreateUserPage implements OnInit {
   });
 
   ngOnInit(): void {
+    this.form.controls.globalRole.valueChanges.subscribe(role => this.roleHint.set(this.roleHints[role] ?? ''));
+    this.form.controls.storeRole.valueChanges.subscribe(role => this.storeRoleHint.set(this.storeRoleHints[role ?? 'VIEWER']));
+
+    // The store role only means something with a store
+    this.form.controls.storeId.valueChanges.subscribe(storeId => {
+      if (storeId) this.form.controls.storeRole.enable({ emitEvent: false });
+      else this.form.controls.storeRole.disable({ emitEvent: false });
+    });
+    this.form.controls.storeRole.disable({ emitEvent: false });
+
     this.id = this.route.snapshot.paramMap.get('id');
     this.isEditMode = !!this.id;
 
@@ -175,9 +201,9 @@ export class CreateUserPage implements OnInit {
 
 
   roleOptions: { label: string; value: GlobalRole }[] = [
-    { label: 'Administrator', value: 'SYSADMIN' },
-    { label: 'Moderator', value: 'MODERATOR' },
     { label: 'User', value: 'USER' },
+    { label: 'Moderator', value: 'MODERATOR' },
+    { label: 'Administrator', value: 'SYSADMIN' },
   ];
 
   storeOptions = computed(() =>
@@ -187,9 +213,10 @@ export class CreateUserPage implements OnInit {
     }))
   );
 
+  // Different from the system roles, so "Administrator" always means the system administrator
   storeRoleOptions: { label: string; value: StoreRole }[] = [
-    { label: 'Administrator', value: 'ADMIN' },
-    { label: 'Moderator', value: 'MODERATOR' },
     { label: 'Viewer', value: 'VIEWER' },
+    { label: 'Store moderator', value: 'MODERATOR' },
+    { label: 'Store admin', value: 'ADMIN' },
   ];
 }

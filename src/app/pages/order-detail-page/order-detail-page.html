@@ -1,145 +1,174 @@
 <p-card>
-    <div class="flex justify-evenly text-lg mb-6 px-4 ">
-        <div class="w-full">
-            <p>Order date: <span class="font-bold">{{ order()?.createdAt | date:'yyyy. MM. dd. HH:mm' }}</span></p>
-            <p>Store:
-                @if (order()?.store; as store) {
-                <a class="link-text font-bold" [routerLink]="['/store', store.id]">{{ store.name }}</a>
-                }
-            </p>
-            <p>Webshop order: <span class="font-bold font-mono">#{{ order()?.externalOrderId }}</span>
-                <app-external-link class="ml-2" [href]="order()?.externalUrl" fallback="">Open in the webshop</app-external-link>
-            </p>
-            <p>Order status:
+    <div class="flex items-start justify-between gap-6 px-4 mb-6">
+        <div class="flex flex-col gap-1">
+            <div class="flex items-center gap-3">
+                <h1 class="header text-left!">Order <span class="font-mono">#{{ order()?.externalOrderId }}</span></h1>
                 <app-order-status-tag [status]="order()?.status" />
-            </p>
+            </div>
+            @if (order(); as o) {
+            <div class="flex items-center gap-3 text-gray-500">
+                <span>{{ o.createdAt | date:'yyyy. MM. dd. HH:mm' }}</span>
+                <app-external-link [href]="o.externalUrl" title="Open in the webshop admin" fallback="">
+                    Open in the webshop
+                </app-external-link>
+            </div>
+            }
         </div>
-        <div class="w-full">
-            <p>Customer name: <span class="font-bold">{{order()?.name ?? ''}}</span></p>
-            <p>Customer email:
-                @if (order()?.email) {
-                <a class="link-text font-bold" [href]="'mailto:' + order()?.email">{{ order()?.email }}</a>
+
+        @if (order()) {
+        <div class="flex flex-col items-end gap-2">
+            @if (nextStatusActions().length === 0) {
+            <small class="text-gray-500">This order is closed, its status cannot be changed</small>
+            }
+            @else if (!canChangeStatus()) {
+            <small class="text-gray-500">Changing the status needs the store moderator or store admin role</small>
+            }
+            @else {
+            <small class="text-gray-500">Mark order as</small>
+            <div class="flex flex-row gap-2">
+                @for (action of nextStatusActions(); track action.status) {
+                <p-button [icon]="action.icon" [severity]="action.severity" [label]="action.label"
+                    [outlined]="action.status === 'CANCELLED'" [disabled]="isChangingStatus()"
+                    (onClick)="confirmStatus($event, action.status)" />
                 }
-            </p>
+            </div>
+            }
         </div>
+        }
     </div>
 
-    <p-table [value]="order()?.orderItems ?? []">
+    <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 px-4">
+        <div class="flex flex-col">
+            <small class="text-gray-500">Customer</small>
+            <span class="font-bold">{{ order()?.name }}</span>
+        </div>
+        <div class="flex flex-col min-w-0">
+            <small class="text-gray-500">Email</small>
+            @if (order()?.email; as email) {
+            <a class="link-text font-bold truncate" [href]="'mailto:' + email" [title]="email">{{ email }}</a>
+            }
+        </div>
+        <div class="flex flex-col">
+            <small class="text-gray-500">Store</small>
+            @if (order()?.store; as store) {
+            <a class="link-text font-bold" [routerLink]="['/store', store.id]">{{ store.name }}</a>
+            }
+        </div>
+        <div class="flex flex-col">
+            <small class="text-gray-500">Payment</small>
+            <span class="font-bold">{{ order()?.paymentMethod ?? '-' }}</span>
+        </div>
+        <div class="flex flex-col">
+            <small class="text-gray-500">Placed in the webshop</small>
+            <span class="font-bold">{{ (order()?.createdAtExternal | date:'yyyy. MM. dd. HH:mm') ?? '-' }}</span>
+        </div>
+        <div class="flex flex-col">
+            <small class="text-gray-500">Received</small>
+            <span class="font-bold">{{ order()?.createdAt | date:'yyyy. MM. dd. HH:mm' }}</span>
+        </div>
+    </div>
+</p-card>
+
+<p-card class="mt-6">
+    <p-table [value]="order()?.orderItems ?? []" [loading]="isLoading()">
         <ng-template #caption>
-            <div class="flex items-center justify-between">
+            <div class="flex items-baseline gap-2">
                 <span class="text-xl font-bold">Ordered items</span>
+                <span class="text-sm text-gray-500">{{ itemsSummary() }}</span>
             </div>
         </ng-template>
 
         <ng-template #header>
             <tr>
-                <th>Name</th>
-                <th>Image</th>
-                <th>Issue</th>
-                <th>Wholesaler</th>
-                <th>SKU</th>
-                <th>
-                    <p class="text-center w-full">Quantity</p>
-                </th>
-                <th>Unit Price</th>
-                <th>Subtotal</th>
-                <th>
-                    <p class="text-center w-full">EAN</p>
-                </th>
+                <th class="w-0"><span class="sr-only">Image</span></th>
+                <th>Product</th>
+                <th>Fulfilment</th>
+                <th class="text-center!">Quantity</th>
+                <th class="text-right!">Unit price</th>
+                <th class="text-right!">Subtotal</th>
             </tr>
         </ng-template>
 
         <ng-template #body let-item>
             <tr>
+                <td class="w-0">
+                    @if (item.product?.images?.[0]; as image) {
+                    <img [src]="image.url" [alt]="image.alt || item.product?.name"
+                        class="w-12 h-12 max-w-none object-cover rounded-md border border-gray-200" />
+                    }
+                    @else {
+                    <div class="w-12 h-12 rounded-md bg-gray-100 flex items-center justify-center text-gray-400">
+                        <i class="pi pi-image"></i>
+                    </div>
+                    }
+                </td>
+
                 <td>
                     @if (item.product) {
                     @if (authService.isSysadmin()) {
-                    <a class="link-text" [routerLink]="['/product', item.product.id]">{{ item.product.name }}</a>
-                    }
-                    @else {{{ item.product.name }}}
+                    <a class="link-text font-bold" [routerLink]="['/product', item.product.id]">{{ item.product.name }}</a>
                     }
                     @else {
-                    <span class="italic">Unknown product</span>
+                    <span class="font-bold">{{ item.product.name }}</span>
+                    }
+                    }
+                    @else {
+                    <span class="font-bold italic">Unknown product</span>
+                    }
+                    <div>
+                        <small class="text-gray-500 font-mono">
+                            SKU {{ item.sku }}@if (item.product?.ean) {, EAN {{ item.product.ean }}}
+                        </small>
+                    </div>
+                    @if (item.product?.ean; as ean) {
+                    <app-barcode [value]="ean" [height]="28" [barWidth]="1" class="block mt-1" />
                     }
                 </td>
-                <td>
-                    @if (item.product?.images?.[0]; as image) {
-                    <img [src]="image.url" [alt]="image.alt || item.product?.name" class="w-24 rounded" />
-                    }
-                </td>
+
                 <td>
                     @if (item.issue) {
-                    <p-tag severity="danger" [value]="issueLabel(item.issue)" />
+                    <p-tag severity="danger" icon="pi pi-exclamation-triangle" [value]="issueLabel(item.issue)"
+                        class="whitespace-nowrap" />
                     }
-                </td>
-                <td>
                     @if (item.wholesaler) {
-                    @if (authService.isSysadmin()) {
-                    <a class="link-text" [routerLink]="['/wholesaler', item.wholesaler.id]">{{ item.wholesaler.name }}</a>
-                    }
-                    @else {{{ item.wholesaler.name }}}
-                    }
-                    @if (item.wholesalerOrder; as po) {
-                    <a class="flex items-center gap-1 mt-1" [routerLink]="['/wholesaler-order', po.id]" title="Purchase order">
-                        <app-wholesaler-order-status-tag [status]="po.status" />
-                        @if (po.externalOrderId) { <span class="font-mono text-sm">{{ po.externalOrderId }}</span> }
-                    </a>
-                    }
-                </td>
-                <td class="font-mono">{{ item.sku }}</td>
-                <td class="font-mono">
-                    <p class="text-center w-full">
-                        {{item.quantity}}
-                    </p>
-                </td>
-                <td>{{ item.unitPrice | money:order()?.currency }}</td>
-                <td>{{ item.total | money:order()?.currency }}</td>
-                <td>
-                    <div class="flex justify-center">
-                        @if (item.product?.ean; as ean) {
-                        <app-barcode [value]="ean" />
+                    <div [class.mt-1]="item.issue">
+                        @if (authService.isSysadmin()) {
+                        <a class="link-text" [routerLink]="['/wholesaler', item.wholesaler.id]">{{ item.wholesaler.name }}</a>
+                        }
+                        @else {
+                        <span>{{ item.wholesaler.name }}</span>
                         }
                     </div>
+                    }
+                    @if (item.wholesalerOrder; as po) {
+                    <a class="inline-flex items-center gap-1 mt-1" [routerLink]="['/wholesaler-order', po.id]"
+                        title="Open the purchase order">
+                        <app-wholesaler-order-status-tag [status]="po.status" />
+                        @if (po.externalOrderId) {
+                        <span class="font-mono text-sm text-gray-500">{{ po.externalOrderId }}</span>
+                        }
+                    </a>
+                    }
+                    @if (!item.issue && !item.wholesaler && !item.wholesalerOrder) {
+                    <span class="text-gray-500">-</span>
+                    }
                 </td>
+
+                <td class="text-center! font-mono">{{ item.quantity }}</td>
+                <td class="text-right! whitespace-nowrap text-gray-500">{{ item.unitPrice | money:order()?.currency }}</td>
+                <td class="text-right! whitespace-nowrap font-bold">{{ item.total | money:order()?.currency }}</td>
             </tr>
         </ng-template>
 
         <ng-template #footer>
             <tr>
-                <td class="font-bold">Total:</td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td>
+                <td colspan="5" class="text-right! font-bold">Total</td>
+                <td class="text-right! whitespace-nowrap font-bold text-lg">
                     {{ order()?.total | money:order()?.currency }}
                 </td>
-                <td></td>
             </tr>
         </ng-template>
     </p-table>
-
-    @if (order()) {
-    <div class="mt-8 px-4 flex justify-between items-center">
-        @if (nextStatusActions().length === 0) {
-        <p class="text-lg">This order is closed, its status cannot be changed.</p>
-        }
-        @else if (!canChangeStatus()) {
-        <p class="text-lg">Changing the status needs the store moderator or admin role.</p>
-        }
-        @else {
-        <p class="text-lg">Mark order as:</p>
-        <div class="flex flex-row gap-4">
-            @for (action of nextStatusActions(); track action.status) {
-            <p-button [icon]="action.icon" [severity]="action.severity" [label]="action.label"
-                [disabled]="isChangingStatus()" (onClick)="confirmStatus($event, action.status)" />
-            }
-        </div>
-        }
-    </div>
-    }
 </p-card>
 
 <p-confirmdialog />

@@ -98,7 +98,7 @@ export class StoreApiCredentials implements OnInit {
   confirmRevoke(event: Event, credential: StoreApiCredential) {
     this.confirmationService.confirm({
       target: event.target as EventTarget,
-      message: `The webshop can no longer call the API with the key "${credential.label ?? credential.key}". Are you sure?`,
+      message: `Revoke the key "${credential.label ?? credential.key}"? The webshop can no longer call the API with it`,
       header: 'Revoke API key',
       icon: 'pi pi-exclamation-triangle',
       rejectButtonProps: {

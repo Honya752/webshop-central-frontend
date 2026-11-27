@@ -1,74 +1,111 @@
 <p-card>
-    <div class="flex flex-row gap-4 items-center">
-        <h1 class="font-bold w-full">Purchase orders</h1>
+    <p-table [value]="orders()" [loading]="isLoading()" [rowHover]="true">
+        <ng-template #caption>
+            <div class="flex flex-col gap-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-baseline gap-2">
+                        <span class="text-xl font-bold">Purchase orders</span>
+                        @if (total() !== null) {
+                        <span class="text-sm text-gray-500">{{ total() }} total</span>
+                        }
+                    </div>
+                    <p-button icon="pi pi-refresh" [rounded]="true" [text]="true" severity="secondary"
+                        [loading]="isLoading()" (onClick)="load()" ariaLabel="Refresh" title="Refresh" />
+                </div>
 
-        <p-select [options]="wholesalers()" [(ngModel)]="wholesalerId" optionLabel="name" optionValue="id"
-            placeholder="All wholesalers" [showClear]="true" (onChange)="load()" class="w-full md:w-56" />
+                <div class="flex flex-row items-center gap-3">
+                    <p-select [options]="wholesalers()" [(ngModel)]="wholesalerId" optionLabel="name" optionValue="id"
+                        placeholder="All wholesalers" [showClear]="true" (onChange)="load()" class="w-64"
+                        ariaLabel="Wholesaler" />
+                    <p-select [options]="statusOptions" [(ngModel)]="status" optionLabel="label" optionValue="value"
+                        placeholder="All statuses" [showClear]="true" (onChange)="load()" class="w-56"
+                        ariaLabel="Status" />
+                    <small class="text-gray-500 flex-1 text-right">
+                        The lines of the incoming orders are collected into one purchase order per wholesaler
+                    </small>
+                </div>
+            </div>
+        </ng-template>
 
-        <p-select [options]="statusOptions" [(ngModel)]="status" optionLabel="label" optionValue="value"
-            placeholder="All statuses" [showClear]="true" (onChange)="load()" class="w-full md:w-56" />
-
-        <p-button icon="pi pi-refresh" severity="secondary" [outlined]="true" [rounded]="true" (onClick)="load()" />
-    </div>
-    <small class="block mt-3">
-        The lines of the incoming orders are collected per wholesaler. An automatic wholesaler gets them after its
-        waiting time, a manual one when you send them.
-    </small>
-</p-card>
-
-<p-card class="w-full mt-4">
-    <p-table [value]="orders()" [loading]="isLoading()">
         <ng-template #header>
             <tr>
-                <th>Created</th>
+                <th>Purchase order</th>
                 <th>Wholesaler</th>
                 <th>Status</th>
-                <th>Lines</th>
-                <th>Total</th>
-                <th>Wholesaler order no.</th>
-                <th>Sent / to be sent</th>
-                <th></th>
+                <th class="text-center!">Lines</th>
+                <th class="text-right!">Total</th>
+                <th>Sending</th>
+                <th class="w-0 whitespace-nowrap text-right!">Actions</th>
             </tr>
         </ng-template>
 
         <ng-template #body let-order>
             <tr>
-                <td>{{ order.createdAt | date:'yyyy. MM. dd. HH:mm' }}</td>
-                <td><a class="link-text" [routerLink]="['/wholesaler', order.wholesaler.id]">{{ order.wholesaler.name }}</a></td>
+                <td class="whitespace-nowrap">
+                    <a class="link-text font-bold" [routerLink]="['/wholesaler-order', order.id]">
+                        {{ order.createdAt | date:'yyyy. MM. dd. HH:mm' }}
+                    </a>
+                    <div>
+                        <small class="text-gray-500 font-mono">
+                            @if (order.externalOrderId) {No. {{ order.externalOrderId }}}
+                            @else {No number yet}
+                        </small>
+                    </div>
+                </td>
+                <td>
+                    <a class="link-text" [routerLink]="['/wholesaler', order.wholesaler.id]">{{ order.wholesaler.name }}</a>
+                    <div>
+                        <small class="text-gray-500">
+                            @if (order.wholesaler.orderMode === 'MANUAL') {Manual}
+                            @else {Automatic}
+                        </small>
+                    </div>
+                </td>
                 <td>
                     <app-wholesaler-order-status-tag [status]="order.status" />
                     @if (order.lastError) {
-                    <div class="text-sm text-red-600 mt-1">{{ order.lastError }}</div>
+                    <div class="text-sm text-red-600 mt-1 max-w-64">{{ order.lastError }}</div>
                     }
                 </td>
-                <td class="font-mono">{{ order.itemCount }}</td>
-                <td>{{ order.total | money:order.currency }}</td>
-                <td class="font-mono">{{ order.externalOrderId ?? '-' }}</td>
-                <td>
+                <td class="text-center! font-mono">{{ order.itemCount ?? '-' }}</td>
+                <td class="text-right! font-bold whitespace-nowrap">{{ order.total | money:order.currency }}</td>
+                <td class="text-gray-500 whitespace-nowrap">
                     @if (order.sentAt) {
-                    {{ order.sentAt | date:'yyyy. MM. dd. HH:mm' }}
-                    } @else if (order.status === 'DRAFT') {
-                    @if (order.sendAfter) {
-                    <span class="text-sm">automatically at {{ order.sendAfter | date:'HH:mm' }}</span>
-                    } @else {
-                    <span class="text-sm">waits for sending</span>
+                    Sent {{ order.sentAt | date:'yyyy. MM. dd. HH:mm' }}
                     }
-                    } @else { - }
+                    @else if (order.status === 'DRAFT') {
+                    @if (order.sendAfter) {Automatically at {{ order.sendAfter | date:'HH:mm' }}}
+                    @else {Waits for sending}
+                    }
+                    @else {-}
                 </td>
-                <td class="whitespace-nowrap text-right">
-                    @if (canSend(order)) {
-                    <p-button icon="pi pi-send" label="Send now" size="small" [loading]="sendingId() === order.id"
-                        (onClick)="send(order)" class="mr-2" />
-                    }
-                    <p-button icon="pi pi-chevron-right" [rounded]="true" severity="secondary" [outlined]="true"
-                        [routerLink]="['/wholesaler-order', order.id]" />
+                <td class="w-0 whitespace-nowrap">
+                    <div class="flex gap-2 justify-end">
+                        @if (canSend(order)) {
+                        <p-button icon="pi pi-send" label="Send now" size="small" [loading]="sendingId() === order.id"
+                            (onClick)="send(order)" />
+                        }
+                        <p-button icon="pi pi-chevron-right" [rounded]="true" severity="secondary" [outlined]="true"
+                            [routerLink]="['/wholesaler-order', order.id]" ariaLabel="Open purchase order"
+                            title="Open purchase order" />
+                    </div>
                 </td>
             </tr>
         </ng-template>
 
         <ng-template #emptymessage>
             <tr>
-                <td colspan="8">No purchase orders yet. They are created when orders come in from the webshops.</td>
+                <td colspan="7">
+                    <div class="flex flex-col items-center gap-2 py-8 text-gray-500">
+                        <i class="pi pi-send text-3xl"></i>
+                        @if (status || wholesalerId) {
+                        <span>No purchase order matches the filters</span>
+                        }
+                        @else {
+                        <span>No purchase orders yet, they are created when orders come in from the webshops</span>
+                        }
+                    </div>
+                </td>
             </tr>
         </ng-template>
     </p-table>

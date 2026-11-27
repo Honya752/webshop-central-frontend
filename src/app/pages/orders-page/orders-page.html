@@ -1,56 +1,90 @@
 <p-card>
-    <form [formGroup]="filterForm" class="flex flex-row gap-4 items-center">
-        <h1 class="font-bold w-full">Sort Orders</h1>
-
-        <p-select [options]="sortByOptions" formControlName="sortBy" optionLabel="label" optionValue="value"
-            placeholder="Sort by" class="w-full md:w-56" />
-
-        <p-select [options]="sortOrderOptions" formControlName="sortOrder" optionLabel="label" optionValue="value"
-            placeholder="Sort order" class="w-full md:w-56" />
-    </form>
-</p-card>
-
-<p-card class="w-full mt-4">
-    <p-table [value]="orders()" [loading]="isLoading()">
+    <p-table [value]="orders()" [loading]="isLoading()" [rowHover]="true">
         <ng-template #caption>
-            <div class="flex items-center justify-between">
-                <span class="text-xl font-bold">Orders</span>
+            <div class="flex flex-col gap-4">
+                <div class="flex items-baseline gap-2">
+                    <span class="text-xl font-bold">Orders</span>
+                    @if (total() !== null) {
+                    <span class="text-sm text-gray-500">{{ total() }} total</span>
+                    }
+                </div>
+
+                <form [formGroup]="filterForm" class="flex flex-row items-center gap-3">
+                    <p-iconfield class="flex-1">
+                        <p-inputicon class="pi pi-search" />
+                        <input pInputText type="search" formControlName="search" class="w-full"
+                            placeholder="Search by order number, customer name or email" aria-label="Search orders" />
+                    </p-iconfield>
+
+                    <p-select [options]="statusOptions" formControlName="status" optionLabel="label"
+                        optionValue="value" placeholder="All statuses" [showClear]="true" class="w-48"
+                        ariaLabel="Status" />
+
+                    <p-select [options]="sortByOptions" formControlName="sortBy" optionLabel="label" optionValue="value"
+                        class="w-44" ariaLabel="Sort by" />
+
+                    <p-select [options]="sortOrderOptions" formControlName="sortOrder" optionLabel="label"
+                        optionValue="value" class="w-40" ariaLabel="Sort order" />
+                </form>
             </div>
         </ng-template>
 
         <ng-template #header>
             <tr>
                 <th>Order</th>
-                <th>Order date</th>
                 <th>Customer</th>
                 <th>Store</th>
                 <th>Status</th>
-                <th>Total price</th>
-                <th>Payment Method</th>
-                <th></th>
+                <th>Payment</th>
+                <th class="text-right!">Total</th>
+                <th class="w-0"><span class="sr-only">Actions</span></th>
             </tr>
         </ng-template>
 
         <ng-template #body let-order>
             <tr>
                 <td class="whitespace-nowrap">
-                    <a class="link-text font-mono" [routerLink]="['/order', order.id]">#{{ order.externalOrderId }}</a>
-                    <app-external-link class="ml-1" [href]="order.externalUrl" title="Open in the webshop admin" fallback="" />
+                    <div class="flex items-center gap-1">
+                        <a class="link-text font-bold font-mono" [routerLink]="['/order', order.id]">
+                            #{{ order.externalOrderId }}
+                        </a>
+                        <app-external-link [href]="order.externalUrl" title="Open in the webshop admin" fallback="" />
+                    </div>
+                    <small class="text-gray-500">{{ order.createdAt | date:'yyyy. MM. dd. HH:mm' }}</small>
                 </td>
-                <td>{{ order.createdAt | date:'yyyy. MM. dd. HH:mm' }}</td>
-                <td>{{ order.name }}</td>
-                <td><a class="link-text" [routerLink]="['/store', order.store.id]">{{ order.store.name }}</a></td>
                 <td>
-                    <app-order-status-tag [status]="order.status" /></td>
-                <td>{{ order.total | money:order.currency }}</td>
-                <td>{{order.paymentMethod}}</td>
+                    <div>{{ order.name }}</div>
+                    <small class="text-gray-500">{{ order.email }}</small>
+                </td>
                 <td>
+                    <a class="link-text" [routerLink]="['/store', order.store.id]">{{ order.store.name }}</a>
+                </td>
+                <td><app-order-status-tag [status]="order.status" /></td>
+                <td class="text-gray-500">{{ order.paymentMethod ?? '-' }}</td>
+                <td class="text-right! font-bold whitespace-nowrap">{{ order.total | money:order.currency }}</td>
+                <td class="w-0">
                     <p-button icon="pi pi-chevron-right" [rounded]="true" severity="secondary" [outlined]="true"
-                        [routerLink]="['/order', order.id]" />
+                        [routerLink]="['/order', order.id]" ariaLabel="Open order" title="Open order" />
+                </td>
+            </tr>
+        </ng-template>
+
+        <ng-template #emptymessage>
+            <tr>
+                <td colspan="7">
+                    <div class="flex flex-col items-center gap-2 py-8 text-gray-500">
+                        <i class="pi pi-shopping-cart text-3xl"></i>
+                        @if (hasFilter()) {
+                        <span>No order matches the filters</span>
+                        }
+                        @else {
+                        <span>No orders yet, they arrive from the webshops</span>
+                        }
+                    </div>
                 </td>
             </tr>
         </ng-template>
     </p-table>
 
-    <div #loadMoreTrigger class="h-4"></div>
+    <div #loadMoreTrigger></div>
 </p-card>

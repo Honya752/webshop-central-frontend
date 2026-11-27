@@ -6,14 +6,12 @@ import { CommonModule } from '@angular/common';
 import { Card } from 'primeng/card';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputNumberModule } from 'primeng/inputnumber';
-import { PanelModule } from 'primeng/panel';
 import { ButtonModule } from 'primeng/button';
 import { TextareaModule } from 'primeng/textarea';
 import { ActivatedRoute, Router } from '@angular/router';
 import { applyServerErrors } from '../../utils/form-errors';
 import { getApiErrorMessage } from '../../utils/api-error';
 import { ConfirmationService, MessageService } from 'primeng/api';
-import { ImageModule } from 'primeng/image';
 import { SelectModule } from 'primeng/select';
 
 type LocalizationForm = FormGroup<{
@@ -39,9 +37,10 @@ type ProductForm = FormGroup<{
 }>;
 
 import { CURRENCY_OPTIONS, DEFAULT_CURRENCY } from '../../utils/currencies';
+import { AuthService } from '../../services/auth.service';
 @Component({
   selector: 'app-create-product-page',
-  imports: [CommonModule, ReactiveFormsModule, Card, ImageModule, InputTextModule, InputNumberModule, PanelModule, ButtonModule, TextareaModule, SelectModule],
+  imports: [CommonModule, ReactiveFormsModule, Card, InputTextModule, InputNumberModule, ButtonModule, TextareaModule, SelectModule],
   providers: [ConfirmationService],
   templateUrl: './create-product-page.html',
   styleUrl: './create-product-page.sass',
@@ -52,6 +51,7 @@ export class CreateProductPage implements OnInit {
   private readonly router = inject(Router);
   private readonly productsService = inject(ProductsService);
   private readonly messageService = inject(MessageService);
+  private readonly authService = inject(AuthService);
 
   readonly maxLocalizations = 20;
   readonly maxImages = 20;
@@ -135,13 +135,12 @@ export class CreateProductPage implements OnInit {
     }
     else {
       this.localizations.push(this.createLocalizationGroup());
-      this.images.push(this.createImageGroup());
     }
   }
 
   createLocalizationGroup(): LocalizationForm {
     return this.fb.group({
-      region: this.fb.nonNullable.control('', [Validators.required, Validators.maxLength(10)]),
+      region: this.fb.nonNullable.control('', [Validators.required, Validators.pattern(/^[A-Za-z]{2}$/)]),
       name: this.fb.nonNullable.control('', [Validators.required, Validators.maxLength(255)]),
       description: this.fb.nonNullable.control('', [Validators.required])
     });
@@ -170,8 +169,26 @@ export class CreateProductPage implements OnInit {
   }
 
   removeImage(index: number): void {
-    if (this.images.length <= 1) return;
     this.images.removeAt(index);
+  }
+
+  /** Back to the product page if it can be opened, else to the list. */
+  cancel(): void {
+    if (this.isEditMode && this.id && this.authService.isSysadmin()) {
+      this.router.navigate(['/product', this.id]);
+    } else {
+      this.router.navigate(['/products']);
+    }
+  }
+
+  /** The product page needs SYSADMIN, a moderator goes back to the list. */
+  private navigateAfterSave(productId: string): void {
+    this.router.navigate(this.authService.isSysadmin() ? ['/product', productId] : ['/products']);
+  }
+
+  /** Region codes are stored upper case (HU, EN, ...). */
+  private localizationValues() {
+    return this.localizations.getRawValue().map(loc => ({ ...loc, region: loc.region.trim().toUpperCase() }));
   }
 
   submit(): void {
@@ -191,14 +208,14 @@ export class CreateProductPage implements OnInit {
         category: this.form.controls.category.getRawValue(),
         price: this.form.controls.price.getRawValue()!,
         currency: this.form.controls.currency.getRawValue(),
-        localizations: this.localizations.getRawValue(),
+        localizations: this.localizationValues(),
         images: this.images.getRawValue()
       };
 
       this.productsService.updateProduct(payload, this.id).subscribe({
         next: (product) => {
           this.isLoading.set(false);
-          this.router.navigate(['/product', product.id]);
+          this.navigateAfterSave(product.id);
           this.messageService.add({
             severity: 'success',
             summary: 'Product updated',
@@ -220,14 +237,14 @@ export class CreateProductPage implements OnInit {
         category: this.form.controls.category.getRawValue(),
         price: this.form.controls.price.getRawValue()!,
         currency: this.form.controls.currency.getRawValue(),
-        localizations: this.localizations.getRawValue(),
+        localizations: this.localizationValues(),
         images: this.images.getRawValue()
       };
 
       this.productsService.createProduct(payload).subscribe({
         next: (product) => {
           this.isLoading.set(false);
-          this.router.navigate(['/product', product.id]);
+          this.navigateAfterSave(product.id);
           this.messageService.add({
             severity: 'success',
             summary: 'Product created',
@@ -244,12 +261,4 @@ export class CreateProductPage implements OnInit {
     }
   }
 
-
-  getFlagEmoji(region: string): string {
-    return region
-      .toUpperCase()
-      .replace(/./g, char =>
-        String.fromCodePoint(127397 + char.charCodeAt(0))
-      );
-  }
 }

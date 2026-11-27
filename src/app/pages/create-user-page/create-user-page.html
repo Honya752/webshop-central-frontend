@@ -1,8 +1,11 @@
 <p-card class="px-6">
-    <h1 class="header">
-        @if (isEditMode) {Edit user profile}
-        @else {Create a user}
-    </h1>
+    <div class="flex items-center justify-center gap-4">
+        <app-user-avatar [role]="form.controls.globalRole.value" [name]="form.controls.name.value" size="lg" />
+        <h1 class="header">
+            @if (isEditMode) {Edit user}
+            @else {Add user}
+        </h1>
+    </div>
 
     @if (errorMessage()) {
     <p class="form-error">{{ errorMessage() }}</p>
@@ -55,7 +58,10 @@
 
         <div class="field w-full">
             <div class="flex items-center justify-between">
-                <label for="password">Password</label>
+                <label for="password">
+                    @if (isEditMode) {New password}
+                    @else {Password}
+                </label>
                 <div>
                     @if (form.controls.password.touched && form.controls.password.hasError('required')) {
                     <small class="error">Password is required</small>
@@ -72,40 +78,48 @@
                     }
                 </div>
             </div>
-            <p-password inputId="password" formControlName="password" [feedback]="false" [toggleMask]="true" autocomplete="off" fluid />
+            <p-password inputId="password" formControlName="password" [feedback]="false" [toggleMask]="true"
+                autocomplete="new-password" fluid />
+            @if (isEditMode) {
+            <small class="text-gray-500">Leave it empty to keep the current password</small>
+            }
+        </div>
+
+        <div class="field w-full">
+            <label for="globalRole">System role</label>
+            <p-select [options]="roleOptions" inputId="globalRole" formControlName="globalRole" optionLabel="label"
+                optionValue="value" placeholder="System role" class="w-full" />
+            <small class="text-gray-500">{{ roleHint() }}</small>
         </div>
 
         <div class="flex flex-row w-full gap-4">
             <div class="field w-full">
-                <label for="globalRole">Role</label>
-                <p-select [options]="roleOptions" inputId="globalRole" formControlName="globalRole" optionLabel="label" optionValue="value"
-                    placeholder="Role" class="w-full" />
-            </div>
-
-            <div class="field w-full">
                 <label for="storeId">Store</label>
-                <p-select [options]="storeOptions()" inputId="storeId" formControlName="storeId" optionLabel="label" optionValue="value"
-                    placeholder="Store" class="w-full" [checkmark]="true" [showClear]="true" />
+                <p-select [options]="storeOptions()" inputId="storeId" formControlName="storeId" optionLabel="label"
+                    optionValue="value" placeholder="No store" class="w-full" [checkmark]="true" [showClear]="true" />
+                <small class="text-gray-500">The store the user works with, a user can belong to one store only</small>
             </div>
 
             <div class="field w-full">
                 <label for="storeRole">Store role</label>
                 <p-select [options]="storeRoleOptions" inputId="storeRole" formControlName="storeRole" optionLabel="label"
-                    optionValue="value" placeholder="Store role" class="w-full" [checkmark]="true" [showClear]="true" />
+                    optionValue="value" placeholder="Viewer (default)" class="w-full" [checkmark]="true"
+                    [showClear]="true" />
+                <small class="text-gray-500">{{ storeRoleHint() }}</small>
             </div>
         </div>
 
-        <div class="flex items-center justify-between">
-            <div></div>
+        <div class="flex items-center justify-end gap-2">
+            <p-button label="Cancel" severity="secondary" [outlined]="true" routerLink="/users" />
 
             <button pButton type="submit" [disabled]="isLoading()">
                 @if (isEditMode) {
-                <i class="pi pi-check"></i>
-                <span pButtonLabel>Save</span>
+                <i class="pi pi-check" pButtonIcon></i>
+                <span pButtonLabel>Save changes</span>
                 }
                 @else {
-                <i class="pi pi-plus"></i>
-                <span pButtonLabel>Create</span>
+                <i class="pi pi-user-plus" pButtonIcon></i>
+                <span pButtonLabel>Add user</span>
                 }
             </button>
         </div>

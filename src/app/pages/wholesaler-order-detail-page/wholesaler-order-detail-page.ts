@@ -1,4 +1,5 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { MessageModule } from 'primeng/message';
 import { DatePipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MessageService } from 'primeng/api';
@@ -13,7 +14,7 @@ import { getApiErrorMessage } from '../../utils/api-error';
 
 @Component({
   selector: 'app-wholesaler-order-detail-page',
-  imports: [DatePipe, RouterLink, MoneyPipe, Card, ButtonModule, TableModule, WholesalerOrderStatusTag],
+  imports: [DatePipe, RouterLink, MoneyPipe, Card, ButtonModule, TableModule, WholesalerOrderStatusTag, MessageModule],
   templateUrl: './wholesaler-order-detail-page.html',
 })
 export class WholesalerOrderDetailPage implements OnInit {
@@ -22,6 +23,12 @@ export class WholesalerOrderDetailPage implements OnInit {
   private readonly route = inject(ActivatedRoute);
 
   readonly order = signal<WholesalerOrderDetail | null>(null);
+
+  readonly linesSummary = computed(() => {
+    const items = this.order()?.items ?? [];
+    const pieces = items.reduce((sum, item) => sum + item.quantity, 0);
+    return `${items.length} ${items.length === 1 ? 'line' : 'lines'}, ${pieces} pcs`;
+  });
   readonly isLoading = signal(false);
   readonly isSending = signal(false);
 

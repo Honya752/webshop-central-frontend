@@ -13,12 +13,14 @@ import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
 import { WholesalersService } from '../../services/wholesalers.service';
 import { WholesalerCredentialsStatus, WholesalerDetail } from '../../types/wholesaler';
-import { WholesalerIntegrationType } from '../../types/enums';
 
 import { MoneyPipe } from '../../pipes/money.pipe';
+import { TabsModule } from 'primeng/tabs';
+import { BadgeModule } from 'primeng/badge';
+import { orderModeLabel, wholesalerIntegrationLabel } from '../../utils/labels';
 @Component({
   selector: 'app-wholesaler-detail-page',
-  imports: [ExternalLink, MoneyPipe, DatePipe, DecimalPipe, Card, TableModule, ButtonModule, TagModule, ConfirmDialogModule, RouterLink, FormsModule, InputTextModule],
+  imports: [ExternalLink, MoneyPipe, DatePipe, DecimalPipe, Card, TableModule, ButtonModule, TagModule, ConfirmDialogModule, RouterLink, FormsModule, InputTextModule, TabsModule, BadgeModule],
   providers: [ConfirmationService],
   templateUrl: './wholesaler-detail-page.html',
   styleUrl: './wholesaler-detail-page.sass',
@@ -38,6 +40,9 @@ export class WholesalerDetailPage implements OnInit {
   readonly wholesaler = signal<WholesalerDetail | null>(null);
   readonly credentials = signal<WholesalerCredentialsStatus | null>(null);
   readonly isSavingKey = signal(false);
+  readonly activeTab = signal<'stocks' | 'api-key'>('stocks');
+  readonly orderModeLabel = orderModeLabel;
+  readonly integrationLabel = wholesalerIntegrationLabel;
   apiKey = '';
 
   readonly totalStock = computed(() =>
@@ -48,11 +53,6 @@ export class WholesalerDetailPage implements OnInit {
     (this.wholesaler()?.stocks ?? []).filter(stock => stock.stock <= 0).length
   );
 
-  private readonly integrationLabels: Record<WholesalerIntegrationType, string> = {
-    EXAMPLEWHOLESALER: 'Example wholesaler',
-    JSON_INTEGRATION: 'JSON integration',
-    XML_INTEGRATION: 'XML integration',
-  };
 
   ngOnInit(): void {
     this.id = this.route.snapshot.paramMap.get('id');
@@ -158,7 +158,7 @@ export class WholesalerDetailPage implements OnInit {
 
     this.confirmationService.confirm({
       target: event.target as EventTarget,
-      message: `Are you sure you want to delete ${wholesaler.name}? Its product stocks and wholesaler orders are deleted too.`,
+      message: `Are you sure you want to delete ${wholesaler.name}? Its product stocks and wholesaler orders are deleted too`,
       header: 'Delete wholesaler',
       icon: 'pi pi-exclamation-triangle',
       rejectButtonProps: {
@@ -187,7 +187,4 @@ export class WholesalerDetailPage implements OnInit {
     });
   }
 
-  integrationLabel(type: WholesalerIntegrationType | undefined): string {
-    return type ? this.integrationLabels[type] : '';
-  }
 }

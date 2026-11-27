@@ -2,7 +2,7 @@
 <p-card>
     <div class="px-4">
         <h1 class="header">Dashboard</h1>
-        <p>The statistics are available to store members. Ask an administrator to add you to a store.</p>
+        <p>The statistics are available to store members, ask an administrator to add you to a store</p>
     </div>
 </p-card>
 }
@@ -21,8 +21,7 @@
     </div>
     @if (summary(); as s) {
     <p class="px-4 text-sm">
-        {{ s.meta.from }} – {{ s.meta.to }}, amounts in {{ s.meta.currency }} (other currencies converted with the ECB
-        rate of the order's day). Cancelled orders are not counted.
+        From {{ s.meta.from }} to {{ s.meta.to }}, amounts in {{ s.meta.currency }} (other currencies converted with the ECB rate of the order's day), cancelled orders are not counted
     </p>
     }
 </p-card>
@@ -33,7 +32,7 @@
         <span>
             <i class="pi pi-exclamation-triangle"></i>
             <span class="font-bold"> {{ summary()?.totals?.needsAttention }} order(s) need attention</span>
-            – some items could not be fulfilled automatically.
+            , some items could not be fulfilled automatically
         </span>
         <p-button label="Open orders" icon="pi pi-chevron-right" iconPos="right" severity="secondary"
             [outlined]="true" routerLink="/orders" />
@@ -114,7 +113,7 @@
             </div>
             }
             @else if (!isLoading()) {
-            <p class="py-6">No sales in this period.</p>
+            <p class="py-6">No sales in this period</p>
             }
         </div>
     </p-card>
@@ -128,7 +127,7 @@
             </div>
             }
             @else if (!isLoading()) {
-            <p class="py-6">No sales in this period.</p>
+            <p class="py-6">No sales in this period</p>
             }
         </div>
     </p-card>
@@ -185,7 +184,7 @@
 
         <ng-template #emptymessage>
             <tr>
-                <td colspan="7">No product is running out.</td>
+                <td colspan="7">No product is running out</td>
             </tr>
         </ng-template>
     </p-table>
@@ -226,7 +225,7 @@
 
         <ng-template #emptymessage>
             <tr>
-                <td colspan="4">Every uploaded product sold in the last 30 days.</td>
+                <td colspan="4">Every uploaded product sold in the last 30 days</td>
             </tr>
         </ng-template>
     </p-table>
@@ -292,7 +291,7 @@
 
         <ng-template #emptymessage>
             <tr>
-                <td colspan="8">No stores yet.</td>
+                <td colspan="8">No stores yet</td>
             </tr>
         </ng-template>
     </p-table>

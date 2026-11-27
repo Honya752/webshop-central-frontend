@@ -2,7 +2,12 @@
 
 <p-card>
     <div class="flex items-start justify-between px-4 mb-6">
-        <h1 class="header">{{ wholesaler()?.name }}</h1>
+        <div>
+            <h1 class="header text-left!">{{ wholesaler()?.name }}</h1>
+            @if (wholesaler(); as w) {
+            <app-external-link [href]="w.baseUrl" title="Open the wholesaler">{{ w.baseUrl }}</app-external-link>
+            }
+        </div>
         @if (wholesaler(); as w) {
         <div class="flex gap-2">
             <p-button icon="pi pi-sync" label="Sync catalog" severity="secondary" [outlined]="true"
@@ -15,112 +20,176 @@
         }
     </div>
 
-    <div class="flex justify-evenly text-lg px-4">
-        <div class="w-full">
-            <p>URL: <app-external-link class="font-bold" [href]="wholesaler()?.baseUrl">{{ wholesaler()?.baseUrl }}</app-external-link></p>
-            <p>Integration type: <span class="font-bold">{{ integrationLabel(wholesaler()?.integrationType) }}</span></p>
-            <p>Currency: <span class="font-bold">{{ wholesaler()?.currency }}</span></p>
-            <p>Purchase orders:
-                <span class="font-bold">
-                    @if (wholesaler()?.orderMode === 'AUTOMATIC') { automatic, after {{ wholesaler()?.orderDelayMinutes }} min }
-                    @else { manual }
+    <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 px-4">
+        <div class="flex flex-col">
+            <small class="text-gray-500">Catalog</small>
+            <span class="font-bold">{{ integrationLabel(wholesaler()?.integrationType) }}</span>
+        </div>
+        <div class="flex flex-col">
+            <small class="text-gray-500">Currency</small>
+            <span class="font-bold font-mono">{{ wholesaler()?.currency }}</span>
+        </div>
+        <div class="flex flex-col">
+            <small class="text-gray-500">Purchase orders</small>
+            <span class="font-bold">{{ orderModeLabel(wholesaler()?.orderMode, wholesaler()?.orderDelayMinutes) }}</span>
+            @if (wholesaler(); as w) {
+            <a class="link-text text-sm" [routerLink]="['/wholesaler-orders']" [queryParams]="{ wholesalerId: w.id }">
+                View purchase orders
+            </a>
+            }
+        </div>
+        <div class="flex flex-col">
+            <small class="text-gray-500">Products</small>
+            <span class="font-bold">{{ wholesaler()?.stocks?.length ?? 0 }}</span>
+        </div>
+        <div class="flex flex-col">
+            <small class="text-gray-500">Total stock</small>
+            <span class="font-bold">{{ totalStock() | number }} pcs</span>
+            @if (outOfStockCount() > 0) {
+            <small class="text-red-600">{{ outOfStockCount() }} out of stock</small>
+            }
+        </div>
+        <div class="flex flex-col">
+            <small class="text-gray-500">Last updated</small>
+            <span class="font-bold">{{ wholesaler()?.updatedAt | date:'yyyy. MM. dd. HH:mm' }}</span>
+        </div>
+    </div>
+</p-card>
+
+<p-card class="mt-6">
+    <p-tabs [value]="activeTab()" (valueChange)="activeTab.set($any($event))">
+        <p-tablist>
+            <p-tab value="stocks">
+                <span class="flex items-center gap-2"><i class="pi pi-box"></i> Product stocks</span>
+            </p-tab>
+            <p-tab value="api-key">
+                <span class="flex items-center gap-2">
+                    <i class="pi pi-key"></i> API key
+                    @if (credentials() && !credentials()?.configured) {
+                    <p-badge value="!" severity="danger" title="No API key set" />
+                    }
                 </span>
-                @if (wholesaler(); as w) {
-                <a class="link-text text-sm ml-2" [routerLink]="['/wholesaler-orders']" [queryParams]="{ wholesalerId: w.id }">show orders</a>
-                }
-            </p>
-            <p>Created at: <span class="font-bold">{{ wholesaler()?.createdAt | date:'yyyy. MM. dd. HH:mm' }}</span></p>
-            <p>Last updated: <span class="font-bold">{{ wholesaler()?.updatedAt | date:'yyyy. MM. dd. HH:mm' }}</span></p>
-        </div>
-        <div class="w-full">
-            <p>Products: <span class="font-bold">{{ wholesaler()?.stocks?.length ?? 0 }}</span></p>
-            <p>Total stock: <span class="font-bold">{{ totalStock() | number }} pcs</span></p>
-            <p>Out of stock products: <span class="font-bold">{{ outOfStockCount() }}</span></p>
-        </div>
-    </div>
-</p-card>
+            </p-tab>
+        </p-tablist>
 
-<p-card class="mt-6">
-    <div class="px-4">
-        <h2 class="text-xl font-bold mb-2">API key</h2>
-        <p class="mb-3">
-            @if (credentials()?.configured) {
-            Set: <span class="font-bold font-mono">{{ credentials()?.apiKeyHint }}</span>
-            <span class="text-sm"> (updated {{ credentials()?.updatedAt | date:'yyyy. MM. dd. HH:mm' }})</span>
-            } @else {
-            <span class="text-red-600">Not set — purchase orders to this wholesaler cannot be sent.</span>
-            }
-        </p>
-        <div class="flex gap-2 items-center">
-            <input pInputText type="password" [(ngModel)]="apiKey" placeholder="New API key" autocomplete="off" class="w-full md:w-80" />
-            <p-button icon="pi pi-save" label="Save" [loading]="isSavingKey()" [disabled]="!apiKey.trim()" (onClick)="saveApiKey()" />
-            @if (credentials()?.configured) {
-            <p-button icon="pi pi-trash" label="Delete" severity="danger" [outlined]="true" (onClick)="deleteApiKey()" />
-            }
-        </div>
-        <small>Sent in the X-Api-Key header with the purchase orders. Stored encrypted, never shown again.</small>
-    </div>
-</p-card>
+        <p-tabpanels>
+            <!-- Product stocks -->
+            <p-tabpanel value="stocks">
+                <p-table [value]="wholesaler()?.stocks ?? []" [loading]="isLoading()" [rowHover]="true">
+                    <ng-template #caption>
+                        <div class="flex items-baseline gap-2">
+                            <span class="text-xl font-bold">Product stocks</span>
+                            <span class="text-sm text-gray-500">From the last catalog sync</span>
+                        </div>
+                    </ng-template>
 
-<p-card class="mt-6">
-    <p-table [value]="wholesaler()?.stocks ?? []" [loading]="isLoading()">
-        <ng-template #caption>
-            <div class="flex items-center justify-between">
-                <span class="text-xl font-bold">Product stocks</span>
-            </div>
-        </ng-template>
+                    <ng-template #header>
+                        <tr>
+                            <th class="w-0"><span class="sr-only">Image</span></th>
+                            <th>Product</th>
+                            <th>Stock</th>
+                            <th class="text-right!">Wholesale price</th>
+                            <th>Last updated</th>
+                            <th class="w-0"><span class="sr-only">Actions</span></th>
+                        </tr>
+                    </ng-template>
 
-        <ng-template #header>
-            <tr>
-                <th>Image</th>
-                <th>Name</th>
-                <th>Status</th>
-                <th>SKU</th>
-                <th>EAN</th>
-                <th>Quantity</th>
-                <th>Wholesale price</th>
-                <th>Last updated</th>
-                <th></th>
-            </tr>
-        </ng-template>
+                    <ng-template #body let-stock>
+                        <tr>
+                            <td class="w-0">
+                                @if (stock.imageUrl) {
+                                <img [src]="stock.imageUrl" [alt]="stock.name ?? stock.sku"
+                                    class="w-12 h-12 max-w-none object-cover rounded-md border border-gray-200" />
+                                }
+                                @else {
+                                <div class="w-12 h-12 rounded-md bg-gray-100 flex items-center justify-center text-gray-400">
+                                    <i class="pi pi-image"></i>
+                                </div>
+                                }
+                            </td>
+                            <td>
+                                <a class="link-text font-bold" [routerLink]="['/product', stock.productId]">
+                                    {{ stock.name ?? stock.sku }}
+                                </a>
+                                <div>
+                                    <small class="text-gray-500 font-mono">SKU {{ stock.sku }}, EAN {{ stock.ean }}</small>
+                                </div>
+                            </td>
+                            <td>
+                                @if (stock.stock <= 0) {
+                                <p-tag severity="danger" icon="pi pi-times-circle" value="Out of stock" class="whitespace-nowrap" />
+                                }
+                                @else if (stock.stock <= 5) {
+                                <p-tag severity="warn" icon="pi pi-exclamation-triangle" value="Low stock" class="whitespace-nowrap" />
+                                }
+                                @else {
+                                <p-tag severity="success" icon="pi pi-check" value="In stock" class="whitespace-nowrap" />
+                                }
+                                <div><small class="text-gray-500">{{ stock.stock }} pcs</small></div>
+                            </td>
+                            <td class="text-right! font-bold whitespace-nowrap">{{ stock.price | money:wholesaler()?.currency }}</td>
+                            <td class="text-gray-500 whitespace-nowrap">{{ stock.updatedAt | date:'yyyy. MM. dd. HH:mm' }}</td>
+                            <td class="w-0">
+                                <p-button icon="pi pi-chevron-right" [rounded]="true" severity="secondary" [outlined]="true"
+                                    [routerLink]="['/product', stock.productId]" ariaLabel="Open product"
+                                    title="Open product" />
+                            </td>
+                        </tr>
+                    </ng-template>
 
-        <ng-template #body let-stock>
-            <tr>
-                <td>
-                    @if (stock.imageUrl) {
-                    <img [src]="stock.imageUrl" [alt]="stock.name ?? stock.sku" class="w-24 rounded" />
-                    }
-                </td>
-                <td>
-                    <a class="link-text" [routerLink]="['/product', stock.productId]">{{ stock.name ?? stock.sku }}</a>
-                </td>
-                <td>
-                    @if (stock.stock <= 0) {
-                    <p-tag severity="danger" value="Out of stock" />
-                    }
-                    @else if (stock.stock <= 5) {
-                    <p-tag severity="warn" value="Low stock" />
-                    }
-                    @else {
-                    <p-tag severity="success" value="In stock" />
-                    }
-                </td>
-                <td class="font-mono">{{ stock.sku }}</td>
-                <td class="font-mono">{{ stock.ean }}</td>
-                <td class="font-mono">{{ stock.stock }}</td>
-                <td>{{ stock.price | money:wholesaler()?.currency }}</td>
-                <td>{{ stock.updatedAt | date:'yyyy. MM. dd. HH:mm' }}</td>
-                <td>
-                    <p-button icon="pi pi-chevron-right" [rounded]="true" severity="secondary" [outlined]="true"
-                        [routerLink]="['/product', stock.productId]" class="float-right" />
-                </td>
-            </tr>
-        </ng-template>
+                    <ng-template #emptymessage>
+                        <tr>
+                            <td colspan="6">
+                                <div class="flex flex-col items-center gap-2 py-8 text-gray-500">
+                                    <i class="pi pi-box text-3xl"></i>
+                                    <span>This wholesaler has no products yet, sync the catalog to import them</span>
+                                </div>
+                            </td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+            </p-tabpanel>
 
-        <ng-template #emptymessage>
-            <tr>
-                <td colspan="9">This wholesaler has no products yet. Sync the catalog to import them.</td>
-            </tr>
-        </ng-template>
-    </p-table>
+            <!-- API key -->
+            <p-tabpanel value="api-key">
+                <div class="flex flex-col gap-4 max-w-2xl">
+                    <div class="flex flex-col gap-1">
+                        <small class="text-gray-500">Status</small>
+                        @if (credentials()?.configured) {
+                        <div class="flex items-center gap-2">
+                            <p-tag severity="success" icon="pi pi-check" value="Configured" />
+                            <span class="font-mono">{{ credentials()?.apiKeyHint }}</span>
+                            <small class="text-gray-500">updated {{ credentials()?.updatedAt | date:'yyyy. MM. dd. HH:mm' }}</small>
+                        </div>
+                        }
+                        @else {
+                        <div class="flex items-center gap-2">
+                            <p-tag severity="danger" icon="pi pi-times" value="Not set" />
+                            <small class="text-red-600">Purchase orders to this wholesaler cannot be sent</small>
+                        </div>
+                        }
+                    </div>
+
+                    <div class="field">
+                        <label for="apiKey">
+                            @if (credentials()?.configured) {Replace API key}
+                            @else {API key}
+                        </label>
+                        <div class="flex gap-2 items-center">
+                            <input pInputText id="apiKey" type="password" [(ngModel)]="apiKey" autocomplete="off"
+                                class="flex-1" placeholder="The key given by the wholesaler" />
+                            <p-button icon="pi pi-check" label="Save" [loading]="isSavingKey()"
+                                [disabled]="!apiKey.trim()" (onClick)="saveApiKey()" />
+                            @if (credentials()?.configured) {
+                            <p-button icon="pi pi-trash" label="Delete" severity="danger" [outlined]="true"
+                                (onClick)="deleteApiKey()" />
+                            }
+                        </div>
+                        <small class="text-gray-500">Sent in the X-Api-Key header with the purchase orders, stored
+                            encrypted and never shown again</small>
+                    </div>
+                </div>
+            </p-tabpanel>
+        </p-tabpanels>
+    </p-tabs>
 </p-card>

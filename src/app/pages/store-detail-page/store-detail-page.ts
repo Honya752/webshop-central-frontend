@@ -18,15 +18,18 @@ import { StoreApiCredentials } from '../../components/store-api-credentials/stor
 import { StoreJobs } from '../../components/store-jobs/store-jobs';
 import { getApiErrorMessage } from '../../utils/api-error';
 
-type StoreTab = 'orders' | 'products' | 'integration' | 'api-keys' | 'jobs';
-
 import { MoneyPipe } from '../../pipes/money.pipe';
 import { AuthService } from '../../services/auth.service';
+import { BadgeModule } from 'primeng/badge';
+import { platformLabel } from '../../utils/labels';
+
+type StoreTab = 'orders' | 'products' | 'jobs' | 'integration' | 'api-keys';
+
 @Component({
   selector: 'app-store-detail-page',
-  imports: [ExternalLink, MoneyPipe, 
+  imports: [ExternalLink, MoneyPipe,
     DatePipe, RouterLink,
-    Card, TableModule, ButtonModule, TagModule, TabsModule, ConfirmDialogModule,
+    Card, TableModule, ButtonModule, TagModule, TabsModule, ConfirmDialogModule, BadgeModule,
     OrderStatusTag, StoreIntegrationCredentials, StoreApiCredentials, StoreJobs,
   ],
   providers: [ConfirmationService],
@@ -48,6 +51,22 @@ export class StoreDetailPage implements OnInit {
   readonly error = signal<string | null>(null);
   readonly store = signal<StoreDetail | null>(null);
   readonly activeTab = signal<StoreTab>('orders');
+  /** Product whose single sync is running (spinner on its button). */
+  readonly syncingProductId = signal<string | null>(null);
+
+  readonly platformLabel = platformLabel;
+
+  // Shown as badges on the tabs
+  readonly needsAttentionCount = computed(() =>
+    (this.store()?.orders ?? []).filter(order => order.status === 'NEEDS_ATTENTION').length
+  );
+  readonly outOfSyncCount = computed(() =>
+    (this.store()?.products ?? []).filter(product => !this.isInSync(product)).length
+  );
+  readonly productsSummary = computed(() => {
+    const uploaded = `${this.store()?.products?.length ?? 0} uploaded`;
+    return this.outOfSyncCount() > 0 ? `${uploaded}, ${this.outOfSyncCount()} out of sync` : uploaded;
+  });
 
   // Permissions of the current user on this store (mirror the backend guards)
   private readonly storeId = computed(() => this.store()?.id ?? this.id);
@@ -102,10 +121,13 @@ export class StoreDetailPage implements OnInit {
 
   syncWithStore(productId: string) {
     const storeId = this.store()?.id;
-    if (!storeId) return;
+    if (!storeId || this.syncingProductId()) return;
+
+    this.syncingProductId.set(productId);
 
     this.storesService.syncProductToStore(storeId, productId).subscribe({
       next: () => {
+        this.syncingProductId.set(null);
         this.messageService.add({
           severity: 'success',
           summary: 'Product synced',
@@ -114,6 +136,7 @@ export class StoreDetailPage implements OnInit {
         this.loadStore(storeId);
       },
       error: (error) => {
+        this.syncingProductId.set(null);
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
@@ -157,7 +180,7 @@ export class StoreDetailPage implements OnInit {
 
     this.confirmationService.confirm({
       target: event.target as EventTarget,
-      message: `Are you sure you want to delete ${store.name}? Its API keys, product mappings and memberships are deleted too.`,
+      message: `Are you sure you want to delete ${store.name}? Its API keys, product mappings and memberships are deleted too`,
       header: 'Delete store',
       icon: 'pi pi-exclamation-triangle',
       rejectButtonProps: {

@@ -1,264 +1,229 @@
 <p-card class="px-6">
-
     <form [formGroup]="form" (ngSubmit)="submit()" class="form">
 
         <h1 class="header">
             @if (isEditMode) {Edit product}
-            @else {Create a product}
+            @else {Add product}
         </h1>
 
         @if (errorMessage()) {
         <p class="form-error">{{ errorMessage() }}</p>
         }
 
-        <div formArrayName="images" class="flex flex-col gap-4">
-            <div class="flex items-center justify-between pt-4">
-                <h2 class="font-bold">Product images</h2>
-                <div>
-                    <button pButton type="button" size="small" (click)="addImage()"
-                        [disabled]="images.length >= maxImages">
-                        <i class="pi pi-plus" pButtonIcon></i>
-                        <span pButtonLabel>Add</span>
-                    </button>
-                    <button pButton type="button" size="small" severity="danger"
-                        (click)="removeImage(images.length - 1)" [disabled]="images.length <= 1" class="ms-2">
-                        <i class="pi pi-minus" pButtonIcon></i>
-                        <span pButtonLabel>Remove</span>
-                    </button>
-                </div>
+        <!-- Basic data -->
+        <section class="flex flex-col gap-4">
+            <div>
+                <h2 class="text-lg font-bold">Basic data</h2>
+                <small class="text-gray-500">The same in every store</small>
             </div>
 
-            @for (group of images.controls; track $index; let i = $index) {
-            <p-panel [formGroupName]="i" class="form-group">
-                <div class="flex justify-between gap-4">
-                    <img [src]="group.controls.url.value || 'https://placehold.co/200x200?text=No+image'" alt="Preview"
-                        imageClass="h-full w-full object-cover" class="w-24 rounded" />
-                    <div class="field w-full">
-                        <div class="flex items-center justify-between">
-                            <label for="url">Product image URL</label>
-
-                            @if (group.controls.url.touched && group.controls.url.invalid) {
-                            <small class="error">Image URL is required</small>
-                            }
-                        </div>
-                        <input pInputText type="text" formControlName="url" class="font-mono" />
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="field">
+                    <div class="flex items-center justify-between">
+                        <label for="sku">SKU</label>
+                        @if (form.controls.sku.touched && form.controls.sku.hasError('required')) {
+                        <small class="error">SKU is required</small>
+                        }
+                        @if (form.controls.sku.hasError('server')) {
+                        <small class="error">{{ form.controls.sku.getError('server') }}</small>
+                        }
                     </div>
-
-                    <div class="field w-70">
-                        <div class="flex items-center justify-between">
-                            <label for="alt">Alternative text</label>
-
-                            @if (group.controls.alt.touched && group.controls.alt.invalid) {
-                            <small class="error">Alternative text is required (max. 255 characters)</small>
-                            }
-                        </div>
-                        <input pInputText type="text" formControlName="alt" />
-                    </div>
+                    <input pInputText id="sku" type="text" formControlName="sku" class="font-mono!" placeholder="KEY-003" />
                 </div>
-            </p-panel>
-            }
 
-        </div>
+                <div class="field">
+                    <div class="flex items-center justify-between">
+                        <label for="ean">EAN</label>
+                        @if (form.controls.ean.touched && form.controls.ean.hasError('required')) {
+                        <small class="error">EAN is required</small>
+                        }
+                        @if (form.controls.ean.hasError('server')) {
+                        <small class="error">{{ form.controls.ean.getError('server') }}</small>
+                        }
+                    </div>
+                    <input pInputText id="ean" type="text" formControlName="ean" class="font-mono!"
+                        placeholder="13 digit barcode" />
+                </div>
 
-        <div formArrayName="localizations" class="flex flex-col gap-4">
-            <div class="flex items-center justify-between pt-4">
-                <h2 class="font-bold">Localizations</h2>
-                <div>
-                    <button pButton type="button" size="small" (click)="addLocalization()"
-                        [disabled]="localizations.length >= maxLocalizations">
-                        <i class="pi pi-plus" pButtonIcon></i>
-                        <span pButtonLabel>Add</span>
-                    </button>
-                    <button pButton type="button" size="small" severity="danger"
-                        (click)="removeLocalization(localizations.length - 1)"
-                        [disabled]="localizations.length <= 1" class="ms-2">
-                        <i class="pi pi-minus" pButtonIcon></i>
-                        <span pButtonLabel>Remove</span>
-                    </button>
+                <div class="field">
+                    <div class="flex items-center justify-between">
+                        <label for="brand">Brand</label>
+                        @if (form.controls.brand.touched && form.controls.brand.hasError('required')) {
+                        <small class="error">Brand is required</small>
+                        }
+                        @if (form.controls.brand.hasError('server')) {
+                        <small class="error">{{ form.controls.brand.getError('server') }}</small>
+                        }
+                    </div>
+                    <input pInputText id="brand" type="text" formControlName="brand" />
+                </div>
+
+                <div class="field">
+                    <div class="flex items-center justify-between">
+                        <label for="category">Category</label>
+                        @if (form.controls.category.touched && form.controls.category.hasError('required')) {
+                        <small class="error">Category is required</small>
+                        }
+                        @if (form.controls.category.hasError('server')) {
+                        <small class="error">{{ form.controls.category.getError('server') }}</small>
+                        }
+                    </div>
+                    <input pInputText id="category" type="text" formControlName="category" />
+                </div>
+
+                <div class="field">
+                    <div class="flex items-center justify-between">
+                        <label for="price">Base price</label>
+                        @if (form.controls.price.touched && form.controls.price.hasError('required')) {
+                        <small class="error">Price is required</small>
+                        }
+                        @if (form.controls.price.touched && form.controls.price.hasError('min')) {
+                        <small class="error">Price must be 0 or greater</small>
+                        }
+                        @if (form.controls.price.hasError('server')) {
+                        <small class="error">{{ form.controls.price.getError('server') }}</small>
+                        }
+                    </div>
+                    <p-inputnumber inputId="price" mode="decimal" locale="hu-HU" formControlName="price"
+                        [minFractionDigits]="0" [maxFractionDigits]="2" fluid />
+                    <small class="text-gray-500">The selling price of each store is calculated from it, converted to
+                        the currency of the store</small>
+                </div>
+
+                <div class="field">
+                    <div class="flex items-center justify-between">
+                        <label for="currency">Currency</label>
+                        @if (form.controls.currency.hasError('server')) {
+                        <small class="error">{{ form.controls.currency.getError('server') }}</small>
+                        }
+                    </div>
+                    <p-select [options]="currencies" inputId="currency" formControlName="currency" optionLabel="label"
+                        optionValue="value" class="w-full" [filter]="true" />
                 </div>
             </div>
+        </section>
 
-            @for (group of localizations.controls; track $index; let i = $index) {
-            <p-panel [formGroupName]="i" class="form-group">
-                <div class="flex justify-between gap-4">
-                    <div class="field w-full">
+        <!-- Localizations -->
+        <section formArrayName="localizations" class="flex flex-col gap-4 pt-6 border-t border-gray-200">
+            <div class="flex items-end justify-between">
+                <div>
+                    <h2 class="text-lg font-bold">Names and descriptions</h2>
+                    <small class="text-gray-500">One per region, a store shows the one of its own region</small>
+                </div>
+                <p-button type="button" icon="pi pi-plus" label="Add region" severity="secondary" [outlined]="true"
+                    [disabled]="localizations.length >= maxLocalizations" (onClick)="addLocalization()" />
+            </div>
+
+            @for (group of localizations.controls; track group; let i = $index) {
+            <div [formGroupName]="i" class="flex flex-col gap-4 p-4 rounded-lg border border-gray-200">
+                <div class="flex items-start gap-4">
+                    <div class="field w-28">
+                        <label [for]="'region-' + i">Region</label>
+                        <input pInputText [id]="'region-' + i" type="text" formControlName="region" maxlength="2"
+                            class="uppercase font-mono!" placeholder="HU" />
+                    </div>
+
+                    <div class="field flex-1">
                         <div class="flex items-center justify-between">
-                            <label for="name">Product name</label>
-
+                            <label [for]="'name-' + i">Product name</label>
                             @if (group.controls.name.touched && group.controls.name.invalid) {
                             <small class="error">Product name is required (max. 255 characters)</small>
                             }
                         </div>
-                        <input pInputText type="text" formControlName="name" fluid />
+                        <input pInputText [id]="'name-' + i" type="text" formControlName="name" />
                     </div>
 
-                    <div class="field w-70">
-                        <div class="flex items-center justify-between">
-                            <label for="region">Region</label>
-
-                            @if (group.controls.region.touched && group.controls.region.invalid) {
-                            <small class="error">Region is required</small>
-                            }
-                        </div>
-                        <div class="flex flex-row gap-2 items-center">
-                            <input pInputText type="text" formControlName="region" fluid maxlength="2" />
-
-                            <div>
-                                <span class="text-4xl">{{getFlagEmoji(group.controls.region.value)}}</span>
-                            </div>
-                        </div>
-                    </div>
+                    <p-button type="button" icon="pi pi-trash" severity="danger" [text]="true" [rounded]="true"
+                        class="mt-6" [disabled]="localizations.length <= 1" (onClick)="removeLocalization(i)"
+                        ariaLabel="Remove region" title="Remove region" />
                 </div>
+                @if (group.controls.region.touched && group.controls.region.invalid) {
+                <small class="error -mt-2">Region is required, a 2 letter code like HU</small>
+                }
 
-                <div class="field pt-4">
+                <div class="field">
                     <div class="flex items-center justify-between">
-                        <label for="description">Description</label>
-
+                        <label [for]="'description-' + i">Description</label>
                         @if (group.controls.description.touched && group.controls.description.invalid) {
                         <small class="error">Description is required</small>
                         }
                     </div>
-                    <textarea rows="3" pTextarea formControlName="description"></textarea>
+                    <textarea pTextarea [id]="'description-' + i" rows="3" formControlName="description"></textarea>
                 </div>
-            </p-panel>
+            </div>
             }
-        </div>
+        </section>
 
-        <div class="flex items-center justify-between gap-6">
-            <div class="field w-full">
-                <div class="flex items-center justify-between">
-                    <label for="brand">Brand</label>
-                    <div>
-                        @if (form.controls.brand.touched && form.controls.brand.hasError('required')) {
-                        <small class="error">Brand is required</small>
-                        }
-
-                        @if (form.controls.brand.hasError('server')) {
-                        <small class="error">
-                            {{ form.controls.brand.getError('server') }}
-                        </small>
-                        }
-                    </div>
-                </div>
-                <input pInputText id="brand" type="text" formControlName="brand" />
-            </div>
-
-            <div class="field  w-full">
-                <div class="flex items-center justify-between">
-                    <label for="category">Category</label>
-                    <div>
-                        @if (form.controls.category.touched && form.controls.category.hasError('required')) {
-                        <small class="error">Category is required</small>
-                        }
-
-                        @if (form.controls.category.hasError('server')) {
-                        <small class="error">
-                            {{ form.controls.category.getError('server') }}
-                        </small>
-                        }
-                    </div>
-                </div>
-                <input pInputText id="category" type="text" formControlName="category" />
-            </div>
-        </div>
-
-        <div class="flex items-center justify-between gap-6">
-            <div class="field w-full">
-                <div class="flex items-center justify-between">
-                    <label for="sku">SKU code</label>
-                    <div>
-                        @if (form.controls.sku.touched && form.controls.sku.hasError('required')) {
-                        <small class="error">SKU code is required</small>
-                        }
-
-                        @if (form.controls.sku.hasError('server')) {
-                        <small class="error">
-                            {{ form.controls.sku.getError('server') }}
-                        </small>
-                        }
-                    </div>
-                </div>
-                <input pInputText id="sku" type="text" formControlName="sku" />
-            </div>
-
-            <div class="field  w-full">
-                <div class="flex items-center justify-between">
-                    <label for="ean">EAN code</label>
-                    <div>
-                        @if (form.controls.ean.touched && form.controls.ean.hasError('required')) {
-                        <small class="error">EAN code is required</small>
-                        }
-
-                        @if (form.controls.ean.hasError('server')) {
-                        <small class="error">
-                            {{ form.controls.ean.getError('server') }}
-                        </small>
-                        }
-                    </div>
-                </div>
-                <input pInputText id="ean" type="text" formControlName="ean" />
-            </div>
-        </div>
-
-        <div class="flex items-start justify-between gap-6">
-        <div class="field w-full">
-            <div class="flex items-center justify-between">
-                <label for="price">Base price</label>
+        <!-- Images -->
+        <section formArrayName="images" class="flex flex-col gap-4 pt-6 border-t border-gray-200">
+            <div class="flex items-end justify-between">
                 <div>
-                    @if (form.controls.price.touched && form.controls.price.hasError('required')) {
-                    <small class="error">Price is required</small>
-                    }
-
-                    @if (form.controls.price.touched && form.controls.price.hasError('min')) {
-                    <small class="error">Price must be 0 or greater</small>
-                    }
-
-                    @if (form.controls.price.hasError('server')) {
-                    <small class="error">
-                        {{ form.controls.price.getError('server') }}
-                    </small>
-                    }
+                    <h2 class="text-lg font-bold">Images</h2>
+                    <small class="text-gray-500">The first one is the main image of the product</small>
                 </div>
+                <p-button type="button" icon="pi pi-plus" label="Add image" severity="secondary" [outlined]="true"
+                    [disabled]="images.length >= maxImages" (onClick)="addImage()" />
             </div>
-            <p-inputnumber inputId="price" mode="decimal" locale="hu-HU" formControlName="price"
-                [minFractionDigits]="0" [maxFractionDigits]="2" fluid />
-            <small>The selling price of each store is calculated from it, converted to the currency of the store.</small>
-        </div>
 
-        <div class="field w-80">
-            <div class="flex items-center justify-between">
-                <label for="currency">Currency</label>
-                <div>
-                    @if (form.controls.currency.touched && form.controls.currency.hasError('required')) {
-                    <small class="error">Currency is required</small>
-                    }
-
-                    @if (form.controls.currency.hasError('server')) {
-                    <small class="error">
-                        {{ form.controls.currency.getError('server') }}
-                    </small>
-                    }
+            @for (group of images.controls; track group; let i = $index) {
+            <div [formGroupName]="i" class="flex items-start gap-4 p-4 rounded-lg border border-gray-200">
+                @if (group.controls.url.value) {
+                <img [src]="group.controls.url.value" [alt]="group.controls.alt.value || 'Preview'"
+                    class="w-20 h-20 max-w-none object-cover rounded-md border border-gray-200" />
+                }
+                @else {
+                <div class="w-20 h-20 rounded-md bg-gray-100 flex items-center justify-center text-gray-400">
+                    <i class="pi pi-image text-2xl"></i>
                 </div>
-            </div>
-            <p-select [options]="currencies" inputId="currency" formControlName="currency" optionLabel="label"
-                optionValue="value" placeholder="Currency" class="w-full" [filter]="true" />
-        </div>
-        </div>
+                }
 
-        <div class="flex items-center justify-between">
-            <div></div>
+                <div class="field flex-1">
+                    <div class="flex items-center justify-between">
+                        <label [for]="'url-' + i">Image URL</label>
+                        @if (group.controls.url.touched && group.controls.url.invalid) {
+                        <small class="error">Image URL is required</small>
+                        }
+                    </div>
+                    <input pInputText [id]="'url-' + i" type="url" formControlName="url" class="font-mono!"
+                        placeholder="https://" />
+                </div>
+
+                <div class="field w-64">
+                    <div class="flex items-center justify-between">
+                        <label [for]="'alt-' + i">Alternative text</label>
+                        @if (group.controls.alt.touched && group.controls.alt.invalid) {
+                        <small class="error">Required</small>
+                        }
+                    </div>
+                    <input pInputText [id]="'alt-' + i" type="text" formControlName="alt"
+                        placeholder="What the image shows" />
+                </div>
+
+                <p-button type="button" icon="pi pi-trash" severity="danger" [text]="true" [rounded]="true"
+                    class="mt-6" (onClick)="removeImage(i)" ariaLabel="Remove image" title="Remove image" />
+            </div>
+            }
+            @empty {
+            <div class="flex flex-col items-center gap-2 py-6 rounded-lg border border-dashed border-gray-300 text-gray-500">
+                <i class="pi pi-image text-2xl"></i>
+                <span>No images, the product is shown without a picture</span>
+            </div>
+            }
+        </section>
+
+        <div class="flex items-center justify-end gap-2 pt-6 border-t border-gray-200">
+            <p-button type="button" label="Cancel" severity="secondary" [outlined]="true" (onClick)="cancel()" />
 
             <button pButton type="submit" [disabled]="isLoading()">
                 @if (isEditMode) {
-                <i class="pi pi-check"></i>
-                <span pButtonLabel>Save</span>
+                <i class="pi pi-check" pButtonIcon></i>
+                <span pButtonLabel>Save changes</span>
                 }
                 @else {
-                <i class="pi pi-plus"></i>
-                <span pButtonLabel>Create</span>
+                <i class="pi pi-plus" pButtonIcon></i>
+                <span pButtonLabel>Add product</span>
                 }
             </button>
         </div>
     </form>
-
 </p-card>
