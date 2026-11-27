@@ -1,3 +1,12 @@
+@if (noStatisticsAccess()) {
+<p-card>
+    <div class="px-4">
+        <h1 class="header">Dashboard</h1>
+        <p>The statistics are available to store members. Ask an administrator to add you to a store.</p>
+    </div>
+</p-card>
+}
+@else {
 <p-card>
     <div class="flex items-center justify-between gap-4 px-4">
         <h1 class="header">Dashboard</h1>
@@ -149,7 +158,12 @@
 
         <ng-template #body let-alert>
             <tr>
-                <td><a class="link-text" [routerLink]="['/product', alert.productId]">{{ alert.name }}</a></td>
+                <td>
+                    @if (authService.isSysadmin()) {
+                    <a class="link-text" [routerLink]="['/product', alert.productId]">{{ alert.name }}</a>
+                    }
+                    @else {{{ alert.name }}}
+                </td>
                 <td class="font-mono">{{ alert.sku }}</td>
                 <td class="font-mono">{{ alert.stock }}</td>
                 <td class="font-mono">{{ alert.soldInPeriod }}</td>
@@ -172,6 +186,47 @@
         <ng-template #emptymessage>
             <tr>
                 <td colspan="7">No product is running out.</td>
+            </tr>
+        </ng-template>
+    </p-table>
+</p-card>
+
+<!-- Slow movers -->
+<p-card class="mt-6">
+    <p-table [value]="slowMovers()" [loading]="isLoading()">
+        <ng-template #caption>
+            <div class="flex items-center justify-between">
+                <span class="text-xl font-bold">Products that do not sell</span>
+                <small>Uploaded to a store, without a sale in the last 30 days</small>
+            </div>
+        </ng-template>
+
+        <ng-template #header>
+            <tr>
+                <th>Product</th>
+                <th>SKU</th>
+                <th>Stock</th>
+                <th>Last sold</th>
+            </tr>
+        </ng-template>
+
+        <ng-template #body let-product>
+            <tr>
+                <td>
+                    @if (authService.isSysadmin()) {
+                    <a class="link-text" [routerLink]="['/product', product.productId]">{{ product.name }}</a>
+                    }
+                    @else {{{ product.name }}}
+                </td>
+                <td class="font-mono">{{ product.sku }}</td>
+                <td class="font-mono">{{ product.stock }}</td>
+                <td>{{ (product.lastSoldAt | date:'yyyy. MM. dd.') ?? 'Never' }}</td>
+            </tr>
+        </ng-template>
+
+        <ng-template #emptymessage>
+            <tr>
+                <td colspan="4">Every uploaded product sold in the last 30 days.</td>
             </tr>
         </ng-template>
     </p-table>
@@ -242,3 +297,4 @@
         </ng-template>
     </p-table>
 </p-card>
+}

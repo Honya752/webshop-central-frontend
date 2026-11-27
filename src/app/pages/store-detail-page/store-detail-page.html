@@ -5,10 +5,14 @@
         <h1 class="header">{{ store()?.name }}</h1>
         @if (store(); as s) {
         <div class="flex gap-2">
+            @if (canEdit()) {
             <p-button icon="pi pi-pencil" label="Edit" severity="success" [outlined]="true"
                 [routerLink]="['/store', s.id, 'edit']" />
+            }
+            @if (canDelete()) {
             <p-button icon="pi pi-trash" label="Delete" severity="danger" [outlined]="true"
                 (onClick)="confirmDelete($event)" />
+            }
         </div>
         }
     </div>
@@ -31,9 +35,13 @@
         <p-tablist>
             <p-tab value="orders"><i class="pi pi-shopping-cart"></i> Orders</p-tab>
             <p-tab value="products"><i class="pi pi-box"></i> Products</p-tab>
+            @if (canManageKeys()) {
             <p-tab value="integration"><i class="pi pi-link"></i> Integration</p-tab>
             <p-tab value="api-keys"><i class="pi pi-key"></i> API keys</p-tab>
+            }
+            @if (canSync()) {
             <p-tab value="jobs"><i class="pi pi-history"></i> Jobs</p-tab>
+            }
         </p-tablist>
 
         <p-tabpanels>
@@ -87,9 +95,11 @@
                     <ng-template #caption>
                         <div class="flex items-center justify-between">
                             <span class="text-xl font-bold">Products</span>
+                            @if (canSync()) {
                             <p-button icon="pi pi-sync" label="Sync all products" severity="secondary"
                                 [outlined]="true" [loading]="isSyncingAll()"
                                 [disabled]="!store()?.products?.length" (onClick)="syncAllProducts()" />
+                            }
                         </div>
                     </ng-template>
 
@@ -115,9 +125,14 @@
                                     class="w-24 rounded" />
                             </td>
                             <td>
+                                @if (canOpenProducts()) {
                                 <a class="link-text" [routerLink]="['/product', product.data.id]">
                                     {{ product.data.name }}
                                 </a>
+                                }
+                                @else {
+                                <span>{{ product.data.name }}</span>
+                                }
                                 <app-external-link class="ml-1" [href]="product.mapping.externalUrl"
                                     title="Open in the webshop" fallback="" />
                             </td>
@@ -136,11 +151,15 @@
                             <td>{{ product.data.price | money:product.data.currency }}</td>
                             <td>{{ product.mapping.lastSyncedAt | date:'yyyy. MM. dd. HH:mm' }}</td>
                             <td>
+                                @if (canOpenProducts()) {
                                 <p-button icon="pi pi-chevron-right" [rounded]="true" severity="secondary"
                                     [outlined]="true" [routerLink]="['/product', product.data.id]"
                                     class="ml-2 float-right" />
+                                }
+                                @if (canSync()) {
                                 <p-button class="float-right" icon="pi pi-sync" [rounded]="true"
                                     severity="secondary" [outlined]="true" (click)="syncWithStore(product.data.id)" />
+                                }
                             </td>
                         </tr>
                     </ng-template>
@@ -155,19 +174,19 @@
             </p-tabpanel>
 
             <p-tabpanel value="integration">
-                @if (activeTab() === 'integration' && store(); as s) {
+                @if (activeTab() === 'integration' && canManageKeys() && store(); as s) {
                 <app-store-integration-credentials [storeId]="s.id" [integrationType]="s.integrationType" />
                 }
             </p-tabpanel>
 
             <p-tabpanel value="api-keys">
-                @if (activeTab() === 'api-keys' && store(); as s) {
+                @if (activeTab() === 'api-keys' && canManageKeys() && store(); as s) {
                 <app-store-api-credentials [storeId]="s.id" />
                 }
             </p-tabpanel>
 
             <p-tabpanel value="jobs">
-                @if (activeTab() === 'jobs' && store(); as s) {
+                @if (activeTab() === 'jobs' && canSync() && store(); as s) {
                 <app-store-jobs [storeId]="s.id" />
                 }
             </p-tabpanel>

@@ -15,6 +15,7 @@ import { getApiErrorMessage } from '../../utils/api-error';
 
 type TagSeverity = 'secondary' | 'info' | 'success' | 'danger';
 
+import { AuthService } from '../../services/auth.service';
 /** Background jobs of a store: received webhooks and product / stock syncs. */
 @Component({
   selector: 'app-store-jobs',
@@ -24,6 +25,7 @@ type TagSeverity = 'secondary' | 'info' | 'success' | 'danger';
 export class StoreJobs implements OnInit {
   private readonly storesService = inject(StoresService);
   private readonly messageService = inject(MessageService);
+  readonly authService = inject(AuthService);
 
   readonly storeId = input.required<string>();
 

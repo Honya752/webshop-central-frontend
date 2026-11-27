@@ -13,7 +13,7 @@ import { ButtonModule } from 'primeng/button';
 import { SkeletonModule } from 'primeng/skeleton';
 import type { ChartData, ChartOptions } from 'chart.js';
 import { StatisticsService } from '../../services/statistics.service';
-import { StatisticsMetric, StatisticsResult, StockAlert, StoreHealth } from '../../types/statistics';
+import { ProductActivity, StatisticsMetric, StatisticsResult, StockAlert, StoreHealth } from '../../types/statistics';
 import { MoneyPipe } from '../../pipes/money.pipe';
 import { CURRENCY_OPTIONS, currencyDecimals, DEFAULT_CURRENCY } from '../../utils/currencies';
 import { getApiErrorMessage } from '../../utils/api-error';
@@ -33,6 +33,7 @@ const SERIES_FILL = 'rgba(42, 120, 214, 0.12)';
 const TEXT_SECONDARY = '#52514e';
 const GRID_COLOR = 'rgba(11, 11, 11, 0.08)';
 
+import { AuthService } from '../../services/auth.service';
 @Component({
   selector: 'app-dashboard-page',
   imports: [
@@ -43,6 +44,7 @@ const GRID_COLOR = 'rgba(11, 11, 11, 0.08)';
   styleUrl: './dashboard-page.sass',
 })
 export class DashboardPage implements OnInit {
+  readonly authService = inject(AuthService);
   private readonly statisticsService = inject(StatisticsService);
   private readonly messageService = inject(MessageService);
   private readonly router = inject(Router);
@@ -72,6 +74,13 @@ export class DashboardPage implements OnInit {
   readonly byStore = signal<StatisticsResult | null>(null);
   readonly stockAlerts = signal<StockAlert[]>([]);
   readonly storeHealth = signal<StoreHealth[]>([]);
+  readonly slowMovers = signal<ProductActivity[]>([]);
+
+  /** The backend gives statistics to SYSADMINs and store members only. */
+  readonly noStatisticsAccess = computed(() => {
+    const user = this.authService.currentUser();
+    return !!user && user.globalRole !== 'SYSADMIN' && !user.storeMembership;
+  });
 
   /** Currency of the loaded data (the select may already show a new one while loading). */
   readonly dataCurrency = computed(() => this.summary()?.meta.currency ?? this.currency);
@@ -158,7 +167,10 @@ export class DashboardPage implements OnInit {
   }
 
   ngOnInit(): void {
-    this.load();
+    // After a page reload the profile may still be loading
+    this.authService.ensureCurrentUser().subscribe(() => {
+      if (!this.noStatisticsAccess()) this.load();
+    });
   }
 
   load() {
@@ -181,6 +193,7 @@ export class DashboardPage implements OnInit {
       byStore: this.statisticsService.query({ ...base, metrics: ['revenue', 'orders'], groupBy: ['store'], sort: '-revenue' }),
       stockAlerts: this.statisticsService.stockAlerts({ days: 30, horizonDays: 14 }),
       storeHealth: this.statisticsService.integrationHealth(),
+      slowMovers: this.statisticsService.slowMovers({ days: 30 }),
     }).subscribe({
       next: result => {
         this.summary.set(result.summary);
@@ -189,6 +202,7 @@ export class DashboardPage implements OnInit {
         this.byStore.set(result.byStore);
         this.stockAlerts.set(result.stockAlerts.slice(0, 10));
         this.storeHealth.set(result.storeHealth);
+        this.slowMovers.set(result.slowMovers.slice(0, 10));
         this.isLoading.set(false);
       },
       error: (error) => {

@@ -44,7 +44,12 @@
                 </td>
 
                 <td>
+                    @if (authService.isSysadmin()) {
                     <a class="link-text" [routerLink]="['/product', product.id]">{{ product.name }}</a>
+                    }
+                    @else {
+                    <span>{{ product.name }}</span>
+                    }
                 </td>
 
                 <td>{{ product.brand }}</td>
@@ -70,12 +75,18 @@
                 <td>{{ product.price | money:product.currency }}</td>
 
                 <td>
+                    @if (authService.isSysadmin()) {
                     <p-button icon="pi pi-chevron-right" [rounded]="true" severity="secondary" [outlined]="true"
                         [routerLink]="['/product', product.id]" class="ml-2 float-right" />
+                    }
+                    @if (authService.canManageProducts()) {
                     <p-button icon="pi pi-trash" [rounded]="true" severity="danger" [outlined]="true"
                         (click)="confirmDelete($event, product.id)" class="ml-2 float-right" />
+                    }
+                    @if (authService.isSysadmin()) {
                     <p-button icon="pi pi-pencil" [rounded]="true" severity="success" [outlined]="true"
                         [routerLink]="['/product', product.id, 'edit']" class="ml-2 float-right" />
+                    }
                 </td>
             </tr>
         </ng-template>

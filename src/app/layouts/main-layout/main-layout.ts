@@ -1,4 +1,5 @@
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
+import { StoreRole } from '../../types/enums';
 import { Router, RouterOutlet, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { Card } from 'primeng/card';
@@ -26,4 +27,25 @@ export class MainLayout {
   get user() {
     return this.authService.currentUser();
   }
+
+  /** The store of a store member; a SYSADMIN reaches every store from "All stores". */
+  readonly ownStore = computed(() => this.authService.isSysadmin() ? null : this.authService.membership()?.store ?? null);
+
+  readonly roleLabel = computed(() => {
+    const user = this.authService.currentUser();
+    if (!user) return '';
+    if (user.globalRole === 'SYSADMIN') return 'Administrator';
+
+    const membership = user.storeMembership;
+    const global = user.globalRole === 'MODERATOR' ? 'Moderator' : 'User';
+    return membership
+      ? `${global} · ${STORE_ROLE_LABELS[membership.role]} of ${membership.store.name}`
+      : global;
+  });
 }
+
+const STORE_ROLE_LABELS: Record<StoreRole, string> = {
+  ADMIN: 'Admin',
+  MODERATOR: 'Moderator',
+  VIEWER: 'Viewer',
+};

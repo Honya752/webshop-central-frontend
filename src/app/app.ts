@@ -13,13 +13,8 @@ export class App {
   private authService = inject(AuthService);
 
   constructor() {
-    if (this.authService.isAuthenticated()) {
-      this.authService.loadCurrentUser().subscribe({
-        error: () => {
-          this.authService.logout();
-        },
-      });
-    }
+    // Loads the profile after a page reload; logs out if the token is no longer valid
+    this.authService.ensureCurrentUser().subscribe();
   }
 
   protected readonly title = signal('webshop-central-frontend');

@@ -38,7 +38,7 @@
             </td>
             <td class="font-mono">{{ job.attempts }}</td>
             <td>
-                @if (job.productId) {
+                @if (job.productId && authService.isSysadmin()) {
                 <a class="link-text" [routerLink]="['/product', job.productId]">Open</a>
                 }
                 @else {-}

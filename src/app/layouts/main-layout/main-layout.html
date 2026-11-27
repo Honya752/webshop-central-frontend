@@ -7,7 +7,10 @@
                     <a routerLink="/dashboard" class="nav-item nav-logo">Webshop Central</a>
                 </div>
                 <div class="flex h-16 items-center justify-between gap-4">
-                    <span>{{ user?.name || user?.email }}</span>
+                    <div class="flex flex-col items-end leading-tight">
+                        <span>{{ user?.name || user?.email }}</span>
+                        <small>{{ roleLabel() }}</small>
+                    </div>
                     <div class="nav-profile">
                         <i class="pi pi-user"></i>
                     </div>
@@ -23,11 +26,26 @@
             <p-card>
                 <div class="w-80 flex flex-col gap-2">
                     <div class="sidebar-item">
-                        <div class="item-title">
+                        <a routerLink="/dashboard" class="item-title">
                             <i class="pi pi-th-large"></i>
                             <span>Dashboard</span>
+                        </a>
+                    </div>
+
+                    @if (ownStore(); as store) {
+                    <div class="sidebar-item">
+                        <div class="item-title">
+                            <i class="pi pi-shop"></i>
+                            <span>My store</span>
                         </div>
                     </div>
+                    <div class="sidebar-menu">
+                        <a [routerLink]="['/store', store.id]" class="item-title">
+                            <i class="pi pi-home"></i>
+                            <span>{{ store.name }}</span>
+                        </a>
+                    </div>
+                    }
                     <div class="sidebar-item">
                         <div class="item-title">
                             <i class="pi pi-box"></i>
@@ -39,11 +57,15 @@
                             <i class="pi pi-list"></i>
                             <span>All products</span>
                         </a>
+                        @if (authService.canManageProducts()) {
                         <a routerLink="/product/create" class="item-title">
                             <i class="pi pi-plus-circle"></i>
                             <span>Create new product</span>
                         </a>
+                        }
                     </div>
+
+                    @if (authService.isSysadmin()) {
                     <div class="sidebar-item">
                         <div class="item-title">
                             <i class="pi pi-shopping-cart"></i>
@@ -108,6 +130,7 @@
                             <span>Purchase orders</span>
                         </a>
                     </div>
+                    }
                 </div>
             </p-card>
         </div>

@@ -53,7 +53,10 @@
             <tr>
                 <td>
                     @if (item.product) {
+                    @if (authService.isSysadmin()) {
                     <a class="link-text" [routerLink]="['/product', item.product.id]">{{ item.product.name }}</a>
+                    }
+                    @else {{{ item.product.name }}}
                     }
                     @else {
                     <span class="italic">Unknown product</span>
@@ -71,7 +74,10 @@
                 </td>
                 <td>
                     @if (item.wholesaler) {
+                    @if (authService.isSysadmin()) {
                     <a class="link-text" [routerLink]="['/wholesaler', item.wholesaler.id]">{{ item.wholesaler.name }}</a>
+                    }
+                    @else {{{ item.wholesaler.name }}}
                     }
                     @if (item.wholesalerOrder; as po) {
                     <a class="flex items-center gap-1 mt-1" [routerLink]="['/wholesaler-order', po.id]" title="Purchase order">
@@ -115,21 +121,25 @@
         </ng-template>
     </p-table>
 
-    <div class="mt-8 px-4 flex justify-between">
-        <div>
-            <p class="text-lg">Mark order as:</p>
-        </div>
+    @if (order()) {
+    <div class="mt-8 px-4 flex justify-between items-center">
+        @if (nextStatusActions().length === 0) {
+        <p class="text-lg">This order is closed, its status cannot be changed.</p>
+        }
+        @else if (!canChangeStatus()) {
+        <p class="text-lg">Changing the status needs the store moderator or admin role.</p>
+        }
+        @else {
+        <p class="text-lg">Mark order as:</p>
         <div class="flex flex-row gap-4">
-            <p-button icon="pi pi-spinner-dotted" severity="secondary" label="Processing"
-                (onClick)="markOrderAs('PROCESSING')" />
-            <p-button icon="pi pi-box" severity="warn" label="Ordered"
-                (onClick)="markOrderAs('ORDERED_FROM_WHOLESALER')" />
-            <p-button icon="pi pi-truck" severity="info" label="Shipping"
-                (onClick)="markOrderAs('SHIPPING_TO_STORE')" />
-            <p-button icon="pi pi-check-circle" severity="success" label="Completed"
-                (onClick)="markOrderAs('COMPLETED')" />
-            <p-button icon="pi pi-times-circle" severity="danger" label="Cancelled"
-                (onClick)="markOrderAs('CANCELLED')" />
+            @for (action of nextStatusActions(); track action.status) {
+            <p-button [icon]="action.icon" [severity]="action.severity" [label]="action.label"
+                [disabled]="isChangingStatus()" (onClick)="confirmStatus($event, action.status)" />
+            }
         </div>
+        }
     </div>
+    }
 </p-card>
+
+<p-confirmdialog />

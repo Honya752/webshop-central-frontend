@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { computed, Component, inject, OnInit, signal } from '@angular/core';
 import { ExternalLink } from '../../components/external-link/external-link';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
@@ -21,6 +21,7 @@ import { getApiErrorMessage } from '../../utils/api-error';
 type StoreTab = 'orders' | 'products' | 'integration' | 'api-keys' | 'jobs';
 
 import { MoneyPipe } from '../../pipes/money.pipe';
+import { AuthService } from '../../services/auth.service';
 @Component({
   selector: 'app-store-detail-page',
   imports: [ExternalLink, MoneyPipe, 
@@ -37,6 +38,7 @@ export class StoreDetailPage implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly storesService = inject(StoresService);
+  private readonly authService = inject(AuthService);
   private readonly messageService = inject(MessageService);
   private readonly confirmationService = inject(ConfirmationService);
 
@@ -46,6 +48,15 @@ export class StoreDetailPage implements OnInit {
   readonly error = signal<string | null>(null);
   readonly store = signal<StoreDetail | null>(null);
   readonly activeTab = signal<StoreTab>('orders');
+
+  // Permissions of the current user on this store (mirror the backend guards)
+  private readonly storeId = computed(() => this.store()?.id ?? this.id);
+  readonly canEdit = computed(() => this.authService.hasStoreRole(this.storeId(), 'ADMIN'));
+  readonly canManageKeys = computed(() => this.authService.hasStoreRole(this.storeId(), 'ADMIN'));
+  readonly canSync = computed(() => this.authService.hasStoreRole(this.storeId(), 'MODERATOR'));
+  readonly canDelete = computed(() => this.authService.isSysadmin());
+  /** The product page needs the full product data, which is SYSADMIN only. */
+  readonly canOpenProducts = computed(() => this.authService.isSysadmin());
 
   ngOnInit(): void {
     this.id = this.route.snapshot.paramMap.get('id');

@@ -38,7 +38,7 @@ export class ProductsPage implements OnInit, AfterViewInit, OnDestroy {
   private readonly messageService = inject(MessageService);
   private readonly confirmationService = inject(ConfirmationService);
   private readonly productService = inject(ProductsService);
-  private readonly authService = inject(AuthService);
+  readonly authService = inject(AuthService);
 
   products = signal<Product[]>([]);
 
@@ -171,9 +171,6 @@ export class ProductsPage implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  get Role() {
-    return this.authService.currentUser()?.globalRole;
-  }
 
   sortByOptions: { label: string; value: ProductSortBy }[] = [
     { label: 'Creation Date', value: 'createdAt' },
