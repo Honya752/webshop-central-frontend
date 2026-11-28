@@ -1,0 +1,73 @@
+<p-confirmdialog />
+
+<p-card>
+    <p-table [value]="users()" [loading]="isLoading()" class="table-auto">
+        <ng-template #caption>
+            <div class="flex items-center justify-between">
+                <div class="flex items-baseline gap-2">
+                    <span class="text-xl font-bold">Users</span>
+                    @if (total() !== null) {
+                    <span class="text-sm text-gray-500">{{ total() }} total</span>
+                    }
+                </div>
+                <p-button icon="pi pi-user-plus" label="Add user" routerLink="/user/create" />
+            </div>
+        </ng-template>
+
+        <ng-template #header>
+            <tr>
+                <th class="w-0"><span class="sr-only">Avatar</span></th>
+                <th>Name</th>
+                <th>Email address</th>
+                <th>System role</th>
+                <th>Store</th>
+                <th class="w-0 whitespace-nowrap text-right!">Actions</th>
+            </tr>
+        </ng-template>
+
+        <ng-template #body let-user>
+            <tr>
+                <td class="w-0">
+                    <app-user-avatar [role]="user.globalRole" [name]="user.name" size="md" />
+                </td>
+                <td>
+                    <a class="link-text font-bold" [routerLink]="['/user', user.id]">{{ user.name }}</a>
+                    @if (user.id === currentUserId()) {
+                    <span class="text-sm text-gray-500"> (you)</span>
+                    }
+                </td>
+                <td><a class="link-text" [href]="'mailto:' + user.email">{{ user.email }}</a></td>
+                <td>{{ roleLabel(user.globalRole) }}</td>
+                <td>
+                    @if (user.storeMembership) {
+                    <a [routerLink]="['/store', user.storeMembership.storeId]" class="link-text">
+                        {{ user.storeMembership.name }}
+                    </a>
+                    <span class="text-gray-500"> ({{ storeRoleLabel(user.storeMembership.role) }})</span>
+                    }
+                    @else {
+                    <span class="text-gray-500">No store</span>
+                    }
+                </td>
+                <td class="w-0 whitespace-nowrap">
+                    <div class="flex gap-2 justify-end">
+                        <p-button icon="pi pi-pencil" [rounded]="true" severity="success" [outlined]="true"
+                            [routerLink]="['/user', user.id]" ariaLabel="Edit user" title="Edit user" />
+                        @if (user.id !== currentUserId()) {
+                        <p-button icon="pi pi-trash" [rounded]="true" severity="danger" [outlined]="true"
+                            (click)="confirmDelete($event, user)" ariaLabel="Delete user" title="Delete user" />
+                        }
+                    </div>
+                </td>
+            </tr>
+        </ng-template>
+
+        <ng-template #emptymessage>
+            <tr>
+                <td colspan="6">No users yet</td>
+            </tr>
+        </ng-template>
+    </p-table>
+
+    <div #loadMoreTrigger></div>
+</p-card>

@@ -1,0 +1,133 @@
+<div class="min-h-screen bg-gray-100">
+    <nav class="bg-white shadow">
+        <div class="flex h-14 items-center justify-between gap-4 px-6">
+            <a routerLink="/dashboard" class="flex items-center" aria-label="Webshop Central, go to the dashboard">
+                <app-logo size="sm" />
+            </a>
+
+            <div class="flex items-center gap-3">
+                <div class="flex flex-col items-end leading-tight">
+                    <span>{{ user?.name || user?.email }}</span>
+                    <small class="text-gray-500">{{ roleLabel() }}</small>
+                </div>
+                <app-user-avatar [role]="user?.globalRole" [name]="user?.name" size="md" />
+                <p-button icon="pi pi-sign-out" [rounded]="true" severity="danger" [outlined]="true"
+                    (onClick)="logout()" ariaLabel="Log out" title="Log out" />
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-layout">
+        <aside class="w-60 shrink-0">
+            <p-card>
+                <nav class="flex flex-col" aria-label="Main menu">
+                    <!-- top level link: aligned with the group titles, not indented -->
+                    <a routerLink="/dashboard" class="item-title item-top" [class.active]="active() === 'dashboard'">
+                        <i class="pi pi-th-large"></i>
+                        <span>Dashboard</span>
+                    </a>
+
+                    @if (ownStore(); as store) {
+                    <div class="sidebar-item">
+                        <i class="pi pi-shop"></i>
+                        <span>My store</span>
+                    </div>
+                    <div class="sidebar-menu">
+                        <a [routerLink]="['/store', store.id]" class="item-title"
+                            [class.active]="active() === 'my-store'">
+                            <i class="pi pi-home"></i>
+                            <span class="truncate">{{ store.name }}</span>
+                        </a>
+                    </div>
+                    }
+
+                    <div class="sidebar-item">
+                        <i class="pi pi-box"></i>
+                        <span>Products</span>
+                    </div>
+                    <div class="sidebar-menu">
+                        <a routerLink="/products" class="item-title" [class.active]="active() === 'products'">
+                            <i class="pi pi-list"></i>
+                            <span>All products</span>
+                        </a>
+                        @if (authService.canManageProducts()) {
+                        <a routerLink="/product/create" class="item-title"
+                            [class.active]="active() === 'product-create'">
+                            <i class="pi pi-plus-circle"></i>
+                            <span>New product</span>
+                        </a>
+                        }
+                    </div>
+
+                    @if (authService.isSysadmin()) {
+                    <div class="sidebar-item">
+                        <i class="pi pi-shopping-cart"></i>
+                        <span>Orders</span>
+                    </div>
+                    <div class="sidebar-menu">
+                        <a routerLink="/orders" class="item-title" [class.active]="active() === 'orders'">
+                            <i class="pi pi-list"></i>
+                            <span>Incoming orders</span>
+                        </a>
+                    </div>
+
+                    <div class="sidebar-item">
+                        <i class="pi pi-shop"></i>
+                        <span>Stores</span>
+                    </div>
+                    <div class="sidebar-menu">
+                        <a routerLink="/stores" class="item-title" [class.active]="active() === 'stores'">
+                            <i class="pi pi-list"></i>
+                            <span>All stores</span>
+                        </a>
+                        <a routerLink="/store/create" class="item-title" [class.active]="active() === 'store-create'">
+                            <i class="pi pi-plus-circle"></i>
+                            <span>New store</span>
+                        </a>
+                    </div>
+
+                    <div class="sidebar-item">
+                        <i class="pi pi-user"></i>
+                        <span>Users</span>
+                    </div>
+                    <div class="sidebar-menu">
+                        <a routerLink="/users" class="item-title" [class.active]="active() === 'users'">
+                            <i class="pi pi-users"></i>
+                            <span>All users</span>
+                        </a>
+                        <a routerLink="/user/create" class="item-title" [class.active]="active() === 'user-create'">
+                            <i class="pi pi-user-plus"></i>
+                            <span>New user</span>
+                        </a>
+                    </div>
+
+                    <div class="sidebar-item">
+                        <i class="pi pi-truck"></i>
+                        <span>Wholesalers</span>
+                    </div>
+                    <div class="sidebar-menu">
+                        <a routerLink="/wholesalers" class="item-title" [class.active]="active() === 'wholesalers'">
+                            <i class="pi pi-list"></i>
+                            <span>All wholesalers</span>
+                        </a>
+                        <a routerLink="/wholesaler/create" class="item-title"
+                            [class.active]="active() === 'wholesaler-create'">
+                            <i class="pi pi-cart-plus"></i>
+                            <span>New wholesaler</span>
+                        </a>
+                        <a routerLink="/wholesaler-orders" class="item-title"
+                            [class.active]="active() === 'purchase-orders'">
+                            <i class="pi pi-send"></i>
+                            <span>Purchase orders</span>
+                        </a>
+                    </div>
+                    }
+                </nav>
+            </p-card>
+        </aside>
+
+        <main class="flex-1 min-w-0">
+            <router-outlet />
+        </main>
+    </div>
+</div>

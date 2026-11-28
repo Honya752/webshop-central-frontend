@@ -1,0 +1,48 @@
+# Production build on every push and pull request.
+# The build also type checks the templates (strictTemplates), so wrong field names and DTO mismatches fail here.
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+  workflow_dispatch:
+
+# a newer push to the same branch cancels the run still in progress
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: 22
+  # the same npm version as the one that writes package-lock.json (packageManager in package.json)
+  NPM_VERSION: 11.9.0
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - run: npm install -g npm@${{ env.NPM_VERSION }}
+      - run: npm ci
+
+      - name: Build (production)
+        run: npm run build -- --configuration production
+
+      - name: Upload the built app
+        uses: actions/upload-artifact@v4
+        with:
+          name: webshop-central-frontend
+          path: dist/webshop-central-frontend/browser
+          retention-days: 7

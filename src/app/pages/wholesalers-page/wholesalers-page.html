@@ -1,0 +1,85 @@
+<p-confirmdialog />
+
+<p-card>
+    <p-table [value]="wholesalers()" [loading]="isLoading()" [rowHover]="true">
+        <ng-template #caption>
+            <div class="flex items-center justify-between">
+                <div class="flex items-baseline gap-2">
+                    <span class="text-xl font-bold">Wholesalers</span>
+                    @if (!isLoading()) {
+                    <span class="text-sm text-gray-500">{{ wholesalers().length }} total</span>
+                    }
+                </div>
+                <p-button icon="pi pi-plus" label="Add wholesaler" routerLink="/wholesaler/create" />
+            </div>
+        </ng-template>
+
+        <ng-template #header>
+            <tr>
+                <th>Name</th>
+                <th>Catalog</th>
+                <th>Purchase orders</th>
+                <th>Currency</th>
+                <th class="w-0 whitespace-nowrap text-right!">Actions</th>
+            </tr>
+        </ng-template>
+
+        <ng-template #body let-wholesaler>
+            <tr>
+                <td>
+                    <a class="link-text font-bold" [routerLink]="['/wholesaler', wholesaler.id]">{{ wholesaler.name }}</a>
+                    <div>
+                        <app-external-link class="text-sm" [href]="wholesaler.baseUrl" title="Open the wholesaler">
+                            {{ wholesaler.baseUrl }}
+                        </app-external-link>
+                    </div>
+                </td>
+                <td>{{ integrationLabel(wholesaler.integrationType) }}</td>
+                <td>
+                    @if (wholesaler.orderMode === 'MANUAL') {
+                    <p-tag severity="secondary" icon="pi pi-user" value="Manual" />
+                    }
+                    @else {
+                    <p-tag severity="info" icon="pi pi-bolt" value="Automatic" />
+                    }
+                    @if (wholesaler.orderMode === 'AUTOMATIC') {
+                    <div>
+                        <small class="text-gray-500">
+                            @if (wholesaler.orderDelayMinutes) {after {{ wholesaler.orderDelayMinutes }} min}
+                            @else {immediately}
+                        </small>
+                    </div>
+                    }
+                </td>
+                <td class="font-mono">{{ wholesaler.currency }}</td>
+                <td class="w-0 whitespace-nowrap">
+                    <div class="flex gap-2 justify-end">
+                        <p-button icon="pi pi-sync" [rounded]="true" severity="secondary" [outlined]="true"
+                            [loading]="syncingId() === wholesaler.id" (click)="syncWholesalerCatalog(wholesaler.id)"
+                            ariaLabel="Sync catalog" title="Sync catalog" />
+                        <p-button icon="pi pi-pencil" [rounded]="true" severity="success" [outlined]="true"
+                            [routerLink]="['/wholesaler', wholesaler.id, 'edit']" ariaLabel="Edit wholesaler"
+                            title="Edit wholesaler" />
+                        <p-button icon="pi pi-trash" [rounded]="true" severity="danger" [outlined]="true"
+                            (click)="confirmDelete($event, wholesaler)" ariaLabel="Delete wholesaler"
+                            title="Delete wholesaler" />
+                        <p-button icon="pi pi-chevron-right" [rounded]="true" severity="secondary" [outlined]="true"
+                            [routerLink]="['/wholesaler', wholesaler.id]" ariaLabel="Open wholesaler"
+                            title="Open wholesaler" />
+                    </div>
+                </td>
+            </tr>
+        </ng-template>
+
+        <ng-template #emptymessage>
+            <tr>
+                <td colspan="5">
+                    <div class="flex flex-col items-center gap-2 py-8 text-gray-500">
+                        <i class="pi pi-truck text-3xl"></i>
+                        <span>No wholesalers yet, add one to import its catalog</span>
+                    </div>
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+</p-card>

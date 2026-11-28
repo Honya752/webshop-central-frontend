@@ -1,0 +1,273 @@
+<p-confirmdialog />
+
+<p-card>
+    <div class="flex items-start justify-between px-4 mb-6">
+        <div>
+            <h1 class="header text-left!">{{ store()?.name }}</h1>
+            @if (store(); as s) {
+            <app-external-link [href]="s.baseUrl" title="Open the webshop">{{ s.baseUrl }}</app-external-link>
+            }
+        </div>
+        @if (store(); as s) {
+        <div class="flex gap-2">
+            @if (canEdit()) {
+            <p-button icon="pi pi-pencil" label="Edit" severity="success" [outlined]="true"
+                [routerLink]="['/store', s.id, 'edit']" />
+            }
+            @if (canDelete()) {
+            <p-button icon="pi pi-trash" label="Delete" severity="danger" [outlined]="true"
+                (onClick)="confirmDelete($event)" />
+            }
+        </div>
+        }
+    </div>
+
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 px-4">
+        <div class="flex flex-col">
+            <small class="text-gray-500">Platform</small>
+            <span class="font-bold">{{ platformLabel(store()?.integrationType) }}</span>
+        </div>
+        <div class="flex flex-col">
+            <small class="text-gray-500">Slug</small>
+            <span class="font-bold font-mono">{{ store()?.slug }}</span>
+        </div>
+        <div class="flex flex-col">
+            <small class="text-gray-500">Region</small>
+            <span class="font-bold font-mono">{{ store()?.region }}</span>
+        </div>
+        <div class="flex flex-col">
+            <small class="text-gray-500">Currency</small>
+            <span class="font-bold font-mono">{{ store()?.currency }}</span>
+        </div>
+    </div>
+</p-card>
+
+<p-card class="mt-6">
+    <p-tabs [value]="activeTab()" (valueChange)="onTabChange($event)">
+        <p-tablist>
+            <p-tab value="orders">
+                <span class="flex items-center gap-2">
+                    <i class="pi pi-shopping-cart"></i> Orders
+                    @if (needsAttentionCount() > 0) {
+                    <p-badge [value]="needsAttentionCount()" severity="warn" title="Orders needing attention" />
+                    }
+                </span>
+            </p-tab>
+            <p-tab value="products">
+                <span class="flex items-center gap-2">
+                    <i class="pi pi-box"></i> Products
+                    @if (outOfSyncCount() > 0) {
+                    <p-badge [value]="outOfSyncCount()" severity="warn" title="Products out of sync" />
+                    }
+                </span>
+            </p-tab>
+            @if (canSync()) {
+            <p-tab value="jobs"><span class="flex items-center gap-2"><i class="pi pi-history"></i> Jobs</span></p-tab>
+            }
+            @if (canManageKeys()) {
+            <p-tab value="integration">
+                <span class="flex items-center gap-2"><i class="pi pi-link"></i> Webshop connection</span>
+            </p-tab>
+            <p-tab value="api-keys"><span class="flex items-center gap-2"><i class="pi pi-key"></i> API keys</span></p-tab>
+            }
+        </p-tablist>
+
+        <p-tabpanels>
+            <!-- Orders -->
+            <p-tabpanel value="orders">
+                <p-table [value]="store()?.orders ?? []" [loading]="isLoading()" [rowHover]="true">
+                    <ng-template #caption>
+                        <div class="flex items-baseline gap-2">
+                            <span class="text-xl font-bold">Recent orders</span>
+                            <span class="text-sm text-gray-500">
+                                The latest {{ store()?.orders?.length ?? 0 }} orders of the store
+                            </span>
+                        </div>
+                    </ng-template>
+
+                    <ng-template #header>
+                        <tr>
+                            <th>Order</th>
+                            <th>Customer</th>
+                            <th>Status</th>
+                            <th>Payment</th>
+                            <th class="text-right!">Total</th>
+                            <th class="w-0"><span class="sr-only">Actions</span></th>
+                        </tr>
+                    </ng-template>
+
+                    <ng-template #body let-order>
+                        <tr>
+                            <td>
+                                <div class="flex items-center gap-1">
+                                    <a class="link-text font-bold font-mono" [routerLink]="['/order', order.id]">
+                                        #{{ order.externalOrderId }}
+                                    </a>
+                                    <app-external-link [href]="order.externalUrl" title="Open in the webshop admin"
+                                        fallback="" />
+                                </div>
+                                <small class="text-gray-500">{{ order.createdAt | date:'yyyy. MM. dd. HH:mm' }}</small>
+                            </td>
+                            <td>
+                                <div>{{ order.name }}</div>
+                                <small class="text-gray-500">{{ order.email }}</small>
+                            </td>
+                            <td><app-order-status-tag [status]="order.status" /></td>
+                            <td class="text-gray-500">{{ order.paymentMethod ?? '-' }}</td>
+                            <td class="text-right! font-bold whitespace-nowrap">{{ order.total | money:order.currency }}</td>
+                            <td class="w-0">
+                                <p-button icon="pi pi-chevron-right" [rounded]="true" severity="secondary"
+                                    [outlined]="true" [routerLink]="['/order', order.id]" ariaLabel="Open order"
+                                    title="Open order" />
+                            </td>
+                        </tr>
+                    </ng-template>
+
+                    <ng-template #emptymessage>
+                        <tr>
+                            <td colspan="6">
+                                <div class="flex flex-col items-center gap-2 py-8 text-gray-500">
+                                    <i class="pi pi-shopping-cart text-3xl"></i>
+                                    <span>This store has no orders yet</span>
+                                </div>
+                            </td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+            </p-tabpanel>
+
+            <!-- Products -->
+            <p-tabpanel value="products">
+                <p-table [value]="store()?.products ?? []" [loading]="isLoading()" [rowHover]="true">
+                    <ng-template #caption>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-baseline gap-2">
+                                <span class="text-xl font-bold">Products in the webshop</span>
+                                <span class="text-sm text-gray-500">{{ productsSummary() }}</span>
+                            </div>
+                            @if (canSync()) {
+                            <p-button icon="pi pi-sync" label="Sync all products" severity="secondary"
+                                [outlined]="true" [loading]="isSyncingAll()"
+                                [disabled]="!store()?.products?.length" (onClick)="syncAllProducts()" />
+                            }
+                        </div>
+                    </ng-template>
+
+                    <ng-template #header>
+                        <tr>
+                            <th class="w-0"><span class="sr-only">Image</span></th>
+                            <th>Product</th>
+                            <th>Brand</th>
+                            <th>Webshop sync</th>
+                            <th class="text-right!">Base price</th>
+                            <th class="w-0 whitespace-nowrap text-right!">Actions</th>
+                        </tr>
+                    </ng-template>
+
+                    <ng-template #body let-product>
+                        <tr>
+                            <td class="w-0">
+                                @if (product.data.images?.[0]; as image) {
+                                <img [src]="image.url" [alt]="image.alt || product.data.name"
+                                    class="w-12 h-12 max-w-none object-cover rounded-md border border-gray-200" />
+                                }
+                                @else {
+                                <div class="w-12 h-12 rounded-md bg-gray-100 flex items-center justify-center text-gray-400">
+                                    <i class="pi pi-image"></i>
+                                </div>
+                                }
+                            </td>
+                            <td>
+                                <div class="flex items-center gap-1">
+                                    @if (canOpenProducts()) {
+                                    <a class="link-text font-bold" [routerLink]="['/product', product.data.id]">
+                                        {{ product.data.name }}
+                                    </a>
+                                    }
+                                    @else {
+                                    <span class="font-bold">{{ product.data.name }}</span>
+                                    }
+                                    <app-external-link [href]="product.mapping.externalUrl" title="Open in the webshop"
+                                        fallback="" />
+                                </div>
+                                <small class="text-gray-500 font-mono">
+                                    SKU {{ product.data.sku }}, EAN {{ product.data.ean }}
+                                </small>
+                            </td>
+                            <td>
+                                <div>{{ product.data.brand }}</div>
+                                <small class="text-gray-500">{{ product.data.category }}</small>
+                            </td>
+                            <td>
+                                @if (isInSync(product)) {
+                                <p-tag severity="success" icon="pi pi-check" value="In sync" />
+                                }
+                                @else {
+                                <p-tag severity="warn" icon="pi pi-exclamation-circle" value="Out of sync" />
+                                }
+                                <div>
+                                    <small class="text-gray-500">
+                                        @if (product.mapping.lastSyncedAt) {
+                                        Synced {{ product.mapping.lastSyncedAt | date:'yyyy. MM. dd. HH:mm' }}
+                                        }
+                                        @else {Never synced}
+                                    </small>
+                                </div>
+                            </td>
+                            <td class="text-right! font-bold whitespace-nowrap">
+                                {{ product.data.price | money:product.data.currency }}
+                            </td>
+                            <td class="w-0 whitespace-nowrap">
+                                <div class="flex gap-2 justify-end">
+                                    @if (canSync()) {
+                                    <p-button icon="pi pi-sync" [rounded]="true" severity="secondary" [outlined]="true"
+                                        [loading]="syncingProductId() === product.data.id"
+                                        (onClick)="syncWithStore(product.data.id)" ariaLabel="Sync to the webshop"
+                                        title="Sync to the webshop" />
+                                    }
+                                    @if (canOpenProducts()) {
+                                    <p-button icon="pi pi-chevron-right" [rounded]="true" severity="secondary"
+                                        [outlined]="true" [routerLink]="['/product', product.data.id]"
+                                        ariaLabel="Open product" title="Open product" />
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    </ng-template>
+
+                    <ng-template #emptymessage>
+                        <tr>
+                            <td colspan="6">
+                                <div class="flex flex-col items-center gap-2 py-8 text-gray-500">
+                                    <i class="pi pi-box text-3xl"></i>
+                                    <span>No products are uploaded to this store yet, add them from the product page</span>
+                                </div>
+                            </td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+            </p-tabpanel>
+
+            <!-- Jobs -->
+            <p-tabpanel value="jobs">
+                @if (activeTab() === 'jobs' && canSync() && store(); as s) {
+                <app-store-jobs [storeId]="s.id" />
+                }
+            </p-tabpanel>
+
+            <!-- Webshop connection -->
+            <p-tabpanel value="integration">
+                @if (activeTab() === 'integration' && canManageKeys() && store(); as s) {
+                <app-store-integration-credentials [storeId]="s.id" [integrationType]="s.integrationType" />
+                }
+            </p-tabpanel>
+
+            <!-- API keys -->
+            <p-tabpanel value="api-keys">
+                @if (activeTab() === 'api-keys' && canManageKeys() && store(); as s) {
+                <app-store-api-credentials [storeId]="s.id" />
+                }
+            </p-tabpanel>
+        </p-tabpanels>
+    </p-tabs>
+</p-card>

@@ -1,0 +1,107 @@
+<p-card class="login-card">
+
+    <form [formGroup]="form" (ngSubmit)="submit()" class="form">
+        <div class="flex justify-center py-4">
+            <app-logo />
+        </div>
+
+        @if (errorMessage()) {
+        <p class="form-error">{{ errorMessage() }}</p>
+        }
+
+        <div class="field">
+            <div class="flex items-center justify-between">
+                <label for="name">Name</label>
+                <div>
+                    @if (name.touched && name.hasError('required')) {
+                    <small class="error">Name is required</small>
+                    }
+
+                    @if (name.touched && name.hasError('minlength')) {
+                    <small class="error">Name must be at least 3 characters</small>
+                    }
+
+                    @if (name.hasError('server')) {
+                    <small class="error">
+                        {{ name.getError('server') }}
+                    </small>
+                    }
+                </div>
+            </div>
+            <input pInputText id="name" type="text" formControlName="name" />
+        </div>
+
+        <div class="field">
+            <div class="flex items-center justify-between">
+                <label for="email">Email</label>
+                <div>
+                    @if (email.touched && email.hasError('required')) {
+                    <small class="error">Email address is required</small>
+                    }
+
+                    @if (email.touched && email.hasError('email')) {
+                    <small class="error">Email address is invalid</small>
+                    }
+
+                    @if (email.hasError('server')) {
+                    <small class="error">
+                        {{ email.getError('server') }}
+                    </small>
+                    }
+                </div>
+            </div>
+            <input pInputText id="email" type="email" formControlName="email" />
+        </div>
+
+        <div class="field">
+            <div class="flex items-center justify-between">
+                <label for="password">Password</label>
+
+                @if (password.touched && password.hasError('required')) {
+                <small class="error">Password is required</small>
+                }
+
+                @if (password.touched && password.hasError('minlength')) {
+                <small class="error">Password must be at least 6 characters</small>
+                }
+
+                @if (form.hasError('passwordMismatch') && passwordConfirm.touched) {
+                <small class="error">Passwords do not match</small>
+                }
+
+                @if (password.hasError('server')) {
+                <small class="error">
+                    {{ password.getError('server') }}
+                </small>
+                }
+
+            </div>
+            <p-password inputId="password" formControlName="password" [feedback]="false" [toggleMask]="true"
+                fluid></p-password>
+
+        </div>
+
+        <div class="field">
+            <div class="flex items-center justify-between">
+                <label for="passwordConfirm">Confirm password</label>
+                <div>
+                    @if (passwordConfirm.touched && passwordConfirm.hasError('required')) {
+                    <small class="error">Please confirm your password</small>
+                    }
+                </div>
+            </div>
+            <p-password inputId="passwordConfirm" formControlName="passwordConfirm" [feedback]="false"
+                [toggleMask]="true" fluid></p-password>
+
+        </div>
+
+        <div class="flex items-center justify-between">
+            <a routerLink="/login" class="link">I already have an account</a>
+
+            <button pButton type="submit" [disabled]="isSubmitting()">
+                <i class="pi pi-sign-in"></i>
+                <span pButtonLabel>Sign up</span>
+            </button>
+        </div>
+    </form>
+</p-card>

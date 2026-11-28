@@ -1,0 +1,66 @@
+<p-card class="login-card">
+
+    <form [formGroup]="form" (ngSubmit)="submit()" class="form">
+
+        <div class="flex justify-center py-4">
+            <app-logo />
+        </div>
+
+        @if (errorMessage()) {
+        <p class="form-error">{{ errorMessage() }}</p>
+        }
+        @else if (sessionExpired) {
+        <p class="form-error">Your session has expired, please log in again</p>
+        }
+
+        <div class="field">
+            <div class="flex items-center justify-between">
+                <label for="email">Email</label>
+                <div>
+
+                    @if (email.touched && email.hasError('required')) {
+                    <small class="error">Email address is required</small>
+                    }
+
+                    @if (email.touched && email.hasError('email')) {
+                    <small class="error">Email address is invalid</small>
+                    }
+
+                    @if (email.hasError('server')) {
+                    <small class="error">{{ email.getError('server') }}</small>
+                    }
+                </div>
+            </div>
+            <input pInputText id="email" formControlName="email" type="email">
+        </div>
+
+        <div class="field">
+            <div class="flex items-center justify-between">
+                <label for="password">Password</label>
+
+                <div>
+                    @if (password.touched && password.hasError('required')) {
+                    <small class="error">Password is required</small>
+                    }
+
+                    @if (password.hasError('server')) {
+                    <small class="error">{{ password.getError('server') }}</small>
+                    }
+                </div>
+            </div>
+            <p-password inputId="password" formControlName="password" [feedback]="false" [toggleMask]="true"
+                fluid></p-password>
+
+        </div>
+
+
+        <div class="flex items-center justify-between">
+            <a routerLink="/register" class="link">Don't have an account?</a>
+
+            <button pButton type="submit" [disabled]="isSubmitting()">
+                <i class="pi pi-user"></i>
+                <span pButtonLabel>Login</span>
+            </button>
+        </div>
+    </form>
+</p-card>

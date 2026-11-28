@@ -1,0 +1,141 @@
+<p-confirmdialog />
+
+<p-card class="px-6">
+    <form [formGroup]="form" (ngSubmit)="submit()" class="form">
+        <h1 class="header">
+            @if (isEditMode) {Edit wholesaler}
+            @else {Add wholesaler}
+        </h1>
+
+        @if (errorMessage()) {
+        <p class="form-error">{{ errorMessage() }}</p>
+        }
+
+        <!-- Wholesaler -->
+        <section class="flex flex-col gap-4">
+            <div>
+                <h2 class="text-lg font-bold">Wholesaler</h2>
+                <small class="text-gray-500">Where and how the catalog is read</small>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="field">
+                    <div class="flex items-center justify-between">
+                        <label for="name">Name</label>
+                        @if (form.controls.name.touched && form.controls.name.hasError('required')) {
+                        <small class="error">Name is required</small>
+                        }
+                        @if (form.controls.name.touched && form.controls.name.hasError('minlength')) {
+                        <small class="error">Name must be at least 3 characters</small>
+                        }
+                        @if (form.controls.name.hasError('server')) {
+                        <small class="error">{{ form.controls.name.getError('server') }}</small>
+                        }
+                    </div>
+                    <input pInputText id="name" type="text" formControlName="name" />
+                </div>
+
+                <div class="field">
+                    <div class="flex items-center justify-between">
+                        <label for="baseUrl">Catalog URL</label>
+                        @if (form.controls.baseUrl.touched && form.controls.baseUrl.hasError('required')) {
+                        <small class="error">Catalog URL is required</small>
+                        }
+                        @if (form.controls.baseUrl.hasError('server')) {
+                        <small class="error">{{ form.controls.baseUrl.getError('server') }}</small>
+                        }
+                    </div>
+                    <input pInputText id="baseUrl" type="url" formControlName="baseUrl" class="font-mono!"
+                        placeholder="https://" />
+                </div>
+
+                <div class="field">
+                    <div class="flex items-center justify-between">
+                        <label for="integrationType">Catalog format</label>
+                        @if (form.controls.integrationType.touched && form.controls.integrationType.hasError('required')) {
+                        <small class="error">Catalog format is required</small>
+                        }
+                        @if (form.controls.integrationType.hasError('server')) {
+                        <small class="error">{{ form.controls.integrationType.getError('server') }}</small>
+                        }
+                    </div>
+                    <p-select [options]="integrations" inputId="integrationType" formControlName="integrationType"
+                        optionLabel="label" optionValue="value" placeholder="Select a format" class="w-full" />
+                </div>
+
+                <div class="field">
+                    <div class="flex items-center justify-between">
+                        <label for="currency">Catalog currency</label>
+                        @if (form.controls.currency.touched && form.controls.currency.hasError('required')) {
+                        <small class="error">Currency is required</small>
+                        }
+                        @if (form.controls.currency.hasError('server')) {
+                        <small class="error">{{ form.controls.currency.getError('server') }}</small>
+                        }
+                    </div>
+                    <p-select [options]="currencies" inputId="currency" formControlName="currency" optionLabel="label"
+                        optionValue="value" placeholder="Currency" class="w-full" [filter]="true" />
+                    <small class="text-gray-500">Currency of the prices in the catalog</small>
+                </div>
+            </div>
+        </section>
+
+        <!-- Purchase orders -->
+        <section class="flex flex-col gap-4 pt-6 border-t border-gray-200">
+            <div>
+                <h2 class="text-lg font-bold">Purchase orders</h2>
+                <small class="text-gray-500">The lines of the incoming orders are collected into one purchase order
+                    per wholesaler</small>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="field">
+                    <label for="orderMode">Sending</label>
+                    <p-select [options]="orderModes" inputId="orderMode" formControlName="orderMode" optionLabel="label"
+                        optionValue="value" class="w-full" />
+                    <small class="text-gray-500">
+                        @if (form.controls.orderMode.value === 'AUTOMATIC') {
+                        Sent by itself when the first line has waited the waiting time, cancellations are still
+                        possible until then
+                        }
+                        @else {
+                        Collected until you send it from the purchase orders page
+                        }
+                    </small>
+                </div>
+
+                @if (form.controls.orderMode.value === 'AUTOMATIC') {
+                <div class="field">
+                    <div class="flex items-center justify-between">
+                        <label for="orderDelayMinutes">Waiting time (minutes)</label>
+                        @if (form.controls.orderDelayMinutes.invalid && form.controls.orderDelayMinutes.touched) {
+                        <small class="error">0 to 1440 minutes</small>
+                        }
+                        @if (form.controls.orderDelayMinutes.hasError('server')) {
+                        <small class="error">{{ form.controls.orderDelayMinutes.getError('server') }}</small>
+                        }
+                    </div>
+                    <input pInputText id="orderDelayMinutes" type="number" min="0" max="1440"
+                        formControlName="orderDelayMinutes" />
+                    <small class="text-gray-500">0 sends every order at once</small>
+                </div>
+                }
+            </div>
+        </section>
+
+        <div class="flex items-center justify-end gap-2 pt-6 border-t border-gray-200">
+            <p-button type="button" label="Cancel" severity="secondary" [outlined]="true" (onClick)="cancel()" />
+
+            <button pButton type="submit" [disabled]="isLoading()">
+                @if (isEditMode) {
+                <i class="pi pi-check" pButtonIcon></i>
+                <span pButtonLabel>Save changes</span>
+                }
+                @else {
+                <i class="pi pi-plus" pButtonIcon></i>
+                <span pButtonLabel>Add wholesaler</span>
+                }
+            </button>
+        </div>
+    </form>
+</p-card>

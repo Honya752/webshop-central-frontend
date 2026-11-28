@@ -1,1 +1,92 @@
 /* You can add global styles to this file, and also import other style files */
+@import "tailwindcss"
+@import "primeicons/primeicons.css"
+
+@theme
+  --font-mono: "Roboto Mono", monospace
+
+body
+  font-family: Inter, system-ui, sans-serif
+  margin: 0
+
+.field
+  @apply flex flex-col gap-1
+
+.login-card
+  width: 40vw
+
+.form
+  @apply flex flex-col gap-4
+
+.error
+  @apply text-red-600
+
+.header
+  @apply text-4xl font-semibold tracking-tight text-balance text-center py-3
+
+.link
+  @apply text-sm text-blue-600
+  &:hover
+    @apply underline cursor-pointer
+
+// links to detail pages and outside pages
+.link-text, .text-link
+  @apply text-blue-600 cursor-pointer
+  &:hover
+    @apply underline
+
+// opens in a new tab: arrow icon after the text
+.external-link
+  @apply inline-flex items-baseline gap-1 text-blue-600 cursor-pointer no-underline
+  // only the text is underlined on hover, not the gap and the icon
+  &:hover .external-link-text
+    @apply underline
+  .pi
+    @apply text-xs
+
+.form-error
+  @apply text-red-600 font-bold
+
+.ng-invalid.ng-touched
+  border-color: #ef4444 !important
+
+p-password.ng-invalid.ng-touched
+  input
+    border-color: #ef4444 !important
+
+.main-layout
+  @apply relative flex min-h-0 w-full flex-1 gap-6 p-6
+
+// Sidebar: group titles are labels, the links below them can be selected
+.sidebar-item
+  @apply flex items-center gap-2 pt-2 pb-0.5 text-sm font-semibold text-gray-500
+
+// sub items are indented under their group title
+.sidebar-menu
+  @apply flex flex-col pl-4
+
+.item-title
+  @apply flex items-center gap-2 rounded-md px-2 my-1 text-gray-700 whitespace-nowrap border-l-2 border-transparent transition-colors
+  &:hover
+    @apply bg-gray-100 text-gray-900
+  // current page (set by MainLayout.active)
+  &.active
+    @apply bg-emerald-50 text-emerald-700 font-semibold border-emerald-500
+
+// Top level link (Dashboard): its icon lines up with the group titles, the padding and the
+// active bar move to the left instead
+.item-title.item-top
+  margin-left: calc(-0.5rem - 2px)
+
+.form-group
+  .p-panel-header
+    @apply p-0
+  .p-panel-content
+    @apply p-4
+
+// Tables: no border under the last row (the card already closes the table).
+// With a footer the body keeps its last border, as it separates the body from the footer.
+.p-datatable
+  .p-datatable-table:not(:has(.p-datatable-tfoot)) .p-datatable-tbody > tr:last-child > td,
+  .p-datatable-tfoot > tr:last-child > td
+    border-bottom-width: 0
